@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Super Admin - DDQuest</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .setup-container {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #4361ee;
+            font-size: 32px;
+        }
+        
+        .logo p {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #4361ee;
+        }
+        
+        .btn-setup {
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: opacity 0.3s;
+        }
+        
+        .btn-setup:hover:not(:disabled) {
+            opacity: 0.9;
+        }
+        
+        .btn-setup:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .setup-note {
+            margin-top: 25px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 8px;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .setup-note h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            display: block !important;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            display: block !important;
+        }
+        
+        .credentials-box {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border: 2px dashed #dee2e6;
+        }
+        
+        .credential-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .credential-row:last-child {
+            border-bottom: none;
+        }
+        
+        .copy-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: #5a6268;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-direction: column;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="logo">
+            <h1>🔐 DDQuest Setup</h1>
+            <p>Create First Super Admin Account</p>
+        </div>
+        
+        <div id="alertContainer"></div>
+        
+        <form id="setupForm">
+            <div class="form-group">
+                <label for="fullName">Full Name *</label>
+                <input type="text" id="fullName" placeholder="Dr. John Smith" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" placeholder="admin@yourcollege.edu" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number *</label>
+                <input type="tel" id="phone" placeholder="9876543210" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Create Password *</label>
+                <input type="password" id="password" placeholder="Minimum 8 characters" minlength="8" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password *</label>
+                <input type="password" id="confirmPassword" placeholder="Re-enter password" required>
+            </div>
+            
+            <button type="submit" class="btn-setup" id="setupBtn">
+                <span id="btnText">Create Super Admin</span>
+            </button>
+        </form>
+        
+        <div class="setup-note">
+            <h4><i class="fas fa-exclamation-triangle"></i> Important Notes:</h4>
+            <p>• This page should be used <strong>ONLY ONCE</strong></p>
+            <p>• Save the credentials securely - they cannot be recovered</p>
+            <p>• Delete this file after creating super admin</p>
+        </div>
+        
+        <div id="resultBox" class="result-box"></div>
+    </div>
+
+    <!-- Firebase v9 Modular -->
+    <script type="module">
+        console.log("🚀 Loading Firebase v9 for setup...");
+        
+        // Import Firebase v9 modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword,
+            updateProfile 
+        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            collection,
+            query,
+            where,
+            getDocs,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+        
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
+            authDomain: "ddquest-614ea.firebaseapp.com",
+            databaseURL: "https://ddquest-614ea-default-rtdb.firebaseio.com",
+            projectId: "ddquest-614ea",
+            storageBucket: "ddquest-614ea.firebasestorage.app",
+            messagingSenderId: "602140742747",
+            appId: "1:602140742747:web:1cbd274462578fde845b7e",
+            measurementId: "G-1CRQVW0WF9"
+        };
+        
+        try {
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            
+            console.log("✅ Firebase initialized successfully for setup!");
+            
+            // Show alert function
+            function showAlert(message, type = 'error') {
+                const alertContainer = document.getElementById('alertContainer');
+                alertContainer.innerHTML = `
+                    <div class="alert ${type}">
+                        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                // Auto-remove after 5 seconds for success/warning
+                if (type !== 'error') {
+                    setTimeout(() => {
+                        if (alertContainer.firstChild) {
+                            alertContainer.firstChild.remove();
+                        }
+                    }, 5000);
+                }
+            }
+            
+            // Show result in result box
+            function showResult(message, type) {
+                const resultBox = document.getElementById('resultBox');
+                resultBox.className = `result-box ${type}`;
+                resultBox.innerHTML = `
+                    <h4 style="color: ${type === 'error' ? '#dc3545' : '#155724'}">
+                        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>
+                        ${type === 'error' ? 'Error' : 'Success'}
+                    </h4>
+                    <p>${message}</p>
+                `;
+            }
+            
+            // Check if admin already exists
+            async function checkExistingAdmin() {
+                try {
+                    const usersRef = collection(db, "users");
+                    const q = query(usersRef, where("role", "in", ["super_admin", "admin"]));
+                    const snapshot = await getDocs(q);
+                    
+                    return !snapshot.empty;
+                } catch (error) {
+                    console.error("Check error:", error);
+                    return false;
+                }
+            }
+            
+            // Show credentials after successful creation
+            function showCredentials(name, email, password, userId) {
+                const resultBox = document.getElementById('resultBox');
+                resultBox.className = "result-box success";
+                
+                resultBox.innerHTML = `
+                    <h4 style="color: #155724;">
+                        <i class="fas fa-check-circle"></i> Super Admin Created Successfully!
+                    </h4>
+                    
+                    <div class="credentials-box">
+                        <div class="credential-row">
+                            <strong>Name:</strong> <span>${name}</span>
+                        </div>
+                        
+                        <div class="credential-row">
+                            <strong>Email:</strong> 
+                            <span>${email}</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('${email}').then(() => alert('Copied!'))">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        
+                        <div class="credential-row">
+                            <strong>Password:</strong> 
+                            <span>${password}</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('${password}').then(() => alert('Copied!'))">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        
+                        <div class="credential-row">
+                            <strong>User ID:</strong> 
+                            <span style="font-size: 12px;">${userId}</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('${userId}').then(() => alert('Copied!'))">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px; padding: 15px; background: #e8f5e9; border-radius: 6px;">
+                        <h5><i class="fas fa-info-circle"></i> What to do next:</h5>
+                        <ol style="margin: 10px 0 0 20px; font-size: 14px;">
+                            <li><strong>SAVE THESE CREDENTIALS</strong> - They cannot be recovered</li>
+                            <li>Delete this setup file after saving</li>
+                            <li>Login at: <code>/auth/login-admin.html</code></li>
+                            <li>You can now approve other admin requests</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="btn-setup" onclick="window.location.href='../auth/login-admin.html'" 
+                                style="background: #28a745; margin-top: 10px;">
+                            <i class="fas fa-sign-in-alt"></i> Go to Admin Login
+                        </button>
+                        <button class="btn-setup" onclick="window.location.href='../index.html'" 
+                                style="background: #6c757d; margin-top: 10px;">
+                            <i class="fas fa-home"></i> Back to Home
+                        </button>
+                    </div>
+                `;
+                
+                // Disable form
+                document.getElementById('setupForm').reset();
+                document.getElementById('setupBtn').innerHTML = '<i class="fas fa-user-check"></i> Super Admin Created';
+                document.getElementById('setupBtn').disabled = true;
+            }
+            
+            // Setup form submission
+            document.getElementById('setupForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const fullName = document.getElementById('fullName').value.trim();
+                const email = document.getElementById('email').value.trim().toLowerCase();
+                const phone = document.getElementById('phone').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                // Validation
+                if (!fullName || !email || !phone || !password || !confirmPassword) {
+                    showAlert("Please fill all fields", "error");
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showAlert("Passwords do not match", "error");
+                    return;
+                }
+                
+                if (password.length < 8) {
+                    showAlert("Password must be at least 8 characters", "error");
+                    return;
+                }
+                
+                // Validate email
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    showAlert("Invalid email format", "error");
+                    return;
+                }
+                
+                // Validate phone (Indian)
+                const phoneRegex = /^[6-9]\d{9}$/;
+                if (!phoneRegex.test(phone)) {
+                    showAlert("Invalid phone number (10 digits starting with 6-9)", "error");
+                    return;
+                }
+                
+                // Check existing admin
+                const hasAdmin = await checkExistingAdmin();
+                if (hasAdmin) {
+                    const proceed = confirm("⚠️ Super admin already exists! Create another?");
+                    if (!proceed) return;
+                }
+                
+                // Disable button
+                const setupBtn = document.getElementById('setupBtn');
+                const btnText = document.getElementById('btnText');
+                setupBtn.disabled = true;
+                btnText.innerHTML = '<div class="loading"></div> Creating...';
+                
+                try {
+                    // 1. Create user in Firebase Authentication
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+                    const userId = user.uid;
+                    
+                    console.log("✅ Firebase user created:", userId);
+                    
+                    // 2. Update user profile with display name
+                    await updateProfile(user, {
+                        displayName: fullName
+                    });
+                    
+                    // 3. Create user document with super_admin role
+                    const userData = {
+                        uid: userId,
+                        email: email,
+                        fullName: fullName,
+                        phone: phone,
+                        role: "super_admin",
+                        createdAt: serverTimestamp(),
+                        lastLogin: serverTimestamp(),
+                        isActive: true,
+                        profileImage: "",
+                        permissions: ["all"]
+                    };
+                    
+                    // Save to users collection (this is what your rules check)
+                    await setDoc(doc(db, "users", userId), userData);
+                    console.log("✅ User document created in Firestore");
+                    
+                    // 4. Also create in students collection (optional, if needed)
+                    try {
+                        const studentData = {
+                            uid: userId,
+                            email: email,
+                            fullName: fullName,
+                            phone: phone,
+                            role: "super_admin",
+                            college: "System Administration",
+                            semester: 0,
+                            branch: "Administration",
+                            createdAt: serverTimestamp(),
+                            isActive: true
+                        };
+                        
+                        await setDoc(doc(db, "students", userId), studentData);
+                        console.log("✅ Student document created");
+                    } catch (studentError) {
+                        console.warn("Student document creation skipped:", studentError.message);
+                    }
+                    
+                    // 5. Create initial admin request record
+                    try {
+                        const adminRequestsRef = collection(db, "adminRequests");
+                        const requestData = {
+                            fullName: fullName,
+                            email: email,
+                            phone: phone,
+                            college: "System Administration",
+                            department: "System",
+                            designation: "Super Admin",
+                            adminLevel: "super_admin",
+                            reason: "Initial system setup",
+                            requestId: "SETUP-" + Date.now(),
+                            submittedAt: serverTimestamp(),
+                            status: "approved",
+                            reviewedBy: "system",
+                            reviewedAt: serverTimestamp(),
+                            autoGenerated: true
+                        };
+                        
+                        await setDoc(doc(adminRequestsRef), requestData);
+                        console.log("✅ Admin request created");
+                    } catch (requestError) {
+                        console.warn("Admin request creation skipped:", requestError.message);
+                    }
+                    
+                    // 6. Show success with credentials
+                    showCredentials(fullName, email, password, userId);
+                    
+                    // 7. Clear any alerts
+                    document.getElementById('alertContainer').innerHTML = '';
+                    
+                } catch (error) {
+                    console.error("Setup error:", error);
+                    
+                    let errorMessage = "Setup failed: ";
+                    
+                    switch(error.code) {
+                        case 'auth/email-already-in-use':
+                            errorMessage = "Email already registered. Please use a different email.";
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = "Invalid email address.";
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = "Password is too weak. Use at least 8 characters with letters and numbers.";
+                            break;
+                        case 'permission-denied':
+                            errorMessage = "Database permissions issue. Please check Firestore rules.";
+                            break;
+                        default:
+                            errorMessage += error.message;
+                    }
+                    
+                    showAlert(errorMessage, "error");
+                    
+                    // Reset button
+                    setupBtn.disabled = false;
+                    btnText.textContent = 'Create Super Admin';
+                }
+            });
+            
+            // Make Firebase available globally if needed
+            window.firebaseApp = app;
+            window.firebaseAuth = auth;
+            window.firestoreDb = db;
+            
+        } catch (error) {
+            console.error("❌ Failed to initialize Firebase:", error);
+            showAlert(`Firebase initialization failed: ${error.message}`, "error");
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</body>
+</html>

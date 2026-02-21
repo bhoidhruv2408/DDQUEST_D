@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDQuest - Admin Login</title>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="auth.css">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase v9 (Modular) -->
+    <script type="module">
+        console.log("🚀 Loading Firebase v9 for Admin Login...");
+        
+        // Import Firebase modules directly from CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword,
+            setPersistence,
+            browserSessionPersistence,
+            browserLocalPersistence,
+            sendPasswordResetEmail,
+            onAuthStateChanged,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            updateDoc,
+            serverTimestamp,
+            collection,
+            query,
+            where,
+            getDocs
+        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
+            authDomain: "ddquest-614ea.firebaseapp.com",
+            databaseURL: "https://ddquest-614ea-default-rtdb.firebaseio.com",
+            projectId: "ddquest-614ea",
+            storageBucket: "ddquest-614ea.firebasestorage.app",
+            messagingSenderId: "602140742747",
+            appId: "1:602140742747:web:1cbd274462578fde845b7e",
+            measurementId: "G-1CRQVW0WF9"
+        };
+        
+        try {
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            
+            console.log("✅ Firebase initialized successfully for admin login!");
+            
+            // Admin Auth service
+            const adminAuthService = {
+                async loginAdmin(email, password, rememberMe = false) {
+                    try {
+                        console.log("🔐 Admin login attempt:", email);
+                        
+                        // Set persistence based on remember me
+                        await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+                        
+                        // Sign in with email and password
+                        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                        const user = userCredential.user;
+                        
+                        console.log("✅ Firebase auth successful:", user.uid);
+                        
+                        // Get user data from Firestore - check users collection first
+                        let userData = null;
+                        let isAdmin = false;
+                        
+                        try {
+                            // Check users collection
+                            const userDoc = await getDoc(doc(db, "users", user.uid));
+                            
+                            if (userDoc.exists()) {
+                                userData = userDoc.data();
+                                
+                                // Check if user has admin role
+                                if (userData.role === 'admin' || userData.role === 'super_admin') {
+                                    isAdmin = true;
+                                    console.log("✅ User is admin:", userData.role);
+                                } else {
+                                    // Not an admin - sign out and return error
+                                    await signOut(auth);
+                                    return {
+                                        success: false,
+                                        error: "Access denied. This account does not have admin privileges."
+                                    };
+                                }
+                            } else {
+                                // Check if user exists in adminRequests (pending admin)
+                                const adminRequestsQuery = query(
+                                    collection(db, "adminRequests"),
+                                    where("email", "==", email),
+                                    where("status", "==", "approved")
+                                );
+                                
+                                const adminRequestsSnapshot = await getDocs(adminRequestsQuery);
+                                
+                                if (!adminRequestsSnapshot.empty) {
+                                    // User is approved admin but not in users collection
+                                    // Create user entry
+                                    const requestData = adminRequestsSnapshot.docs[0].data();
+                                    userData = {
+                                        uid: user.uid,
+                                        email: user.email,
+                                        fullName: requestData.fullName || user.displayName || 'Admin',
+                                        phone: requestData.phone || '',
+                                        college: requestData.college || '',
+                                        department: requestData.department || '',
+                                        designation: requestData.designation || '',
+                                        adminLevel: requestData.adminLevel || 'admin',
+                                        role: 'admin',
+                                        permissions: ['manage_content', 'view_reports'],
+                                        isActive: true,
+                                        createdAt: serverTimestamp()
+                                    };
+                                    
+                                    // Create user document
+                                    await updateDoc(doc(db, "users", user.uid), userData);
+                                    isAdmin = true;
+                                } else {
+                                    // Not an admin at all
+                                    await signOut(auth);
+                                    return {
+                                        success: false,
+                                        error: "No admin account found. Please request admin access first."
+                                    };
+                                }
+                            }
+                            
+                            // Check if admin account is active
+                            if (userData.isActive === false) {
+                                await signOut(auth);
+                                return {
+                                    success: false,
+                                    error: "Admin account is deactivated. Please contact super admin."
+                                };
+                            }
+                            
+                            // Update last login time
+                            await updateDoc(doc(db, "users", user.uid), {
+                                lastLogin: serverTimestamp()
+                            });
+                            
+                            console.log("✅ Admin login successful");
+                            
+                            return {
+                                success: true,
+                                user: user,
+                                userData: userData,
+                                message: 'Admin login successful!'
+                            };
+                            
+                        } catch (firestoreError) {
+                            console.error("❌ Firestore error:", firestoreError);
+                            await signOut(auth);
+                            return {
+                                success: false,
+                                error: "Database error. Please contact support."
+                            };
+                        }
+                        
+                    } catch (error) {
+                        console.error("❌ Admin login error:", error.code, error.message);
+                        
+                        let errorMessage = "Login failed. Please check your credentials and try again.";
+                        
+                        switch(error.code) {
+                            case 'auth/user-not-found':
+                            case 'auth/wrong-password':
+                                errorMessage = "Invalid email or password.";
+                                break;
+                            case 'auth/invalid-email':
+                                errorMessage = "Invalid email address format.";
+                                break;
+                            case 'auth/user-disabled':
+                                errorMessage = "This account has been disabled. Please contact support.";
+                                break;
+                            case 'auth/too-many-requests':
+                                errorMessage = "Too many failed attempts. Please try again later.";
+                                break;
+                            case 'auth/network-request-failed':
+                                errorMessage = "Network error. Please check your internet connection.";
+                                break;
+                            case 'auth/operation-not-allowed':
+                                errorMessage = "Email/password login is not enabled. Please contact support.";
+                                break;
+                            case 'permission-denied':
+                                errorMessage = "Database permission error. Please contact system administrator.";
+                                break;
+                        }
+                        
+                        return {
+                            success: false,
+                            error: errorMessage
+                        };
+                    }
+                },
+                
+                async resetPassword(email) {
+                    try {
+                        // First check if email belongs to an admin
+                        const adminQuery = query(
+                            collection(db, "users"),
+                            where("email", "==", email),
+                            where("role", "in", ["admin", "super_admin"])
+                        );
+                        
+                        const snapshot = await getDocs(adminQuery);
+                        
+                        if (snapshot.empty) {
+                            return {
+                                success: false,
+                                error: 'No admin account found with this email.'
+                            };
+                        }
+                        
+                        await sendPasswordResetEmail(auth, email);
+                        return {
+                            success: true,
+                            message: 'Password reset email sent to admin email. Please check your inbox.'
+                        };
+                    } catch (error) {
+                        console.error("❌ Admin password reset error:", error);
+                        let errorMessage = 'Failed to send reset email. Please check the email address.';
+                        
+                        if (error.code === 'auth/user-not-found') {
+                            errorMessage = 'No admin account found with this email address.';
+                        }
+                        
+                        return {
+                            success: false,
+                            error: errorMessage
+                        };
+                    }
+                },
+                
+                // Check if user is already logged in as admin
+                async checkAdminSession() {
+                    const user = auth.currentUser;
+                    if (!user) return null;
+                    
+                    try {
+                        const userDoc = await getDoc(doc(db, "users", user.uid));
+                        if (userDoc.exists()) {
+                            const userData = userDoc.data();
+                            if (userData.role === 'admin' || userData.role === 'super_admin') {
+                                return {
+                                    user: user,
+                                    userData: userData
+                                };
+                            }
+                        }
+                    } catch (error) {
+                        console.error("Session check error:", error);
+                    }
+                    return null;
+                }
+            };
+            
+            // Make available globally
+            window.firebaseApp = app;
+            window.firebaseAuth = auth;
+            window.firestoreDb = db;
+            window.adminAuthService = adminAuthService;
+            
+            console.log("✅ Admin auth service ready!");
+            
+            // Check if user is already logged in as admin
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    console.log("👤 User already authenticated:", user.uid);
+                    
+                    const adminSession = await adminAuthService.checkAdminSession();
+                    if (adminSession) {
+                        // Check URL params for auto-redirect
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const autoRedirect = urlParams.get('autoRedirect');
+                        
+                        if (autoRedirect === 'true') {
+                            console.log("🎯 Auto-redirecting admin to dashboard");
+                            window.location.href = '../admin/dashboard/index.html';
+                        }
+                    }
+                }
+            });
+            
+        } catch (error) {
+            console.error("❌ Failed to initialize Firebase:", error);
+        }
+        
+    </script>
+    
+    <style>
+        /* Admin-specific styles */
+        .admin-security-note {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1) 0%, rgba(58, 12, 163, 0.1) 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 2px solid #4361ee;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .admin-security-note i {
+            font-size: 2rem;
+            color: #4361ee;
+        }
+        
+        .admin-security-note h4 {
+            margin: 0 0 8px;
+            font-size: 1rem;
+            color: #4361ee;
+        }
+        
+        .admin-security-note p {
+            margin: 0;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .admin-info-box {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .admin-info-box i {
+            color: #6c757d;
+            font-size: 1.5rem;
+            margin-top: 2px;
+        }
+        
+        .admin-info-box h4 {
+            margin: 0 0 8px;
+            color: #495057;
+            font-size: 1rem;
+        }
+        
+        .admin-info-box p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        /* Status Badge */
+        #firebaseStatusBadge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: #3B82F6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        /* Loading Overlay */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 9998;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #4361ee;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .loading-subtext {
+            font-size: 14px;
+            opacity: 0.8;
+            max-width: 300px;
+            text-align: center;
+        }
+        
+        /* Alert Styles */
+        .alert-close {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            margin-left: auto;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            padding: 0;
+            font-size: 16px;
+        }
+        
+        .alert-close:hover {
+            opacity: 1;
+        }
+        
+        /* Admin Level Badge */
+        .admin-level-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+            text-transform: uppercase;
+        }
+        
+        .admin-level-super {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+        
+        .admin-level-admin {
+            background: linear-gradient(135deg, #4cc9f0, #4361ee);
+            color: white;
+        }
+        
+        .admin-level-moderator {
+            background: linear-gradient(135deg, #7209b7, #3a0ca3);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Connection Status Badge -->
+    <div id="firebaseStatusBadge">
+        <i class="fas fa-spinner fa-spin"></i>
+        <span>Connecting to DDQuest Admin...</span>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loadingText">Authenticating Admin...</div>
+        <div class="loading-subtext" id="loadingSubtext">Please wait while we verify your credentials</div>
+    </div>
+    
+    <div class="auth-container">
+        <div class="auth-wrapper">
+            <!-- Sidebar -->
+            <div class="auth-sidebar">
+                <div class="auth-logo">
+                    <div class="auth-logo-icon" style="background: linear-gradient(135deg, #4361ee, #3a0ca3);">AQ</div>
+                    <div class="auth-logo-text">DDQuest Admin</div>
+                </div>
+                
+                <div class="auth-sidebar-content">
+                    <h2>Admin Portal Access</h2>
+                    <p>Secure access to manage DDQuest platform, students, content, and analytics.</p>
+                    
+                    <ul class="auth-features">
+                        <li>
+                            <i class="fas fa-upload"></i>
+                            <span>Upload & manage study materials for all semesters</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-tasks"></i>
+                            <span>Create tests, quizzes, and question banks</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-chart-bar"></i>
+                            <span>View detailed student analytics & progress reports</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-users-cog"></i>
+                            <span>Manage user accounts and admin permissions</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Approve admin requests and manage system settings</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="admin-security-note">
+                        <i class="fas fa-shield-alt"></i>
+                        <div>
+                            <h4>Secure Admin Access Only</h4>
+                            <p>This portal is restricted to authorized administrators only. All activities are logged.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="auth-sidebar-footer">
+                    <p>Not an admin? <a href="login-student.html">Login as Student</a></p>
+                </div>
+            </div>
+            
+            <!-- Login Form -->
+            <div class="auth-form-section">
+                <div class="auth-header">
+                    <h1>Admin Login</h1>
+                    <p>Enter your admin credentials to access the dashboard</p>
+                </div>
+                
+                <div id="alertContainer"></div>
+                
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="email" class="form-label required">Admin Email</label>
+                        <input type="email" id="email" class="form-control" 
+                               placeholder="admin@ddquest.edu.in" required>
+                        <div class="error-message"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label required">Password</label>
+                        <input type="password" id="password" class="form-control" 
+                               placeholder="Enter your admin password" required>
+                        <div class="error-message"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adminLevel" class="form-label">Admin Level (Optional)</label>
+                        <select id="adminLevel" class="form-control">
+                            <option value="">Select if known</option>
+                            <option value="super_admin">Super Admin</option>
+                            <option value="admin">Admin</option>
+                            <option value="content_admin">Content Admin</option>
+                            <option value="moderator">Moderator</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-options">
+                        <div class="form-check">
+                            <input type="checkbox" id="rememberMe">
+                            <label for="rememberMe">Remember this device</label>
+                        </div>
+                        <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+                    </div>
+                    
+                    <div class="auth-buttons">
+                        <button type="submit" class="btn-auth" id="loginBtn">
+                            <i class="fas fa-lock"></i>
+                            <span>Login to Admin Portal</span>
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="admin-info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <h4>Admin Access Required</h4>
+                        <p>This portal is only for approved administrators. If you need admin access, please submit a request through the button below.</p>
+                    </div>
+                </div>
+                
+                <div class="auth-links">
+                    <a href="admin-request.html" class="btn-auth-outline">
+                        <i class="fas fa-user-shield"></i> Request Admin Access
+                    </a>
+                    <p>
+                        <a href="../role.html"><i class="fas fa-arrow-left"></i> Back to Role Selection</a>
+                    </p>
+                    <p>
+                        <a href="../index.html"><i class="fas fa-home"></i> Go to Home</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Utils -->
+    <script src="../assets/js/utils.js"></script>
+    
+    <!-- Admin Login Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("📄 Admin login page loaded");
+            
+            // Elements
+            const loginForm = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const alertContainer = document.getElementById('alertContainer');
+            const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const adminLevelSelect = document.getElementById('adminLevel');
+            const rememberMeCheckbox = document.getElementById('rememberMe');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const loadingText = document.getElementById('loadingText');
+            const loadingSubtext = document.getElementById('loadingSubtext');
+            
+            // Check URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            const message = urlParams.get('message');
+            const adminEmail = urlParams.get('email');
+            
+            if (status === 'request_submitted') {
+                showAlert('Your admin request has been submitted! You will receive an email when approved.', 'success');
+                if (adminEmail) {
+                    emailInput.value = decodeURIComponent(adminEmail);
+                }
+                // Clean URL
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+            
+            // Show alert function
+            function showAlert(message, type = 'error') {
+                alertContainer.innerHTML = `
+                    <div class="alert alert-${type}">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                        <span>${message}</span>
+                        <button class="alert-close" onclick="this.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Auto-remove success alerts after 5 seconds
+                if (type === 'success') {
+                    setTimeout(() => {
+                        const alert = alertContainer.querySelector('.alert');
+                        if (alert) alert.remove();
+                    }, 5000);
+                }
+            }
+            
+            // Show loading
+            function showLoading(message = 'Processing...', subtext = 'Please wait') {
+                loadingText.textContent = message;
+                loadingSubtext.textContent = subtext;
+                loadingOverlay.style.display = 'flex';
+            }
+            
+            // Hide loading
+            function hideLoading() {
+                loadingOverlay.style.display = 'none';
+            }
+            
+            // Validate email
+            function validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+            
+            // Validate admin email (optional: check for admin domains)
+            function validateAdminEmail(email) {
+                if (!validateEmail(email)) {
+                    return { valid: false, message: 'Please enter a valid email address' };
+                }
+                
+                // Optional: Check for common admin/educational domains
+                const adminDomains = ['edu', 'ac.in', 'college', 'admin', 'ddquest'];
+                const domain = email.split('@')[1]?.toLowerCase() || '';
+                
+                if (!adminDomains.some(d => domain.includes(d))) {
+                    // Just log a warning, don't block login
+                    console.log('⚠️ Non-educational/admin domain detected:', domain);
+                }
+                
+                return { valid: true };
+            }
+            
+            // Validate form
+            function validateForm() {
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+                
+                // Clear previous errors
+                const errorMessages = document.querySelectorAll('.error-message');
+                errorMessages.forEach(el => {
+                    el.textContent = '';
+                    el.style.display = 'none';
+                    const input = el.previousElementSibling;
+                    if (input && input.classList) {
+                        input.classList.remove('error');
+                    }
+                });
+                
+                let isValid = true;
+                
+                // Validate email
+                if (!email) {
+                    showFieldError('email', 'Admin email is required');
+                    isValid = false;
+                } else {
+                    const emailValidation = validateAdminEmail(email);
+                    if (!emailValidation.valid) {
+                        showFieldError('email', emailValidation.message);
+                        isValid = false;
+                    }
+                }
+                
+                // Validate password
+                if (!password) {
+                    showFieldError('password', 'Password is required');
+                    isValid = false;
+                } else if (password.length < 8) {
+                    showFieldError('password', 'Password must be at least 8 characters');
+                    isValid = false;
+                }
+                
+                return isValid;
+            }
+            
+            // Show field error
+            function showFieldError(fieldId, message) {
+                const input = document.getElementById(fieldId);
+                if (!input) return;
+                
+                const errorDiv = input.parentElement.querySelector('.error-message');
+                if (errorDiv) {
+                    errorDiv.textContent = message;
+                    errorDiv.style.display = 'block';
+                    input.classList.add('error');
+                }
+            }
+            
+            // Clear field error
+            function clearFieldError(fieldId) {
+                const input = document.getElementById(fieldId);
+                if (!input) return;
+                
+                const errorDiv = input.parentElement.querySelector('.error-message');
+                if (errorDiv) {
+                    errorDiv.textContent = '';
+                    errorDiv.style.display = 'none';
+                    input.classList.remove('error');
+                }
+            }
+            
+            // Handle form submission
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                if (!validateForm()) return;
+                
+                // Check if Firebase is ready
+                if (!window.adminAuthService) {
+                    showAlert('Admin authentication service is not ready. Please refresh the page.', 'error');
+                    return;
+                }
+                
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+                const adminLevel = adminLevelSelect.value;
+                const rememberMe = rememberMeCheckbox.checked;
+                
+                // Show loading
+                showLoading('Authenticating Admin...', 'Verifying credentials and permissions');
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+                
+                try {
+                    const result = await adminAuthService.loginAdmin(email, password, rememberMe);
+                    
+                    if (result.success) {
+                        showAlert('Admin authentication successful! Redirecting to dashboard...', 'success');
+                        
+                        // Store admin info
+                        if (rememberMe) {
+                            localStorage.setItem('adminEmail', email);
+                            localStorage.setItem('adminRememberMe', 'true');
+                        } else {
+                            sessionStorage.setItem('adminEmail', email);
+                        }
+                        
+                        // Store admin data
+                        if (result.userData) {
+                            localStorage.setItem('adminData', JSON.stringify(result.userData));
+                            localStorage.setItem('adminId', result.user.uid);
+                            localStorage.setItem('adminRole', result.userData.role);
+                            localStorage.setItem('adminLevel', adminLevel || result.userData.adminLevel || 'admin');
+                        }
+                        
+                        // Redirect to admin dashboard
+                        showLoading('Access granted!', 'Loading admin dashboard...');
+                        setTimeout(() => {
+                            window.location.href = '../admin/dashboard/index.html';
+                        }, 1500);
+                        
+                    } else {
+                        showAlert(result.error, 'error');
+                        loginBtn.disabled = false;
+                        loginBtn.innerHTML = '<i class="fas fa-lock"></i> Login to Admin Portal';
+                        hideLoading();
+                    }
+                    
+                } catch (error) {
+                    console.error('Admin login error:', error);
+                    showAlert('An unexpected error occurred. Please try again.', 'error');
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-lock"></i> Login to Admin Portal';
+                    hideLoading();
+                }
+            });
+            
+            // Forgot password handler
+            forgotPasswordLink.addEventListener('click', async function(e) {
+                e.preventDefault();
+                
+                let email = emailInput.value.trim();
+                if (!email) {
+                    email = prompt('Enter your admin email address to reset password:');
+                    if (!email) return;
+                }
+                
+                if (!validateEmail(email)) {
+                    alert('Please enter a valid email address');
+                    return;
+                }
+                
+                if (!window.adminAuthService) {
+                    alert('Admin authentication service not available. Please refresh the page.');
+                    return;
+                }
+                
+                const confirmReset = confirm(`Send password reset email to ${email}?`);
+                if (!confirmReset) return;
+                
+                try {
+                    const result = await adminAuthService.resetPassword(email);
+                    if (result.success) {
+                        alert('✅ Password reset email sent! Please check your admin inbox.');
+                        showAlert('Password reset email sent. Check your inbox.', 'success');
+                    } else {
+                        alert('❌ ' + result.error);
+                        showAlert(result.error, 'error');
+                    }
+                } catch (error) {
+                    console.error('Password reset error:', error);
+                    alert('Failed to send reset email. Please try again.');
+                }
+            });
+            
+            // Auto-fill saved admin credentials
+            const savedEmail = localStorage.getItem('adminEmail') || sessionStorage.getItem('adminEmail');
+            const savedRememberMe = localStorage.getItem('adminRememberMe');
+            const savedAdminLevel = localStorage.getItem('adminLevel');
+            
+            if (savedEmail) {
+                emailInput.value = savedEmail;
+                if (savedRememberMe === 'true') {
+                    rememberMeCheckbox.checked = true;
+                }
+                if (savedAdminLevel) {
+                    adminLevelSelect.value = savedAdminLevel;
+                }
+            }
+            
+            // Clear field errors on input
+            emailInput.addEventListener('input', () => clearFieldError('email'));
+            passwordInput.addEventListener('input', () => clearFieldError('password'));
+            
+            // Check Firebase connection
+            setTimeout(() => {
+                if (!window.firebaseApp) {
+                    showAlert('Unable to connect to DDQuest servers. Please check your internet connection.', 'error');
+                    loginBtn.disabled = true;
+                } else {
+                    // Show connection status badge
+                    const statusBadge = document.getElementById('firebaseStatusBadge');
+                    if (statusBadge) {
+                        statusBadge.style.display = 'flex';
+                        statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Connected to DDQuest Admin';
+                        statusBadge.style.background = '#4361ee';
+                        
+                        setTimeout(() => {
+                            statusBadge.style.opacity = '0';
+                            setTimeout(() => {
+                                statusBadge.style.display = 'none';
+                            }, 300);
+                        }, 3000);
+                    }
+                }
+            }, 2000);
+            
+            console.log("✅ Admin login page initialized");
+        });
+    </script>
+</body>
+</html>

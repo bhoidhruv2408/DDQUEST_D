@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDQuest - Student Dashboard</title>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../student.css">
+    <link rel="stylesheet" href="dashboard.css">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="../../assets/images/logo.svg">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="container">
+                <div class="header-content">
+                    <!-- Navigation Buttons -->
+                    <div class="navigation-buttons">
+                        <a href="../../index.html" class="back-btn">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                        
+                        <button onclick="logoutUser()" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                    
+                    <!-- Welcome Message -->
+                    <div class="welcome-message">
+                        <h1><span id="greeting">Welcome</span>, <span id="userName">Student</span>!</h1>
+                        <p>Ready to continue your diploma journey? Track your progress and access materials here.</p>
+                    </div>
+                    
+                    <!-- User Info -->
+                    <div class="user-info-grid">
+                        <div class="info-card">
+                            <i class="fas fa-envelope"></i>
+                            <div class="info-content">
+                                <h4>Email</h4>
+                                <p id="userEmail">student@college.edu.in</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <i class="fas fa-university"></i>
+                            <div class="info-content">
+                                <h4>College</h4>
+                                <p id="userCollege">Your College</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <i class="fas fa-graduation-cap"></i>
+                            <div class="info-content">
+                                <h4>Semester</h4>
+                                <p id="userSemester">Semester 1</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <i class="fas fa-code-branch"></i>
+                            <div class="info-content">
+                                <h4>Branch</h4>
+                                <p id="userBranch">Computer Engineering</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Current Time & Date -->
+                    <div class="time-display">
+                        <i class="far fa-clock"></i>
+                        <span id="currentTime">00:00</span> • <span id="currentDate">Monday, January 1, 2024</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <div class="container">
+                <!-- Quick Access -->
+                <h2 class="section-title">Quick Access</h2>
+                <div class="quick-access-grid">
+                    <a href="../semesters/sem1/index.html" class="access-card">
+                        <div class="access-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <h3>Study Materials</h3>
+                        <p>Access semester-wise study materials, notes, and resources</p>
+                    </a>
+                    
+                    <a href="../tests/take-test.html" class="access-card">
+                        <div class="access-icon">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <h3>Take Tests</h3>
+                        <p>Practice with subject-wise tests and track your progress</p>
+                    </a>
+                    
+                    <a href="../ddcet/index.html" class="access-card">
+                        <div class="access-icon">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <h3>DDCET Preparation</h3>
+                        <p>Specialized materials and mock tests for DDCET exam</p>
+                    </a>
+                    
+                    <a href="../profile/index.html" class="access-card">
+                        <div class="access-icon">
+                            <i class="fas fa-user-cog"></i>
+                        </div>
+                        <h3>My Profile</h3>
+                        <p>Update your profile, view progress, and manage account</p>
+                    </a>
+                </div>
+                
+                <!-- Statistics -->
+                <h2 class="section-title">Your Progress</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Tests Completed</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Average Score</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Study Hours</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Materials Viewed</div>
+                    </div>
+                </div>
+                
+                <!-- Progress Rings -->
+                <div class="progress-ring-container">
+                    <div class="progress-ring-item">
+                        <div class="progress-ring">
+                            <svg class="progress-ring-circle" width="120" height="120">
+                                <circle class="progress-ring-bg" cx="60" cy="60" r="54"></circle>
+                                <circle class="progress-ring-fill" cx="60" cy="60" r="54" data-value="25"></circle>
+                            </svg>
+                            <div class="progress-value" id="dailyGoal">25%</div>
+                        </div>
+                        <div class="progress-label">Daily Goal</div>
+                    </div>
+                    
+                    <div class="progress-ring-item">
+                        <div class="progress-ring">
+                            <svg class="progress-ring-circle" width="120" height="120">
+                                <circle class="progress-ring-bg" cx="60" cy="60" r="54"></circle>
+                                <circle class="progress-ring-fill" cx="60" cy="60" r="54" data-value="40"></circle>
+                            </svg>
+                            <div class="progress-value">40%</div>
+                        </div>
+                        <div class="progress-label">Course Progress</div>
+                    </div>
+                    
+                    <div class="progress-ring-item">
+                        <div class="progress-ring">
+                            <svg class="progress-ring-circle" width="120" height="120">
+                                <circle class="progress-ring-bg" cx="60" cy="60" r="54"></circle>
+                                <circle class="progress-ring-fill" cx="60" cy="60" r="54" data-value="65"></circle>
+                            </svg>
+                            <div class="progress-value">65%</div>
+                        </div>
+                        <div class="progress-label">Test Readiness</div>
+                    </div>
+                </div>
+                
+                <!-- Dashboard Grid -->
+                <div class="dashboard-grid">
+                    <!-- Upcoming Tests -->
+                    <div class="dashboard-widget upcoming-tests">
+                        <div class="widget-header">
+                            <h3><i class="fas fa-calendar-alt"></i> Upcoming Tests</h3>
+                            <a href="../tests/index.html" class="widget-action">
+                                View All <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="test-list" id="upcomingTests">
+                            <!-- Loaded by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <!-- Recommended Materials -->
+                    <div class="dashboard-widget recommended-materials">
+                        <div class="widget-header">
+                            <h3><i class="fas fa-book"></i> Recommended Materials</h3>
+                            <a href="../semesters/sem1/index.html" class="widget-action">
+                                Browse All <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="material-list" id="recommendedMaterials">
+                            <!-- Loaded by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="recent-activity">
+                    <div class="widget-header">
+                        <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                        <button class="btn btn-outline btn-sm" id="refreshBtn">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="activity-list" id="recentActivity">
+                        <!-- Loaded by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Semester Navigation -->
+                <h2 class="section-title">Your Semester</h2>
+                <div class="quick-access-grid">
+                    <a href="../semesters/sem1/index.html" class="access-card">
+                        <div class="access-icon" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);">
+                            <i class="fas fa-1"></i>
+                        </div>
+                        <h3>Semester 1</h3>
+                        <p>Basic engineering subjects and foundation courses</p>
+                    </a>
+                    
+                    <a href="../semesters/sem2/index.html" class="access-card">
+                        <div class="access-icon" style="background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);">
+                            <i class="fas fa-2"></i>
+                        </div>
+                        <h3>Semester 2</h3>
+                        <p>Advanced foundation and core subjects</p>
+                    </a>
+                    
+                    <a href="../semesters/sem3/index.html" class="access-card">
+                        <div class="access-icon" style="background: linear-gradient(135deg, #ffd166 0%, #f9c74f 100%);">
+                            <i class="fas fa-3"></i>
+                        </div>
+                        <h3>Semester 3</h3>
+                        <p>Branch-specific core subjects begin</p>
+                    </a>
+                    
+                    <a href="../semesters/sem6/index.html?ddcet=true" class="access-card">
+                        <div class="access-icon" style="background: linear-gradient(135deg, #06d6a0 0%, #1b9e5a 100%);">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>DDCET Portal</h3>
+                        <p>Final year students - Start your DDCET preparation</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dashboard Script -->
+    <script src="dashboard.js"></script>
+    
+    <!-- Utils -->
+    <script src="../../assets/js/utils.js"></script>
+</body>
+</html>

@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDQuest - Diploma Student Support Platform</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    
+    <!-- NO FIREBASE SCRIPTS HERE -->
+</head>
+<body>
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+        <div class="loader-content">
+            <div class="logo-spinner">
+                <div class="logo-icon">DQ</div>
+            </div>
+            <p>Loading DDQuest...</p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon animate__animated animate__fadeIn">DQ</div>
+                <div class="logo-text">DDQuest</div>
+            </a>
+            
+            <div class="nav-links">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#semesters" class="nav-link">Semesters</a>
+                <a href="#ddcet" class="nav-link">DDCET</a>
+                <a href="#testimonials" class="nav-link">Testimonials</a>
+                <a href="#contact" class="nav-link">Contact</a>
+                <a href="role.html" class="btn btn-primary btn-sm">
+                    <i class="fas fa-rocket"></i> Get Started
+                </a>
+            </div>
+            
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <div class="logo">
+                <div class="logo-icon">DQ</div>
+                <div class="logo-text">DDQuest</div>
+            </div>
+            <button class="close-menu" id="closeMenuBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-menu-links">
+            <a href="#home" class="mobile-nav-link active">Home</a>
+            <a href="#features" class="mobile-nav-link">Features</a>
+            <a href="#semesters" class="mobile-nav-link">Semesters</a>
+            <a href="#ddcet" class="mobile-nav-link">DDCET</a>
+            <a href="#testimonials" class="mobile-nav-link">Testimonials</a>
+            <a href="#contact" class="mobile-nav-link">Contact</a>
+            <a href="role.html" class="btn btn-primary btn-block">
+                <i class="fas fa-rocket"></i> Get Started
+            </a>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content animate__animated animate__fadeInUp">
+                <h1 class="hero-title">
+                    Master Your <span class="gradient-text">Diploma Journey</span> 
+                    with Smart Learning
+                </h1>
+                <p class="hero-subtitle">
+                    Complete platform for diploma engineering students. Get semester-wise materials, 
+                    DDCET preparation, mock tests, and track your progress - all in one place.
+                </p>
+                
+                <div class="hero-buttons">
+                    <a href="auth/signup-student.html" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-graduate"></i> Start Learning Free
+                    </a>
+                    <a href="#features" class="btn btn-outline btn-lg">
+                        <i class="fas fa-play-circle"></i> Watch Demo
+                    </a>
+                </div>
+                
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-number" data-count="5000">0</div>
+                        <div class="stat-label">Active Students</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" data-count="10000">0</div>
+                        <div class="stat-label">Practice Questions</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number" data-count="95">0</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hero-image animate__animated animate__fadeInRight">
+                <div class="floating-cards">
+                    <div class="floating-card card-1">
+                        <i class="fas fa-book"></i>
+                        <h4>Study Materials</h4>
+                        <p>All semesters covered</p>
+                    </div>
+                    <div class="floating-card card-2">
+                        <i class="fas fa-trophy"></i>
+                        <h4>DDCET Prep</h4>
+                        <p>Exam focused</p>
+                    </div>
+                    <div class="floating-card card-3">
+                        <i class="fas fa-chart-line"></i>
+                        <h4>Track Progress</h4>
+                        <p>Real-time analytics</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features section-padding" id="features">
+        <div class="container">
+            <div class="section-header text-center animate__animated animate__fadeIn">
+                <h2 class="section-title">Everything You Need to Excel</h2>
+                <p class="section-subtitle">Comprehensive tools and resources tailored for diploma engineering students</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card animate__animated animate__fadeInUp">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3>Semester-wise Materials</h3>
+                    <p>Structured study materials, notes, and previous year papers for all 6 semesters. Updated regularly by expert educators.</p>
+                    <a href="#semesters" class="feature-link">Explore Semesters →</a>
+                </div>
+                
+                <div class="feature-card animate__animated animate__fadeInUp" data-wow-delay="0.1s">
+                    <div class="feature-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3>DDCET Special Preparation</h3>
+                    <p>Dedicated section for DDCET entrance exam with MCQs, 200-mark sample papers, and weekly mock tests.</p>
+                    <a href="#ddcet" class="feature-link">Start DDCET Prep →</a>
+                </div>
+                
+                <div class="feature-card animate__animated animate__fadeInUp" data-wow-delay="0.2s">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Smart Progress Tracking</h3>
+                    <p>Monitor your performance with detailed analytics, identify weak areas, and track improvement over time.</p>
+                    <a href="#ddcet" class="feature-link">View Analytics →</a>
+                </div>
+                
+                <div class="feature-card animate__animated animate__fadeInUp" data-wow-delay="0.3s">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Weekly Test Series</h3>
+                    <p>Regular tests with real exam patterns, instant results, and detailed solution explanations.</p>
+                    <a href="#features" class="feature-link">Take Tests →</a>
+                </div>
+                
+                <div class="feature-card animate__animated animate__fadeInUp" data-wow-delay="0.4s">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Mobile Friendly</h3>
+                    <p>Access study materials and take tests anytime, anywhere. Optimized for all devices including smartphones.</p>
+                    <a href="#features" class="feature-link">Mobile App →</a>
+                </div>
+                
+                <div class="feature-card animate__animated animate__fadeInUp" data-wow-delay="0.5s">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Community Support</h3>
+                    <p>Connect with fellow diploma students, discuss doubts, and share knowledge in our interactive forums.</p>
+                    <a href="#contact" class="feature-link">Join Community →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Semesters Section -->
+    <section class="semesters section-padding bg-light" id="semesters">
+        <div class="container">
+            <div class="section-header text-center animate__animated animate__fadeIn">
+                <h2 class="section-title">Complete Semester Coverage</h2>
+                <p class="section-subtitle">From basics to advanced topics, we've got every semester covered</p>
+            </div>
+            
+            <div class="semester-cards">
+                <div class="semester-card animate__animated animate__fadeInLeft" data-sem="1">
+                    <div class="semester-number">01</div>
+                    <h3>Semester 1</h3>
+                    <p>Basic Engineering Mathematics, Physics, Communication Skills</p>
+                    <div class="semester-topics">
+                        <span>Mathematics</span>
+                        <span>Physics</span>
+                        <span>English</span>
+                    </div>
+                    <a href="#" class="btn btn-outline btn-sm">Explore</a>
+                </div>
+                
+                <div class="semester-card animate__animated animate__fadeInUp" data-sem="2">
+                    <div class="semester-number">02</div>
+                    <h3>Semester 2</h3>
+                    <p>Applied Mathematics, Engineering Drawing, Basic Electronics</p>
+                    <div class="semester-topics">
+                        <span>Maths II</span>
+                        <span>Drawing</span>
+                        <span>Electronics</span>
+                    </div>
+                    <a href="#" class="btn btn-outline btn-sm">Explore</a>
+                </div>
+                
+                <div class="semester-card animate__animated animate__fadeInUp" data-sem="3">
+                    <div class="semester-number">03</div>
+                    <h3>Semester 3</h3>
+                    <p>Core subjects begin - Programming, Circuits, Mechanics</p>
+                    <div class="semester-topics">
+                        <span>Programming</span>
+                        <span>Circuits</span>
+                        <span>Mechanics</span>
+                    </div>
+                    <a href="#" class="btn btn-outline btn-sm">Explore</a>
+                </div>
+                
+                <div class="semester-card animate__animated animate__fadeInUp" data-sem="4">
+                    <div class="semester-number">04</div>
+                    <h3>Semester 4</h3>
+                    <p>Advanced topics in your branch specialization</p>
+                    <div class="semester-topics">
+                        <span>DBMS</span>
+                        <span>Networks</span>
+                        <span>Theory</span>
+                    </div>
+                    <a href="#" class="btn btn-outline btn-sm">Explore</a>
+                </div>
+                
+                <div class="semester-card animate__animated animate__fadeInUp" data-sem="5">
+                    <div class="semester-number">05</div>
+                    <h3>Semester 5</h3>
+                    <p>Professional subjects and project work preparation</p>
+                    <div class="semester-topics">
+                        <span>Projects</span>
+                        <span>Electives</span>
+                        <span>Labs</span>
+                    </div>
+                    <a href="#" class="btn btn-outline btn-sm">Explore</a>
+                </div>
+                
+                <div class="semester-card animate__animated animate__fadeInRight" data-sem="6">
+                    <div class="semester-number">06</div>
+                    <h3>Semester 6 + DDCET</h3>
+                    <p>Final semester + DDCET entrance exam preparation</p>
+                    <div class="semester-topics">
+                        <span>Final Proj</span>
+                        <span>DDCET</span>
+                        <span>Placement</span>
+                    </div>
+                    <a href="#ddcet" class="btn btn-primary btn-sm">Start DDCET</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DDCET Section -->
+    <section class="ddcet section-padding" id="ddcet">
+        <div class="container">
+            <div class="ddcet-content">
+                <div class="ddcet-text animate__animated animate__fadeInLeft">
+                    <h2 class="section-title">DDCET Exam <span class="gradient-text">Preparation</span></h2>
+                    <p class="section-subtitle">Specialized preparation for Diploma to Degree Common Entrance Test</p>
+                    
+                    <div class="ddcet-features">
+                        <div class="ddcet-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>200 Marks Sample Papers</h4>
+                                <p>Complete mock tests matching actual exam pattern</p>
+                            </div>
+                        </div>
+                        <div class="ddcet-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>Weekly Test Series</h4>
+                                <p>Regular practice with performance analysis</p>
+                            </div>
+                        </div>
+                        <div class="ddcet-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>Subject-wise MCQs</h4>
+                                <p>Thousands of practice questions with solutions</p>
+                            </div>
+                        </div>
+                        <div class="ddcet-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>Rank Predictor</h4>
+                                <p>Predict your rank based on mock test performance</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ddcet-buttons">
+                        <a href="role.html" class="btn btn-primary btn-lg">
+                            <i class="fas fa-play"></i> Start DDCET Prep
+                        </a>
+                        <a href="#" class="btn btn-outline btn-lg">
+                            <i class="fas fa-download"></i> Download Syllabus
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="ddcet-image animate__animated animate__fadeInRight">
+                    <div class="ddcet-card">
+                        <div class="ddcet-card-header">
+                            <h4>DDCET Mock Test</h4>
+                            <span class="badge">New</span>
+                        </div>
+                        <div class="ddcet-card-body">
+                            <div class="test-info">
+                                <div class="test-stat">
+                                    <i class="fas fa-question-circle"></i>
+                                    <div>
+                                        <h5>100 Questions</h5>
+                                        <p>MCQs & Descriptive</p>
+                                    </div>
+                                </div>
+                                <div class="test-stat">
+                                    <i class="fas fa-clock"></i>
+                                    <div>
+                                        <h5>3 Hours</h5>
+                                        <p>Time Duration</p>
+                                    </div>
+                                </div>
+                                <div class="test-stat">
+                                    <i class="fas fa-star"></i>
+                                    <div>
+                                        <h5>200 Marks</h5>
+                                        <p>Maximum Score</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-block" onclick="showFeatureMessage()">
+                                <i class="fas fa-play"></i> Take Free Mock Test
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials section-padding bg-light" id="testimonials">
+        <div class="container">
+            <div class="section-header text-center animate__animated animate__fadeIn">
+                <h2 class="section-title">What Students Say</h2>
+                <p class="section-subtitle">Join thousands of successful diploma students who improved their scores</p>
+            </div>
+            
+            <div class="testimonial-slider">
+                <div class="testimonial-track" id="testimonialTrack">
+                    <!-- Testimonials will be loaded dynamically -->
+                </div>
+                
+                <div class="slider-controls">
+                    <button class="slider-btn prev-btn" id="prevTestimonial">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="slider-dots" id="testimonialDots"></div>
+                    <button class="slider-btn next-btn" id="nextTestimonial">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section section-padding">
+        <div class="container">
+            <div class="cta-box animate__animated animate__zoomIn">
+                <h2>Ready to Boost Your Grades?</h2>
+                <p>Join thousands of diploma students who are already mastering their subjects with DDQuest. It's 100% free to get started!</p>
+                
+                <div class="cta-buttons">
+                    <a href="auth/signup-student.html" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-graduate"></i> Sign Up Free
+                    </a>
+                    <a href="role.html" class="btn btn-outline btn-lg">
+                        <i class="fas fa-eye"></i> See Demo
+                    </a>
+                </div>
+                
+                <div class="cta-stats">
+                    <div class="cta-stat">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <h4>5000+</h4>
+                            <p>Active Students</p>
+                        </div>
+                    </div>
+                    <div class="cta-stat">
+                        <i class="fas fa-book"></i>
+                        <div>
+                            <h4>1000+</h4>
+                            <p>Study Materials</p>
+                        </div>
+                    </div>
+                    <div class="cta-stat">
+                        <i class="fas fa-trophy"></i>
+                        <div>
+                            <h4>95%</h4>
+                            <p>Satisfaction Rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <div class="footer-logo">
+                        <div class="logo-icon">DQ</div>
+                        <div class="logo-text">DDQuest</div>
+                    </div>
+                    <p class="footer-description">
+                        Your trusted companion for diploma engineering education. 
+                        We're committed to helping students excel in academics and competitive exams.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#semesters">Semesters</a></li>
+                        <li><a href="#ddcet">DDCET Preparation</a></li>
+                        <li><a href="#testimonials">Testimonials</a></li>
+                        <li><a href="role.html">Get Started</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Study Materials</a></li>
+                        <li><a href="#">Practice Tests</a></li>
+                        <li><a href="#">DDCET Guide</a></li>
+                        <li><a href="#">Progress Analytics</a></li>
+                        <li><a href="#">Question Bank</a></li>
+                        <li><a href="#">Mobile App</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Contact Us</h4>
+                    <ul class="footer-contact">
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <a href="mailto:support@ddquest.com">support@ddquest.com</a>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone"></i>
+                            <a href="tel:+919876543210">+91 98765 43210</a>
+                        </li>
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Mumbai, Maharashtra, India</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="newsletter">
+                        <h5>Stay Updated</h5>
+                        <p>Get study tips and test alerts</p>
+                        <form class="newsletter-form" id="newsletterForm">
+                            <input type="email" placeholder="Your email" required>
+                            <button type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 DDQuest. All rights reserved. | Designed with <i class="fas fa-heart"></i> for Diploma Students</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Connection Status Badge -->
+    <div id="connectionStatusBadge" style="
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #3B82F6;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: none;
+        transition: all 0.3s ease;
+    ">
+        <span class="status-icon">🔄</span>
+        <span class="status-text">Connecting to DDQuest...</span>
+    </div>
+
+    <!-- Firebase Notification -->
+    <div id="firebaseNotification" style="
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        background: #10B981;
+        color: white;
+        font-weight: 500;
+        z-index: 9999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        display: none;
+        max-width: 350px;
+    "></div>
+    
+    <!-- Retry Button -->
+    <button id="firebaseRetryBtn" style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background: #3B82F6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        z-index: 9999;
+        display: none;
+    " onclick="retryFirebaseConnection()">
+        🔄 Retry Connection
+    </button>
+
+    <!-- Main JS -->
+    <script src="assets/js/main.js"></script>
+    
+    <!-- SIMPLIFIED FIREBASE INITIALIZATION -->
+    <script type="module">
+        console.log("⚡ DDQuest Firebase Initialization");
+        
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
+            authDomain: "ddquest-614ea.firebaseapp.com",
+            databaseURL: "https://ddquest-614ea-default-rtdb.firebaseio.com",
+            projectId: "ddquest-614ea",
+            storageBucket: "ddquest-614ea.firebasestorage.app",
+            messagingSenderId: "602140742747",
+            appId: "1:602140742747:web:1cbd274462578fde845b7e",
+            measurementId: "G-1CRQVW0WF9"
+        };
+        
+        // Import Firebase v9 modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+        
+        // Initialize Firebase
+        async function initializeFirebase() {
+            try {
+                console.log("🚀 Initializing Firebase...");
+                updateConnectionStatus('connecting');
+                
+                // Initialize Firebase App
+                const app = initializeApp(firebaseConfig);
+                
+                // Initialize services
+                const auth = getAuth(app);
+                const firestore = getFirestore(app);
+                const database = getDatabase(app);
+                
+                // Set global references
+                window.firebaseApp = app;
+                window.firebaseAuth = auth;
+                window.firestoreDb = firestore;
+                window.realtimeDb = database;
+                
+                // Setup auth state listener
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        console.log("👤 User authenticated:", user.uid);
+                        window.currentUser = user;
+                    } else {
+                        console.log("👤 No user authenticated");
+                        window.currentUser = null;
+                    }
+                });
+                
+                // Setup connection listener
+                const connectedRef = ref(database, '.info/connected');
+                onValue(connectedRef, (snap) => {
+                    const isConnected = snap.val() === true;
+                    console.log(isConnected ? "🌐 Connected to Firebase" : "🌐 Disconnected from Firebase");
+                    
+                    if (isConnected) {
+                        updateConnectionStatus('connected', 'Connected to DDQuest Platform');
+                        
+                        // Fire event for other scripts
+                        window.dispatchEvent(new CustomEvent('firebase-ready', {
+                            detail: { app, auth, firestore, database }
+                        }));
+                    } else {
+                        updateConnectionStatus('disconnected', 'Connection lost');
+                    }
+                });
+                
+                return { app, auth, firestore, database };
+                
+            } catch (error) {
+                console.error("❌ Firebase initialization failed:", error);
+                updateConnectionStatus('disconnected', 'Failed to connect');
+                return null;
+            }
+        }
+        
+        // Update connection status UI
+        function updateConnectionStatus(status, message = '') {
+            const badge = document.getElementById('connectionStatusBadge');
+            const notification = document.getElementById('firebaseNotification');
+            const retryBtn = document.getElementById('firebaseRetryBtn');
+            
+            // Update badge
+            if (badge) {
+                badge.style.display = 'flex';
+                
+                switch(status) {
+                    case 'connecting':
+                        badge.innerHTML = '<span class="status-icon">🔄</span><span class="status-text">Connecting to DDQuest...</span>';
+                        badge.style.background = '#F59E0B';
+                        if (retryBtn) retryBtn.style.display = 'none';
+                        break;
+                        
+                    case 'connected':
+                        badge.innerHTML = '<span class="status-icon">✅</span><span class="status-text">Connected to DDQuest</span>';
+                        badge.style.background = '#10B981';
+                        if (retryBtn) retryBtn.style.display = 'none';
+                        
+                        // Auto-hide after 5 seconds
+                        setTimeout(() => {
+                            if (badge.style.display === 'flex') {
+                                badge.style.opacity = '0';
+                                setTimeout(() => {
+                                    badge.style.display = 'none';
+                                }, 300);
+                            }
+                        }, 5000);
+                        break;
+                        
+                    case 'disconnected':
+                        badge.innerHTML = '<span class="status-icon">❌</span><span class="status-text">Connection Issue</span>';
+                        badge.style.background = '#EF4444';
+                        if (retryBtn) retryBtn.style.display = 'block';
+                        break;
+                }
+            }
+            
+            // Show notification
+            if (notification && message) {
+                notification.textContent = message;
+                notification.style.background = status === 'connected' ? '#10B981' : 
+                                                status === 'disconnected' ? '#EF4444' : '#3B82F6';
+                notification.style.display = 'block';
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // Retry Firebase connection
+        async function retryFirebaseConnection() {
+            console.log("🔄 Retrying Firebase connection...");
+            updateConnectionStatus('connecting', 'Retrying connection...');
+            
+            try {
+                const result = await initializeFirebase();
+                if (result) {
+                    console.log("✅ Firebase reconnected successfully");
+                }
+            } catch (error) {
+                console.error("❌ Retry failed:", error);
+            }
+        }
+        
+        // Make retry function globally available
+        window.retryFirebaseConnection = retryFirebaseConnection;
+        
+        // Initialize Firebase when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("📄 DOM loaded, initializing Firebase...");
+            
+            // Start Firebase initialization after a short delay
+            setTimeout(() => {
+                initializeFirebase().catch(console.error);
+            }, 1000);
+            
+            // Add CSS animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInRight {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                
+                #firebaseNotification {
+                    animation: slideInRight 0.3s ease;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+        
+        // Export Firebase utility
+        window.firebaseUtils = {
+            initialize: initializeFirebase,
+            retry: retryFirebaseConnection
+        };
+        
+        console.log("✅ Firebase initialization script loaded");
+    </script>
+    
+    <!-- APPLICATION SCRIPT -->
+    <script>
+        // Feature message for demo buttons
+        function showFeatureMessage() {
+            alert("🎯 This feature will be available soon! Sign up to get notified when it's ready.");
+        }
+        
+        // Listen for Firebase ready event
+        window.addEventListener('firebase-ready', (event) => {
+            console.log('🎉 Firebase is ready!', event.detail);
+            // Your app initialization code here
+        });
+        
+        // Preloader
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const preloader = document.getElementById('preloader');
+                if (preloader) {
+                    preloader.style.opacity = '0';
+                    preloader.style.visibility = 'hidden';
+                }
+            }, 1000);
+        });
+
+        // Mobile Menu
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.add('active');
+        });
+        
+        document.getElementById('closeMenuBtn')?.addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.remove('active');
+        });
+
+        // Close mobile menu when clicking outside
+        document.getElementById('mobileMenu')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('.mobile-nav-link').forEach(link => {
+            link.addEventListener('click', function() {
+                document.getElementById('mobileMenu').classList.remove('active');
+            });
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (navbar) {
+                if (window.scrollY > 100) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+                
+                // Update active nav link
+                const sections = document.querySelectorAll('section');
+                const navLinks = document.querySelectorAll('.nav-link');
+                
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (scrollY >= sectionTop - 200) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === current) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+
+        // Counter animation
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stat-number');
+            const speed = 200;
+            
+            counters.forEach(counter => {
+                const updateCount = () => {
+                    const target = parseInt(counter.getAttribute('data-count'));
+                    const count = parseInt(counter.innerText);
+                    const increment = Math.ceil(target / speed);
+                    
+                    if (count < target) {
+                        counter.innerText = count + increment;
+                        setTimeout(updateCount, 10);
+                    } else {
+                        counter.innerText = target + (counter.getAttribute('data-count').includes('%') ? '%' : '+');
+                    }
+                };
+                updateCount();
+            });
+        }
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                    
+                    // Start counter animation for stats
+                    if (entry.target.classList.contains('hero-stats')) {
+                        animateCounters();
+                    }
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements
+        document.querySelectorAll('.feature-card, .semester-card, .ddcet-text, .ddcet-image').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Testimonial slider
+        const testimonials = [
+            {
+                name: "Raj Patel",
+                role: "Electrical Engineering, Sem 6",
+                content: "DDQuest's DDCET preparation material helped me secure rank 45 in the entrance exam. The weekly tests were exactly what I needed!",
+                avatar: "RP"
+            },
+            {
+                name: "Priya Sharma",
+                role: "Computer Engineering, Sem 4",
+                content: "The semester-wise notes saved me during my exams. The quality of content is exceptional and very exam-oriented.",
+                avatar: "PS"
+            },
+            {
+                name: "Amit Kumar",
+                role: "Mechanical Engineering, Sem 5",
+                content: "Progress tracking feature helped me identify my weak subjects. My average score improved by 35% in just 2 months!",
+                avatar: "AK"
+            },
+            {
+                name: "Sneha Desai",
+                role: "Civil Engineering, Sem 3",
+                content: "The mobile app is super convenient. I can study during commute and take tests anywhere. Perfect for busy students!",
+                avatar: "SD"
+            }
+        ];
+
+        let currentTestimonial = 0;
+        const testimonialTrack = document.getElementById('testimonialTrack');
+        const testimonialDots = document.getElementById('testimonialDots');
+
+        function renderTestimonials() {
+            if (!testimonialTrack) return;
+            
+            testimonialTrack.innerHTML = '';
+            if (testimonialDots) testimonialDots.innerHTML = '';
+            
+            testimonials.forEach((testimonial, index) => {
+                // Create testimonial card
+                const card = document.createElement('div');
+                card.className = `testimonial-card ${index === currentTestimonial ? 'active' : ''}`;
+                card.innerHTML = `
+                    <div class="testimonial-content">
+                        <div class="quote-icon">
+                            <i class="fas fa-quote-left"></i>
+                        </div>
+                        <p>${testimonial.content}</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">${testimonial.avatar}</div>
+                        <div>
+                            <h4>${testimonial.name}</h4>
+                            <p>${testimonial.role}</p>
+                        </div>
+                    </div>
+                `;
+                testimonialTrack.appendChild(card);
+                
+                // Create dot
+                if (testimonialDots) {
+                    const dot = document.createElement('button');
+                    dot.className = `slider-dot ${index === currentTestimonial ? 'active' : ''}`;
+                    dot.addEventListener('click', () => {
+                        currentTestimonial = index;
+                        renderTestimonials();
+                    });
+                    testimonialDots.appendChild(dot);
+                }
+            });
+        }
+
+        // Navigation
+        const prevBtn = document.getElementById('prevTestimonial');
+        const nextBtn = document.getElementById('nextTestimonial');
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                currentTestimonial = (currentTestimonial - 1 + testimonials.length) % testimonials.length;
+                renderTestimonials();
+            });
+        }
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                currentTestimonial = (currentTestimonial + 1) % testimonials.length;
+                renderTestimonials();
+            });
+        }
+
+        // Auto slide
+        let slideInterval;
+        function startAutoSlide() {
+            slideInterval = setInterval(() => {
+                currentTestimonial = (currentTestimonial + 1) % testimonials.length;
+                renderTestimonials();
+            }, 5000);
+        }
+        
+        function stopAutoSlide() {
+            clearInterval(slideInterval);
+        }
+
+        // Pause on hover
+        if (testimonialTrack) {
+            testimonialTrack.addEventListener('mouseenter', stopAutoSlide);
+            testimonialTrack.addEventListener('mouseleave', startAutoSlide);
+        }
+
+        // Initialize
+        renderTestimonials();
+        startAutoSlide();
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Newsletter form
+        const newsletterForm = document.getElementById('newsletterForm');
+        if (newsletterForm) {
+            newsletterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = this.querySelector('input').value;
+                
+                // Simple validation
+                if (!email || !email.includes('@')) {
+                    alert('Please enter a valid email address');
+                    return;
+                }
+                
+                // In production, send to server
+                alert('Thank you for subscribing! You\'ll receive updates soon.');
+                this.querySelector('input').value = '';
+            });
+        }
+
+        // Check Firebase connection status
+        setTimeout(() => {
+            if (window.firebaseApp) {
+                console.log('✅ Firebase connected successfully!');
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

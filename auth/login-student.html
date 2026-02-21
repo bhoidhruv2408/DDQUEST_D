@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDQuest - Student Login</title>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="auth.css">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase v9 (Modular) -->
+    <script type="module">
+        console.log("🚀 Loading Firebase v9 for Login...");
+        
+        // Import Firebase modules directly from CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword,
+            setPersistence,
+            browserSessionPersistence,
+            browserLocalPersistence,
+            sendPasswordResetEmail,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            setDoc,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
+            authDomain: "ddquest-614ea.firebaseapp.com",
+            databaseURL: "https://ddquest-614ea-default-rtdb.firebaseio.com",
+            projectId: "ddquest-614ea",
+            storageBucket: "ddquest-614ea.firebasestorage.app",
+            messagingSenderId: "602140742747",
+            appId: "1:602140742747:web:1cbd274462578fde845b7e",
+            measurementId: "G-1CRQVW0WF9"
+        };
+        
+        try {
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            
+            console.log("✅ Firebase initialized successfully!");
+            
+            // Auth service
+            const authService = {
+                async loginStudent(email, password, rememberMe = false) {
+                    try {
+                        console.log("🔐 Attempting login for:", email);
+                        
+                        // Set persistence based on remember me
+                        await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+                        
+                        // Sign in with email and password
+                        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                        const user = userCredential.user;
+                        
+                        console.log("✅ Login successful, user:", user.uid);
+                        
+                        // Get user data from Firestore
+                        let userData = null;
+                        let isNewUser = false;
+                        
+                        try {
+                            // Try to get from users collection first
+                            const userDoc = await getDoc(doc(db, "users", user.uid));
+                            if (userDoc.exists()) {
+                                userData = userDoc.data();
+                                
+                                // Check if user is a student
+                                if (userData.role && userData.role !== 'student') {
+                                    await auth.signOut();
+                                    return {
+                                        success: false,
+                                        error: 'This account is not a student account. Please use the correct login page.'
+                                    };
+                                }
+                            } else {
+                                // If not in users collection, check students collection
+                                const studentDoc = await getDoc(doc(db, "students", user.uid));
+                                if (studentDoc.exists()) {
+                                    const studentData = studentDoc.data();
+                                    userData = {
+                                        uid: user.uid,
+                                        email: user.email,
+                                        fullName: studentData.fullName || user.displayName || 'Student',
+                                        college: studentData.college || '',
+                                        semester: studentData.semester || '1',
+                                        branch: studentData.branch || '',
+                                        role: 'student',
+                                        isActive: true
+                                    };
+                                    
+                                    // Also create entry in users collection for quick access
+                                    await setDoc(doc(db, "users", user.uid), {
+                                        ...userData,
+                                        lastLogin: serverTimestamp(),
+                                        updatedAt: serverTimestamp()
+                                    });
+                                } else {
+                                    // Create new user entry
+                                    isNewUser = true;
+                                    userData = {
+                                        uid: user.uid,
+                                        email: user.email,
+                                        fullName: user.displayName || 'Student',
+                                        role: 'student',
+                                        isActive: true,
+                                        createdAt: serverTimestamp()
+                                    };
+                                    
+                                    await setDoc(doc(db, "users", user.uid), {
+                                        ...userData,
+                                        lastLogin: serverTimestamp()
+                                    });
+                                }
+                            }
+                            
+                            // Update last login time
+                            await setDoc(doc(db, "users", user.uid), {
+                                lastLogin: serverTimestamp()
+                            }, { merge: true });
+                            
+                        } catch (firestoreError) {
+                            console.warn("Could not fetch user data:", firestoreError);
+                            userData = {
+                                uid: user.uid,
+                                email: user.email,
+                                role: 'student',
+                                isActive: true
+                            };
+                        }
+                        
+                        return {
+                            success: true,
+                            user: user,
+                            userData: userData,
+                            isNewUser: isNewUser,
+                            message: 'Login successful!'
+                        };
+                        
+                    } catch (error) {
+                        console.error("❌ Login error:", error.code, error.message);
+                        
+                        let errorMessage = "Login failed. Please check your credentials and try again.";
+                        
+                        switch(error.code) {
+                            case 'auth/user-not-found':
+                            case 'auth/wrong-password':
+                                errorMessage = "Invalid email or password.";
+                                break;
+                            case 'auth/invalid-email':
+                                errorMessage = "Invalid email address format.";
+                                break;
+                            case 'auth/user-disabled':
+                                errorMessage = "This account has been disabled. Please contact support.";
+                                break;
+                            case 'auth/too-many-requests':
+                                errorMessage = "Too many failed attempts. Please try again later.";
+                                break;
+                            case 'auth/network-request-failed':
+                                errorMessage = "Network error. Please check your internet connection.";
+                                break;
+                            case 'auth/operation-not-allowed':
+                                errorMessage = "Email/password login is not enabled. Please contact support.";
+                                break;
+                        }
+                        
+                        return {
+                            success: false,
+                            error: errorMessage
+                        };
+                    }
+                },
+                
+                async resetPassword(email) {
+                    try {
+                        await sendPasswordResetEmail(auth, email);
+                        return {
+                            success: true,
+                            message: 'Password reset email sent. Please check your inbox.'
+                        };
+                    } catch (error) {
+                        console.error("❌ Password reset error:", error);
+                        let errorMessage = 'Failed to send reset email. Please check the email address.';
+                        
+                        if (error.code === 'auth/user-not-found') {
+                            errorMessage = 'No account found with this email address.';
+                        }
+                        
+                        return {
+                            success: false,
+                            error: errorMessage
+                        };
+                    }
+                }
+            };
+            
+            // Make available globally
+            window.firebaseApp = app;
+            window.firebaseAuth = auth;
+            window.firestoreDb = db;
+            window.authService = authService;
+            
+            console.log("✅ Auth service ready for login!");
+            
+            // Optional: Check if user is already logged in and show a welcome message
+            // But don't auto-redirect - let user choose to login manually
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    console.log("👤 User already authenticated:", user.uid);
+                    
+                    // Check if this is a fresh page load (not from form submission)
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const autoLogin = urlParams.get('autoLogin');
+                    
+                    if (autoLogin === 'true') {
+                        // Only auto-redirect if explicitly requested
+                        try {
+                            const userDoc = await getDoc(doc(db, "users", user.uid));
+                            let userData = null;
+                            
+                            if (userDoc.exists()) {
+                                userData = userDoc.data();
+                                
+                                // Check role and redirect
+                                if (userData.role === 'student') {
+                                    console.log("🎯 Auto-redirecting student to dashboard");
+                                    window.location.href = '../student/dashboard/index.html';
+                                } else if (userData.role === 'admin') {
+                                    window.location.href = '../admin/dashboard/index.html';
+                                }
+                            }
+                        } catch (error) {
+                            console.error("Error checking user role:", error);
+                        }
+                    }
+                }
+            });
+            
+        } catch (error) {
+            console.error("❌ Failed to initialize Firebase:", error);
+        }
+        
+    </script>
+    
+    <style>
+        /* Connection Status Badge */
+        #firebaseStatusBadge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: #3B82F6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        /* Loading Overlay */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 9998;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #4361ee;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .loading-subtext {
+            font-size: 14px;
+            opacity: 0.8;
+            max-width: 300px;
+            text-align: center;
+        }
+        
+        /* Success Message */
+        .signup-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 0 50px 30px 50px;
+            border: 1px solid #c3e6cb;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: fadeIn 0.5s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .signup-success.show {
+            display: flex;
+        }
+        
+        .signup-success i {
+            font-size: 24px;
+            color: #28a745;
+        }
+        
+        .signup-success span {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .alert-close {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            margin-left: auto;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            padding: 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+        
+        .alert-close:hover {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Auto Login Notice */
+        .auto-login-notice {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: #0d47a1;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 0 50px 30px 50px;
+            border: 1px solid #90caf9;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: fadeIn 0.5s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .auto-login-notice.show {
+            display: flex;
+        }
+        
+        .auto-login-notice i {
+            font-size: 24px;
+            color: #2196f3;
+        }
+        
+        .auto-login-notice span {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .auto-login-buttons {
+            display: flex;
+            gap: 10px;
+            margin-left: 10px;
+        }
+        
+        .auto-login-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .auto-login-btn.yes {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .auto-login-btn.yes:hover {
+            background: #0d8bf2;
+        }
+        
+        .auto-login-btn.no {
+            background: #f5f5f5;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+        
+        .auto-login-btn.no:hover {
+            background: #e0e0e0;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .auth-wrapper {
+                max-width: 1000px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .auth-wrapper {
+                flex-direction: column;
+                max-width: 600px;
+                margin: 20px;
+            }
+            
+            .auth-sidebar, .auth-form-section {
+                padding: 40px 30px;
+            }
+            
+            .auth-sidebar {
+                text-align: center;
+            }
+            
+            .signup-success, .auto-login-notice {
+                margin: 0 30px 30px 30px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .auth-container {
+                padding: 20px;
+            }
+            
+            .auth-wrapper {
+                margin: 10px;
+                border-radius: 16px;
+            }
+            
+            .auth-sidebar, .auth-form-section {
+                padding: 30px 20px;
+            }
+            
+            .auth-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .auth-sidebar h2 {
+                font-size: 1.8rem;
+            }
+            
+            .auth-features li {
+                font-size: 0.95rem;
+            }
+            
+            .signup-success, .auto-login-notice {
+                margin: 0 20px 20px 20px;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .auto-login-buttons {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .auth-container {
+                padding: 10px;
+            }
+            
+            .auth-wrapper {
+                border-radius: 12px;
+            }
+            
+            .auth-sidebar, .auth-form-section {
+                padding: 25px 15px;
+            }
+            
+            .auth-logo {
+                justify-content: center;
+            }
+            
+            .auth-logo-text {
+                font-size: 28px;
+            }
+            
+            .auth-header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .auth-sidebar h2 {
+                font-size: 1.6rem;
+            }
+            
+            .form-options {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .auth-links {
+                text-align: center;
+            }
+            
+            .btn-auth-outline {
+                width: 100%;
+                text-align: center;
+            }
+            
+            #firebaseStatusBadge {
+                top: 10px;
+                right: 10px;
+                font-size: 12px;
+                padding: 8px 15px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .auth-sidebar, .auth-form-section {
+                padding: 20px 12px;
+            }
+            
+            .auth-logo-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+            
+            .auth-logo-text {
+                font-size: 24px;
+            }
+            
+            .auth-header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .auth-header p {
+                font-size: 0.9rem;
+            }
+            
+            .form-control {
+                padding: 14px 16px;
+                font-size: 15px;
+            }
+            
+            .btn-auth {
+                padding: 16px;
+                font-size: 15px;
+            }
+            
+            .auth-features li {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+        }
+        
+        /* Mobile-specific optimizations */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .auth-container {
+                padding: 10px;
+            }
+            
+            .auth-wrapper {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            .auth-sidebar {
+                padding: 20px;
+            }
+            
+            .auth-form-section {
+                padding: 20px;
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            .auth-container {
+                background: white !important;
+                padding: 0;
+            }
+            
+            .auth-wrapper {
+                box-shadow: none !important;
+                border: 1px solid #ddd;
+            }
+            
+            .auth-sidebar {
+                display: none;
+            }
+            
+            .btn-auth, .auth-links, .form-options {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Connection Status Badge -->
+    <div id="firebaseStatusBadge">
+        <i class="fas fa-spinner fa-spin"></i>
+        <span>Connecting to DDQuest...</span>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loadingText">Logging in...</div>
+        <div class="loading-subtext" id="loadingSubtext">Please wait while we authenticate</div>
+    </div>
+    
+    <div class="auth-container">
+        <div class="auth-wrapper">
+            <!-- Sidebar -->
+            <div class="auth-sidebar">
+                <div class="auth-logo">
+                    <div class="auth-logo-icon">DQ</div>
+                    <div class="auth-logo-text">DDQuest</div>
+                </div>
+                
+                <div class="auth-sidebar-content">
+                    <h2>Welcome Back, Student!</h2>
+                    <p>Continue your diploma journey with personalized study materials, practice tests, and progress tracking.</p>
+                    
+                    <ul class="auth-features">
+                        <li>
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Access semester-wise study materials</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-trophy"></i>
+                            <span>DDCET exam preparation & mock tests</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-chart-line"></i>
+                            <span>Track your progress with analytics</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-clock"></i>
+                            <span>Weekly test series with instant results</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="auth-sidebar-footer">
+                    <p>Not a student? <a href="login-admin.html">Login as Admin</a></p>
+                </div>
+            </div>
+            
+            <!-- Login Form -->
+            <div class="auth-form-section">
+                <div class="auth-header">
+                    <h1>Student Login</h1>
+                    <p>Enter your credentials to access your account</p>
+                </div>
+                
+                <!-- Auto Login Notice -->
+                <div id="autoLoginNotice" class="auto-login-notice">
+                    <i class="fas fa-user-check"></i>
+                    <span id="autoLoginMessage">You're already logged in. Continue to dashboard?</span>
+                    <div class="auto-login-buttons">
+                        <button class="auto-login-btn yes" id="continueToDashboard">Yes</button>
+                        <button class="auto-login-btn no" id="stayOnPage">Stay Here</button>
+                    </div>
+                </div>
+                
+                <!-- Signup Success Message -->
+                <div id="signupSuccess" class="signup-success">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="successMessage"></span>
+                    <button class="alert-close" onclick="this.parentElement.style.display='none'">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div id="alertContainer"></div>
+                
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="email" class="form-label required">Email Address</label>
+                        <input type="email" id="email" class="form-control" 
+                               placeholder="student@college.edu.in" required>
+                        <div class="error-message"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label required">Password</label>
+                        <input type="password" id="password" class="form-control" 
+                               placeholder="Enter your password" required>
+                        <div class="error-message"></div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <div class="form-check">
+                            <input type="checkbox" id="rememberMe">
+                            <label for="rememberMe">Remember me</label>
+                        </div>
+                        <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+                    </div>
+                    
+                    <div class="auth-buttons">
+                        <button type="submit" class="btn-auth" id="loginBtn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Login to Account</span>
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="auth-divider">
+                    <span>Don't have an account?</span>
+                </div>
+                
+                <div class="auth-links">
+                    <a href="signup-student.html" class="btn-auth-outline">
+                        <i class="fas fa-user-plus"></i> Create Student Account
+                    </a>
+                    <p>
+                        Want to contribute? <a href="admin-request.html">Request Admin Access</a>
+                    </p>
+                    <p>
+                        <a href="../index.html"><i class="fas fa-arrow-left"></i> Back to Home</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Utils -->
+    <script src="../assets/js/utils.js"></script>
+    
+    <!-- Login Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("📄 Login page loaded");
+            
+            // Elements
+            const loginForm = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const alertContainer = document.getElementById('alertContainer');
+            const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const rememberMeCheckbox = document.getElementById('rememberMe');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const loadingText = document.getElementById('loadingText');
+            const loadingSubtext = document.getElementById('loadingSubtext');
+            const signupSuccess = document.getElementById('signupSuccess');
+            const successMessage = document.getElementById('successMessage');
+            const autoLoginNotice = document.getElementById('autoLoginNotice');
+            const autoLoginMessage = document.getElementById('autoLoginMessage');
+            const continueToDashboardBtn = document.getElementById('continueToDashboard');
+            const stayOnPageBtn = document.getElementById('stayOnPage');
+            
+            // Check URL for success message from signup
+            const urlParams = new URLSearchParams(window.location.search);
+            const message = urlParams.get('message');
+            const email = urlParams.get('email');
+            const autoLogin = urlParams.get('autoLogin');
+            
+            if (message === 'signup_success' && email) {
+                successMessage.textContent = `Account created successfully! Please log in with ${decodeURIComponent(email)}.`;
+                signupSuccess.style.display = 'flex';
+                emailInput.value = decodeURIComponent(email);
+                emailInput.focus();
+                
+                // Clean URL
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+            
+            // Show alert
+            function showAlert(message, type = 'error') {
+                alertContainer.innerHTML = `
+                    <div class="alert alert-${type}">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                        <span>${message}</span>
+                        <button class="alert-close" onclick="this.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Auto-remove success alerts
+                if (type === 'success') {
+                    setTimeout(() => {
+                        const alert = alertContainer.querySelector('.alert');
+                        if (alert) alert.remove();
+                    }, 5000);
+                }
+            }
+            
+            // Show loading
+            function showLoading(message = 'Processing...', subtext = 'Please wait') {
+                loadingText.textContent = message;
+                loadingSubtext.textContent = subtext;
+                loadingOverlay.style.display = 'flex';
+            }
+            
+            // Hide loading
+            function hideLoading() {
+                loadingOverlay.style.display = 'none';
+            }
+            
+            // Validate email
+            function validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+            
+            // Validate form
+            function validateForm() {
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+                
+                // Clear previous errors
+                const errorMessages = document.querySelectorAll('.error-message');
+                errorMessages.forEach(el => {
+                    el.textContent = '';
+                    el.style.display = 'none';
+                    const input = el.previousElementSibling;
+                    if (input && input.classList) {
+                        input.classList.remove('error');
+                    }
+                });
+                
+                let isValid = true;
+                
+                // Validate email
+                if (!email) {
+                    showFieldError('email', 'Email is required');
+                    isValid = false;
+                } else if (!validateEmail(email)) {
+                    showFieldError('email', 'Invalid email format');
+                    isValid = false;
+                }
+                
+                // Validate password
+                if (!password) {
+                    showFieldError('password', 'Password is required');
+                    isValid = false;
+                } else if (password.length < 6) {
+                    showFieldError('password', 'Password must be at least 6 characters');
+                    isValid = false;
+                }
+                
+                return isValid;
+            }
+            
+            // Show field error
+            function showFieldError(fieldId, message) {
+                const input = document.getElementById(fieldId);
+                if (!input) return;
+                
+                const errorDiv = input.parentElement.querySelector('.error-message');
+                if (errorDiv) {
+                    errorDiv.textContent = message;
+                    errorDiv.style.display = 'block';
+                    input.classList.add('error');
+                }
+            }
+            
+            // Clear field error
+            function clearFieldError(fieldId) {
+                const input = document.getElementById(fieldId);
+                if (!input) return;
+                
+                const errorDiv = input.parentElement.querySelector('.error-message');
+                if (errorDiv) {
+                    errorDiv.textContent = '';
+                    errorDiv.style.display = 'none';
+                    input.classList.remove('error');
+                }
+            }
+            
+            // Handle form submission
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                if (!validateForm()) return;
+                
+                // Check if Firebase is ready
+                if (!window.authService) {
+                    showAlert('Authentication service is not ready. Please refresh the page.', 'error');
+                    return;
+                }
+                
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+                const rememberMe = rememberMeCheckbox.checked;
+                
+                // Show loading
+                showLoading('Logging in...', 'Authenticating your credentials');
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+                
+                try {
+                    const result = await authService.loginStudent(email, password, rememberMe);
+                    
+                    if (result.success) {
+                        showAlert('Login successful! Redirecting to dashboard...', 'success');
+                        
+                        // Store user info
+                        if (rememberMe) {
+                            localStorage.setItem('userEmail', email);
+                            localStorage.setItem('rememberMe', 'true');
+                        } else {
+                            sessionStorage.setItem('userEmail', email);
+                        }
+                        
+                        // Store user data
+                        if (result.userData) {
+                            localStorage.setItem('userData', JSON.stringify(result.userData));
+                            localStorage.setItem('userId', result.user.uid);
+                            localStorage.setItem('userRole', 'student');
+                        }
+                        
+                        // If new user, redirect to profile setup
+                        if (result.isNewUser) {
+                            showLoading('Welcome!', 'Setting up your profile...');
+                            setTimeout(() => {
+                                window.location.href = '../student/profile/index.html?setup=true';
+                            }, 1500);
+                        } else {
+                            // Redirect to dashboard
+                            showLoading('Login successful!', 'Redirecting to dashboard...');
+                            setTimeout(() => {
+                                window.location.href = '../student/dashboard/index.html';
+                            }, 1500);
+                        }
+                        
+                    } else {
+                        showAlert(result.error, 'error');
+                        loginBtn.disabled = false;
+                        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Account';
+                        hideLoading();
+                    }
+                    
+                } catch (error) {
+                    console.error('Login error:', error);
+                    showAlert('An unexpected error occurred. Please try again.', 'error');
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Account';
+                    hideLoading();
+                }
+            });
+            
+            // Forgot password handler
+            forgotPasswordLink.addEventListener('click', async function(e) {
+                e.preventDefault();
+                
+                let email = emailInput.value.trim();
+                if (!email) {
+                    email = prompt('Enter your email address to reset password:');
+                    if (!email) return;
+                }
+                
+                if (!validateEmail(email)) {
+                    alert('Please enter a valid email address');
+                    return;
+                }
+                
+                if (!window.authService) {
+                    alert('Authentication service not available. Please refresh the page.');
+                    return;
+                }
+                
+                const confirmReset = confirm(`Send password reset email to ${email}?`);
+                if (!confirmReset) return;
+                
+                try {
+                    const result = await authService.resetPassword(email);
+                    if (result.success) {
+                        alert('✅ Password reset email sent! Please check your inbox.');
+                        showAlert('Password reset email sent. Check your inbox.', 'success');
+                    } else {
+                        alert('❌ ' + result.error);
+                        showAlert(result.error, 'error');
+                    }
+                } catch (error) {
+                    alert('Failed to send reset email. Please try again.');
+                }
+            });
+            
+            // Auto-fill saved credentials
+            const savedEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail');
+            const savedRememberMe = localStorage.getItem('rememberMe');
+            
+            if (savedEmail) {
+                emailInput.value = savedEmail;
+                if (savedRememberMe === 'true') {
+                    rememberMeCheckbox.checked = true;
+                }
+            }
+            
+            // Clear field errors on input
+            emailInput.addEventListener('input', () => clearFieldError('email'));
+            passwordInput.addEventListener('input', () => clearFieldError('password'));
+            
+            // Check if user is already logged in (show notice instead of auto-redirect)
+            setTimeout(() => {
+                if (window.firebaseAuth) {
+                    firebaseAuth.onAuthStateChanged(async (user) => {
+                        if (user && !autoLogin) {
+                            console.log("👤 User already logged in, showing notice");
+                            
+                            try {
+                                // Get user email
+                                autoLoginMessage.textContent = `You're already logged in as ${user.email}. Continue to dashboard?`;
+                                autoLoginNotice.style.display = 'flex';
+                                
+                                // Continue to dashboard button
+                                continueToDashboardBtn.onclick = function() {
+                                    window.location.href = '../student/dashboard/index.html?autoLogin=true';
+                                };
+                                
+                                // Stay on page button
+                                stayOnPageBtn.onclick = function() {
+                                    autoLoginNotice.style.display = 'none';
+                                    // Clear the URL if it has autoLogin param
+                                    const cleanUrl = window.location.pathname;
+                                    window.history.replaceState({}, document.title, cleanUrl);
+                                };
+                                
+                            } catch (error) {
+                                console.error("Error showing auto-login notice:", error);
+                            }
+                        }
+                    });
+                }
+            }, 1000);
+            
+            // Check Firebase connection
+            setTimeout(() => {
+                if (!window.firebaseApp) {
+                    showAlert('Unable to connect to DDQuest servers. Please check your internet connection.', 'error');
+                    loginBtn.disabled = true;
+                } else {
+                    // Show connection status badge
+                    const statusBadge = document.getElementById('firebaseStatusBadge');
+                    if (statusBadge) {
+                        statusBadge.style.display = 'flex';
+                        statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Connected to DDQuest';
+                        statusBadge.style.background = '#10B981';
+                        
+                        setTimeout(() => {
+                            statusBadge.style.opacity = '0';
+                            setTimeout(() => {
+                                statusBadge.style.display = 'none';
+                            }, 300);
+                        }, 3000);
+                    }
+                }
+            }, 2000);
+            
+            console.log("✅ Login page initialized");
+        });
+    </script>
+</body>
+</html>

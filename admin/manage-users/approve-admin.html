@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDQuest · Admin Approval</title>
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="approve-admin.css">
+    <!-- Firebase SDK (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div id="loadingText" class="loading-text">Loading...</div>
+        <div id="loadingSubtext" class="loading-subtext">Please wait</div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Main Container (hidden until auth) -->
+    <div id="mainContainer" class="admin-container" style="display: none;">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-left">
+                <h1><i class="fas fa-user-shield"></i> Admin Approval</h1>
+                <span class="live-badge"><i class="fas fa-circle"></i> LIVE</span>
+            </div>
+            <div class="header-right">
+                <div id="adminInfo" class="admin-info"></div>
+                <button class="btn-logout" onclick="logoutAdmin()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Profile Card -->
+        <div class="profile-card">
+            <div class="profile-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" id="profileName">admin</div>
+                <div class="profile-email" id="profileEmail">admin@example.com</div>
+                <div class="profile-phone" id="profilePhone">+1 (123) 456-7890</div>
+            </div>
+            <div class="profile-stats">
+                <div class="profile-stat-item">
+                    <span class="stat-label">Pending</span>
+                    <span class="stat-value" id="profilePendingCount">0</span>
+                </div>
+                <div class="profile-stat-item">
+                    <span class="stat-label">Selected</span>
+                    <span class="stat-value" id="selectedCountProfile">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card pending">
+                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-content">
+                    <div class="stat-value" id="pendingCount">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+            </div>
+            <div class="stat-card approved">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-content">
+                    <div class="stat-value" id="approvedCount">0</div>
+                    <div class="stat-label">Approved</div>
+                </div>
+            </div>
+            <div class="stat-card rejected">
+                <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+                <div class="stat-content">
+                    <div class="stat-value" id="rejectedCount">0</div>
+                    <div class="stat-label">Rejected</div>
+                </div>
+            </div>
+            <div class="stat-card total">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalCount">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+            </div>
+            <div class="stat-card rate">
+                <div class="stat-icon"><i class="fas fa-percent"></i></div>
+                <div class="stat-content">
+                    <div class="stat-value" id="approvalRate">0%</div>
+                    <div class="stat-label">Approval Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-section">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Admin Level</label>
+                    <select id="filterLevel" class="filter-select">
+                        <option value="all">All Levels</option>
+                        <option value="admin">Admin</option>
+                        <option value="content">Content Admin</option>
+                        <option value="super_admin">Super Admin</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Priority</label>
+                    <select id="filterPriority" class="filter-select">
+                        <option value="all">All Priorities</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Experience</label>
+                    <select id="filterExperience" class="filter-select">
+                        <option value="all">All Experience</option>
+                        <option value="fresher">Fresher</option>
+                        <option value="1-3 years">1-3 Years</option>
+                        <option value="3-5 years">3-5 Years</option>
+                        <option value="5+ years">5+ Years</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Days Pending</label>
+                    <select id="filterDays" class="filter-select">
+                        <option value="all">All Days</option>
+                        <option value="1">Last 1 Day</option>
+                        <option value="3">Last 3 Days</option>
+                        <option value="7">Last 7 Days</option>
+                        <option value="30">Last 30 Days</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn-primary" onclick="applyFilters()"><i class="fas fa-filter"></i> Apply</button>
+                <button class="btn-secondary" onclick="clearFilters()"><i class="fas fa-times"></i> Clear</button>
+                <button class="btn-success" onclick="openBulkModal()"><i class="fas fa-check-double"></i> Bulk</button>
+                <button class="btn-export" onclick="exportRequests()"><i class="fas fa-download"></i> Export</button>
+            </div>
+        </div>
+
+        <!-- Requests Table -->
+        <div class="requests-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-list"></i> Requests
+                    <span id="requestsCount" class="count-badge">0</span>
+                </h2>
+                <div class="selected-info">
+                    <span id="selectedCount">0 selected</span>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="requests-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
+                            <th>ID</th>
+                            <th>Applicant</th>
+                            <th>College / Dept</th>
+                            <th>Admin Level</th>
+                            <th>Priority</th>
+                            <th>Experience</th>
+                            <th>Pending</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsBody">
+                        <tr>
+                            <td colspan="10" class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <h3>Loading requests...</h3>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination -->
+            <div id="pagination" class="pagination" style="display: none;">
+                <button onclick="changePage(-1)" class="page-btn" id="prevPage"><i class="fas fa-chevron-left"></i> Prev</button>
+                <span id="pageInfo">Page 1 of 1</span>
+                <button onclick="changePage(1)" class="page-btn" id="nextPage">Next <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="approvalModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-check-circle" style="color:#10b981;"></i> Approve Request</h3>
+                <button class="modal-close" onclick="closeApprovalModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="approvalDetails"></div>
+                <div class="form-group">
+                    <label class="form-label">Notes (optional)</label>
+                    <textarea id="approvalNotes" class="form-control" rows="3" placeholder="Add any notes..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeApprovalModal()">Cancel</button>
+                <button class="btn-approve" onclick="approveSelectedRequest()"><i class="fas fa-check"></i> Confirm Approval</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="rejectionModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-times-circle" style="color:#ef4444;"></i> Reject Request</h3>
+                <button class="modal-close" onclick="closeRejectionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="rejectionDetails"></div>
+                <div class="form-group">
+                    <label class="form-label required">Reason for Rejection</label>
+                    <textarea id="rejectionReason" class="form-control" rows="3" placeholder="Provide a reason..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeRejectionModal()">Cancel</button>
+                <button class="btn-reject" onclick="rejectSelectedRequest()"><i class="fas fa-times"></i> Confirm Rejection</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewModal" class="modal-overlay" style="display: none;">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-eye"></i> Request Details</h3>
+                <button class="modal-close" onclick="closeViewModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="requestFullDetails"></div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="closeViewModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bulkModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fas fa-tasks"></i> Bulk Actions</h3>
+                <button class="modal-close" onclick="closeBulkModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Selected requests: <span id="bulkSelectedCount">0</span></p>
+                <div class="form-group">
+                    <label class="form-label">Action:</label>
+                    <div class="form-check">
+                        <input type="radio" name="bulkAction" value="approve" checked onchange="updateBulkActionButton()"> <span>Approve</span>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" name="bulkAction" value="reject" onchange="updateBulkActionButton()"> <span>Reject</span>
+                    </div>
+                </div>
+                <div id="bulkNotesSection" class="form-group">
+                    <label class="form-label">Notes (optional)</label>
+                    <textarea id="bulkNotes" class="form-control" rows="3" placeholder="Add notes for all approved requests..."></textarea>
+                </div>
+                <div id="bulkReasonSection" class="form-group" style="display: none;">
+                    <label class="form-label required">Reason for Rejection</label>
+                    <textarea id="bulkReason" class="form-control" rows="3" placeholder="Provide a reason for all rejected requests..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeBulkModal()">Cancel</button>
+                <button id="bulkActionBtn" class="btn-approve" onclick="processBulkAction()"><i class="fas fa-check"></i> Approve Selected</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main JavaScript (inline for simplicity) -->
+    <script>
+        // ========== CONFIGURATION ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
+            authDomain: "ddquest-614ea.firebaseapp.com",
+            databaseURL: "https://ddquest-614ea-default-rtdb.firebaseio.com",
+            projectId: "ddquest-614ea",
+            storageBucket: "ddquest-614ea.firebasestorage.app",
+            messagingSenderId: "602140742747",
+            appId: "1:602140742747:web:1cbd274462578fde845b7e",
+            measurementId: "G-1CRQVW0WF9"
+        };
+
+        const EMAILJS_PUBLIC_KEY = "Yco7tV0mY_3qMfaoe";
+        const EMAILJS_SERVICE_ID = "DDQUEST_D";
+        const EMAILJS_TEMPLATE_ID = "template_t3w5qnf";
+
+        // Global variables
+        let app, auth, db;
+        let currentUser = null;
+        let currentAdminData = null;
+        let requests = [];
+        let filteredRequests = [];
+        let selectedRequests = new Set();
+        let currentPage = 1;
+        const pageSize = 10;
+        let totalPages = 1;
+        let currentRequestId = null;
+        let unsubscribeRequests = null;
+
+        // ========== INIT ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            emailjs.init(EMAILJS_PUBLIC_KEY);
+
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    showLoading('Verifying admin privileges...');
+                    try {
+                        const userDoc = await db.collection('users').doc(user.uid).get();
+                        if (!userDoc.exists) throw new Error('User not found');
+                        const userData = userDoc.data();
+                        if (userData.role !== 'super_admin') {
+                            showToast('Access denied. Super admin only.', 'error');
+                            setTimeout(() => window.location.href = '../../auth/login-admin.html', 2000);
+                            return;
+                        }
+                        currentUser = user;
+                        currentAdminData = userData;
+                        document.getElementById('adminInfo').innerHTML = `<i class="fas fa-user-shield"></i> ${userData.fullName || userData.name || user.email}`;
+                        document.getElementById('mainContainer').style.display = 'block';
+                        updateProfileCard();
+                        hideLoading();
+                        startRealtimeListener();
+                    } catch (error) {
+                        console.error('Auth error:', error);
+                        showToast('Authentication failed: ' + error.message, 'error');
+                        setTimeout(redirectToLogin, 2000);
+                    }
+                } else {
+                    redirectToLogin();
+                }
+            });
+        });
+
+        function updateProfileCard() {
+            if (!currentAdminData) return;
+            document.getElementById('profileName').innerText = currentAdminData.fullName || currentAdminData.name || 'Admin';
+            document.getElementById('profileEmail').innerText = currentAdminData.email || currentUser?.email || 'admin@example.com';
+            document.getElementById('profilePhone').innerText = currentAdminData.phone || '+1 (123) 456-7890';
+        }
+
+        function redirectToLogin() {
+            window.location.href = '../../auth/login-admin.html';
+        }
+
+        // ========== LOADING & TOAST ==========
+        function showLoading(text = 'Loading...', subtext = 'Please wait') {
+            document.getElementById('loadingText').innerText = text;
+            document.getElementById('loadingSubtext').innerText = subtext;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+        function showToast(message, type = 'info', title = '', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            const icons = { success: 'check-circle', error: 'exclamation-circle', warning: 'exclamation-triangle', info: 'info-circle' };
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.id = toastId;
+            toast.innerHTML = `
+                <div class="toast-icon"><i class="fas fa-${icons[type]}"></i></div>
+                <div class="toast-content">
+                    ${title ? `<div class="toast-title">${title}</div>` : ''}
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="document.getElementById('${toastId}').remove()"><i class="fas fa-times"></i></button>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => { const el = document.getElementById(toastId); if (el) el.remove(); }, duration);
+        }
+
+        // ========== REAL-TIME FIRESTORE ==========
+        function startRealtimeListener() {
+            if (unsubscribeRequests) unsubscribeRequests();
+            unsubscribeRequests = db.collection('adminRequests')
+                .orderBy('submittedAt', 'desc')
+                .onSnapshot((snapshot) => {
+                    requests = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        let submittedAt = data.submittedAt?.toDate() || data.approvalDate ? new Date(data.approvalDate) : new Date();
+                        return { id: doc.id, ...data, submittedAt };
+                    });
+                    applyFilters();
+                    showToast('Requests updated', 'info', 'Live Update', 2000);
+                }, (error) => {
+                    console.error('Listener error:', error);
+                    showToast('Real-time connection lost. Refresh page.', 'error');
+                });
+        }
+
+        // ========== FILTERING ==========
+        function applyFilters() {
+            const level = document.getElementById('filterLevel').value;
+            const priority = document.getElementById('filterPriority').value;
+            const experience = document.getElementById('filterExperience').value;
+            const days = parseInt(document.getElementById('filterDays').value);
+            filteredRequests = requests.filter(req => {
+                if (level !== 'all' && req.adminLevel !== level) return false;
+                if (priority !== 'all' && req.priority !== priority) return false;
+                if (experience !== 'all' && req.experience !== experience) return false;
+                if (!isNaN(days)) {
+                    const diffDays = Math.floor((new Date() - req.submittedAt) / (1000 * 60 * 60 * 24));
+                    if (diffDays > days) return false;
+                }
+                return true;
+            });
+            updateStats();
+            currentPage = 1;
+            renderTable();
+        }
+        function clearFilters() {
+            document.getElementById('filterLevel').value = 'all';
+            document.getElementById('filterPriority').value = 'all';
+            document.getElementById('filterExperience').value = 'all';
+            document.getElementById('filterDays').value = 'all';
+            applyFilters();
+        }
+
+        // ========== STATS ==========
+        function updateStats() {
+            const pending = requests.filter(r => r.status === 'pending').length;
+            const approved = requests.filter(r => r.status === 'approved').length;
+            const rejected = requests.filter(r => r.status === 'rejected').length;
+            const total = requests.length;
+            const rate = total ? ((approved / total) * 100).toFixed(1) : 0;
+            document.getElementById('pendingCount').innerText = pending;
+            document.getElementById('approvedCount').innerText = approved;
+            document.getElementById('rejectedCount').innerText = rejected;
+            document.getElementById('totalCount').innerText = total;
+            document.getElementById('approvalRate').innerText = rate + '%';
+            document.getElementById('requestsCount').innerText = filteredRequests.length;
+            document.getElementById('profilePendingCount').innerText = pending;
+        }
+
+        // ========== RENDER TABLE ==========
+        function renderTable() {
+            const tbody = document.getElementById('requestsBody');
+            const paginationDiv = document.getElementById('pagination');
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+            const pageData = filteredRequests.slice(start, end);
+            totalPages = Math.ceil(filteredRequests.length / pageSize);
+            if (filteredRequests.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="empty-state"><i class="fas fa-inbox"></i><h3>No requests found</h3></td></tr>`;
+                paginationDiv.style.display = 'none';
+                return;
+            }
+            let html = '';
+            pageData.forEach(req => {
+                const pendingDays = Math.floor((new Date() - req.submittedAt) / (1000 * 60 * 60 * 24)) || 0;
+                const statusClass = `status-badge status-${req.status || 'pending'}`;
+                const selected = selectedRequests.has(req.id) ? 'checked' : '';
+                html += `<tr>
+                    <td><input type="checkbox" class="row-checkbox" value="${req.id}" ${selected} onchange="toggleSelect('${req.id}', this)"></td>
+                    <td>${req.id.slice(0,6)}...</td>
+                    <td><strong>${req.fullName || 'N/A'}</strong><br><small>${req.email}</small></td>
+                    <td>${req.college || ''}<br><small>${req.department || ''}</small></td>
+                    <td><span class="status-badge" style="background:#dbeafe; color:#1e40af;">${req.adminLevel || 'admin'}</span></td>
+                    <td><span class="status-badge" style="background:#fef3c7; color:#b45309;">${req.priority || 'medium'}</span></td>
+                    <td>${req.experience || 'N/A'}</td>
+                    <td>${pendingDays}d</td>
+                    <td><span class="${statusClass}">${req.status || 'pending'}</span></td>
+                    <td>
+                        <button class="action-btn view" onclick="viewRequest('${req.id}')" title="View"><i class="fas fa-eye"></i></button>
+                        ${(!req.status || req.status === 'pending') ? `
+                        <button class="action-btn approve" onclick="openApprovalModal('${req.id}')" title="Approve"><i class="fas fa-check"></i></button>
+                        <button class="action-btn reject" onclick="openRejectionModal('${req.id}')" title="Reject"><i class="fas fa-times"></i></button>
+                        ` : ''}
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+            paginationDiv.style.display = 'flex';
+            document.getElementById('pageInfo').innerText = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = currentPage === totalPages;
+            updateSelectedCount();
+        }
+        function changePage(delta) {
+            const newPage = currentPage + delta;
+            if (newPage >= 1 && newPage <= totalPages) { currentPage = newPage; renderTable(); }
+        }
+
+        // ========== SELECTION ==========
+        function toggleSelect(id, checkbox) {
+            if (checkbox.checked) selectedRequests.add(id); else selectedRequests.delete(id);
+            updateSelectedCount();
+            document.getElementById('selectAll').checked = (selectedRequests.size === filteredRequests.length);
+        }
+        function toggleSelectAll(checkbox) {
+            if (checkbox.checked) filteredRequests.forEach(r => selectedRequests.add(r.id));
+            else selectedRequests.clear();
+            renderTable();
+        }
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').innerText = `${selectedRequests.size} selected`;
+            document.getElementById('selectedCountProfile').innerText = selectedRequests.size;
+        }
+
+        // ========== VIEW DETAILS ==========
+        function viewRequest(id) {
+            const req = requests.find(r => r.id === id);
+            if (!req) return;
+            const details = `<div style="padding:10px;">${Object.entries(req).map(([k,v]) => `<p><strong>${k}:</strong> ${v}</p>`).join('')}</div>`;
+            document.getElementById('requestFullDetails').innerHTML = details;
+            document.getElementById('viewModal').style.display = 'flex';
+        }
+        function closeViewModal() { document.getElementById('viewModal').style.display = 'none'; }
+
+        // ========== APPROVAL ==========
+        function openApprovalModal(id) {
+            currentRequestId = id;
+            const req = requests.find(r => r.id === id);
+            document.getElementById('approvalDetails').innerHTML = `<p><strong>${req.fullName}</strong> (${req.email})<br>Requested: ${req.adminLevel}<br>College: ${req.college}</p>`;
+            document.getElementById('approvalModal').style.display = 'flex';
+        }
+        function closeApprovalModal() {
+            document.getElementById('approvalModal').style.display = 'none';
+            document.getElementById('approvalNotes').value = '';
+            currentRequestId = null;
+        }
+        async function approveSelectedRequest() {
+            if (!currentRequestId) return;
+            const notes = document.getElementById('approvalNotes').value;
+            await processApproval(currentRequestId, notes);
+            closeApprovalModal();
+        }
+
+        // ========== PROCESS APPROVAL (CLIENT-SIDE ONLY) ==========
+        async function processApproval(requestId, notes = '') {
+            showLoading('Approving request...', 'Creating user account');
+            try {
+                const req = requests.find(r => r.id === requestId);
+                if (!req) throw new Error('Request not found');
+                const password = generateRandomPassword(12);
+                console.log(`Generated password for ${req.email}: ${password}`);
+                const adminEmail = currentUser.email;
+                const adminPassword = prompt("Please enter your super admin password to continue:", "");
+                if (!adminPassword) throw new Error('Admin password required to approve');
+
+                // Create user in Firebase Auth (this temporarily logs out current user)
+                const userCred = await auth.createUserWithEmailAndPassword(req.email, password);
+
+                // Store user in Firestore
+                await db.collection('users').doc(userCred.user.uid).set({
+                    email: req.email,
+                    fullName: req.fullName,
+                    name: req.fullName,
+                    role: req.adminLevel || 'admin',
+                    college: req.college || '',
+                    department: req.department || '',
+                    phone: req.phone || '',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: currentUser?.uid || 'system',
+                    status: 'active',
+                    isAdmin: true,
+                    uid: userCred.user.uid
+                });
+
+                // Update admin request
+                await db.collection('adminRequests').doc(requestId).update({
+                    status: 'approved',
+                    approvedBy: currentUser?.uid || 'system',
+                    approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    notes: notes || '',
+                    userId: userCred.user.uid
+                });
+
+                // Send email via EmailJS
+                const emailSent = await sendApprovalEmail(req.email, req.fullName, password, req.adminLevel);
+
+                // Re-login as super admin
+                await auth.signInWithEmailAndPassword(adminEmail, adminPassword);
+                currentUser = auth.currentUser;
+
+                if (emailSent) {
+                    showToast(`✅ Admin approved. Credentials sent to ${req.email}`, 'success');
+                } else {
+                    showToast(`⚠️ User created but email failed. Password: ${password}. Share manually.`, 'warning', 'Action Required', 15000);
+                }
+                selectedRequests.delete(requestId);
+            } catch (error) {
+                console.error('Approval error:', error);
+                if (error.code === 'auth/email-already-in-use') {
+                    showToast('❌ Email already exists. This user may already have an account.', 'error');
+                } else {
+                    showToast('❌ Approval failed: ' + error.message, 'error');
+                }
+                // Try to re-login if we got logged out
+                try {
+                    if (currentUser?.email) {
+                        const pwd = prompt("Session expired. Enter your super admin password to continue:", "");
+                        if (pwd) {
+                            await auth.signInWithEmailAndPassword(currentUser.email, pwd);
+                            currentUser = auth.currentUser;
+                        }
+                    }
+                } catch (loginError) {
+                    console.error('Re-login failed:', loginError);
+                    showToast('Please refresh and login again', 'error');
+                    setTimeout(() => window.location.reload(), 2000);
+                }
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function sendApprovalEmail(email, name, password, role) {
+            try {
+                const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                    to_email: email,
+                    to_name: name,
+                    password: password,
+                    role: role || 'Admin',
+                    login_link: 'https://ddquest-614ea.web.app/auth/login-admin.html',
+                    from_name: 'DDQuest Super Admin',
+                    reply_to: 'admin@ddquest.com'
+                });
+                return response.status === 200;
+            } catch (error) {
+                console.error('EmailJS error:', error);
+                return false;
+            }
+        }
+
+        function generateRandomPassword(length = 12) {
+            const uppercase = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+            const lowercase = 'abcdefghijkmnopqrstuvwxyz';
+            const numbers = '23456789';
+            const special = '!@#$%&*';
+            let allChars = uppercase + lowercase + numbers + special;
+            let password = '';
+            password += uppercase[Math.floor(Math.random() * uppercase.length)];
+            password += lowercase[Math.floor(Math.random() * lowercase.length)];
+            password += numbers[Math.floor(Math.random() * numbers.length)];
+            password += special[Math.floor(Math.random() * special.length)];
+            for (let i = password.length; i < length; i++) {
+                password += allChars[Math.floor(Math.random() * allChars.length)];
+            }
+            return password.split('').sort(() => 0.5 - Math.random()).join('');
+        }
+
+        // ========== REJECTION ==========
+        function openRejectionModal(id) {
+            currentRequestId = id;
+            const req = requests.find(r => r.id === id);
+            document.getElementById('rejectionDetails').innerHTML = `<p><strong>${req.fullName}</strong> (${req.email})</p>`;
+            document.getElementById('rejectionModal').style.display = 'flex';
+        }
+        function closeRejectionModal() {
+            document.getElementById('rejectionModal').style.display = 'none';
+            document.getElementById('rejectionReason').value = '';
+            currentRequestId = null;
+        }
+        async function rejectSelectedRequest() {
+            if (!currentRequestId) return;
+            const reason = document.getElementById('rejectionReason').value;
+            if (!reason.trim()) { showToast('Please provide a reason', 'warning'); return; }
+            await processRejection(currentRequestId, reason);
+            closeRejectionModal();
+        }
+        async function processRejection(requestId, reason) {
+            showLoading('Rejecting request...');
+            try {
+                await db.collection('adminRequests').doc(requestId).update({
+                    status: 'rejected',
+                    rejectedBy: currentUser.uid,
+                    rejectedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    rejectionReason: reason
+                });
+                showToast('Request rejected', 'info');
+                selectedRequests.delete(requestId);
+            } catch (error) {
+                console.error('Rejection error:', error);
+                showToast('Rejection failed: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // ========== BULK ACTIONS ==========
+        function openBulkModal() {
+            if (selectedRequests.size === 0) { showToast('No requests selected', 'warning'); return; }
+            document.getElementById('bulkSelectedCount').innerText = selectedRequests.size;
+            document.getElementById('bulkModal').style.display = 'flex';
+            updateBulkActionButton();
+        }
+        function closeBulkModal() {
+            document.getElementById('bulkModal').style.display = 'none';
+            document.getElementById('bulkNotes').value = '';
+            document.getElementById('bulkReason').value = '';
+        }
+        function updateBulkActionButton() {
+            const action = document.querySelector('input[name="bulkAction"]:checked').value;
+            const btn = document.getElementById('bulkActionBtn');
+            if (action === 'approve') {
+                btn.className = 'btn-approve';
+                btn.innerHTML = '<i class="fas fa-check"></i> Approve Selected';
+                document.getElementById('bulkNotesSection').style.display = 'block';
+                document.getElementById('bulkReasonSection').style.display = 'none';
+            } else {
+                btn.className = 'btn-reject';
+                btn.innerHTML = '<i class="fas fa-times"></i> Reject Selected';
+                document.getElementById('bulkNotesSection').style.display = 'none';
+                document.getElementById('bulkReasonSection').style.display = 'block';
+            }
+        }
+        async function processBulkAction() {
+            const action = document.querySelector('input[name="bulkAction"]:checked').value;
+            const notes = document.getElementById('bulkNotes').value;
+            const reason = document.getElementById('bulkReason').value;
+            if (action === 'reject' && !reason.trim()) { showToast('Please provide a rejection reason', 'warning'); return; }
+            showLoading(`Processing ${selectedRequests.size} requests...`);
+            let success = 0, fail = 0;
+            for (const id of selectedRequests) {
+                try {
+                    if (action === 'approve') await processApproval(id, notes);
+                    else await processRejection(id, reason);
+                    success++;
+                } catch (error) {
+                    console.error(`Bulk action error on ${id}:`, error);
+                    fail++;
+                }
+            }
+            hideLoading();
+            showToast(`Bulk action completed: ${success} succeeded, ${fail} failed`, fail ? 'warning' : 'success');
+            selectedRequests.clear();
+            closeBulkModal();
+        }
+
+        // ========== EXPORT ==========
+        function exportRequests() {
+            if (filteredRequests.length === 0) { showToast('No requests to export', 'warning'); return; }
+            const data = filteredRequests.map(req => ({
+                ID: req.id,
+                Name: req.fullName,
+                Email: req.email,
+                College: req.college || '',
+                Department: req.department || '',
+                AdminLevel: req.adminLevel,
+                Priority: req.priority,
+                Experience: req.experience,
+                Status: req.status || 'pending',
+                Submitted: req.submittedAt.toLocaleDateString()
+            }));
+            const headers = Object.keys(data[0]).join(',');
+            const rows = data.map(row => Object.values(row).map(v => `"${v}"`).join(',')).join('\n');
+            const csv = headers + '\n' + rows;
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `admin_requests_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+            URL.revokeObjectURL(url);
+            showToast('Export started', 'success');
+        }
+
+        // ========== LOGOUT ==========
+        function logoutAdmin() {
+            if (unsubscribeRequests) unsubscribeRequests();
+            auth.signOut().then(() => { window.location.href = '../../auth/login-admin.html'; });
+        }
+
+        // Expose functions globally
+        window.applyFilters = applyFilters;
+        window.clearFilters = clearFilters;
+        window.openBulkModal = openBulkModal;
+        window.closeBulkModal = closeBulkModal;
+        window.updateBulkActionButton = updateBulkActionButton;
+        window.processBulkAction = processBulkAction;
+        window.exportRequests = exportRequests;
+        window.toggleSelectAll = toggleSelectAll;
+        window.toggleSelect = toggleSelect;
+        window.viewRequest = viewRequest;
+        window.closeViewModal = closeViewModal;
+        window.openApprovalModal = openApprovalModal;
+        window.closeApprovalModal = closeApprovalModal;
+        window.approveSelectedRequest = approveSelectedRequest;
+        window.openRejectionModal = openRejectionModal;
+        window.closeRejectionModal = closeRejectionModal;
+        window.rejectSelectedRequest = rejectSelectedRequest;
+        window.changePage = changePage;
+        window.logoutAdmin = logoutAdmin;
+    </script>
+</body>
+</html>

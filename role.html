@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDQuest - Select Your Role</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    
+    <!-- NO FIREBASE SCRIPTS HERE -->
+</head>
+<body>
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+        <div class="loader-content">
+            <div class="logo-spinner">
+                <div class="logo-icon">DQ</div>
+            </div>
+            <p>Loading DDQuest...</p>
+        </div>
+    </div>
+
+    <!-- Back to Home -->
+    <div class="back-home">
+        <a href="index.html" class="btn btn-outline btn-sm">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+    </div>
+
+    <!-- Role Selection -->
+    <section class="role-selection">
+        <div class="container">
+            <div class="role-header text-center animate__animated animate__fadeIn">
+                <div class="role-logo">
+                    <div class="logo-icon">DQ</div>
+                    <div class="logo-text">DDQuest</div>
+                </div>
+                <h1 class="role-title">Welcome to DDQuest!</h1>
+                <p class="role-subtitle">Select your role to continue your journey</p>
+            </div>
+            
+            <div class="role-cards">
+                <!-- Student Card -->
+                <div class="role-card student-card animate__animated animate__fadeInLeft" data-wow-delay="0.2s">
+                    <div class="role-card-header">
+                        <div class="role-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <h3>I am a Student</h3>
+                        <p class="role-description">Looking for study materials, tests, and progress tracking</p>
+                    </div>
+                    
+                    <div class="role-features">
+                        <div class="feature">
+                            <i class="fas fa-check"></i>
+                            <span>Access all semester materials</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check"></i>
+                            <span>Take practice tests and exams</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check"></i>
+                            <span>Track progress with analytics</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check"></i>
+                            <span>DDCET exam preparation</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check"></i>
+                            <span>Weekly test series</span>
+                        </div>
+                    </div>
+                    
+                    <div class="role-stats">
+                        <div class="stat">
+                            <h4>5000+</h4>
+                            <p>Active Students</p>
+                        </div>
+                        <div class="stat">
+                            <h4>95%</h4>
+                            <p>Success Rate</p>
+                        </div>
+                    </div>
+                    
+                    <div class="role-actions">
+                        <a href="auth/login-student.html" class="btn btn-outline btn-block">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                        <a href="auth/signup-student.html" class="btn btn-primary btn-block">
+                            <i class="fas fa-user-plus"></i> Sign Up Free
+                        </a>
+                    </div>
+                    
+                    <div class="role-footer">
+                        <p><i class="fas fa-info-circle"></i> For diploma students Sem 1-6</p>
+                    </div>
+                </div>
+                
+                <!-- Admin Card -->
+                <div class="role-card admin-card animate__animated animate__fadeInRight" data-wow-delay="0.4s">
+                    <div class="role-card-header">
+                        <div class="role-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <h3>I am an Admin/Educator</h3>
+                        <p class="role-description">Managing content and student progress</p>
+                    </div>
+                    
+                    <div class="role-features">
+                        <div class="feature">
+                            <i class="fas fa-check"></i>
+                            <span>Upload study materials</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check"></i>
+                            <span>Create tests and exams</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check"></i>
+                            <span>Manage student accounts</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check"></i>
+                            <span>View analytics and reports</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-check"></i>
+                            <span>Approve admin requests</span>
+                        </div>
+                    </div>
+                    
+                    <div class="role-stats">
+                        <div class="stat">
+                            <h4>Verified</h4>
+                            <p>Educators Only</p>
+                        </div>
+                        <div class="stat">
+                            <h4>Secure</h4>
+                            <p>Approval Required</p>
+                        </div>
+                    </div>
+                    
+                    <div class="role-actions">
+                        <a href="auth/login-admin.html" class="btn btn-outline btn-block">
+                            <i class="fas fa-sign-in-alt"></i> Admin Login
+                        </a>
+                        <a href="auth/admin-request.html" class="btn btn-primary btn-block">
+                            <i class="fas fa-user-shield"></i> Request Access
+                        </a>
+                    </div>
+                    
+                    <div class="role-footer">
+                        <p><i class="fas fa-shield-alt"></i> For educators & verified admins only</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="role-help text-center animate__animated animate__fadeInUp" data-wow-delay="0.6s">
+                <div class="help-card">
+                    <i class="fas fa-question-circle"></i>
+                    <div>
+                        <h4>Not sure which to choose?</h4>
+                        <p>Students use DDQuest for learning. Educators/Admins manage content and view analytics.</p>
+                    </div>
+                    <a href="index.html" class="btn btn-outline btn-sm">
+                        <i class="fas fa-home"></i> Back to Home
+                    </a>
+                </div>
+            </div>
+            
+            <div class="role-security animate__animated animate__fadeIn" data-wow-delay="0.8s">
+                <div class="security-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <h5>Secure & Private</h5>
+                        <p>Your data is protected with Firebase security rules</p>
+                    </div>
+                </div>
+                <div class="security-badge">
+                    <i class="fas fa-bolt"></i>
+                    <div>
+                        <h5>Real-time Updates</h5>
+                        <p>Instant sync across all your devices</p>
+                    </div>
+                </div>
+                <div class="security-badge">
+                    <i class="fas fa-mobile-alt"></i>
+                    <div>
+                        <h5>Mobile Friendly</h5>
+                        <p>Optimized for smartphones & tablets</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Connection Status Badge -->
+    <div id="connectionStatusBadge" style="
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #3B82F6;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: none;
+        transition: all 0.3s ease;
+    ">
+        <span class="status-icon">🔄</span>
+        <span class="status-text">Connecting to DDQuest...</span>
+    </div>
+
+    <!-- Main JS -->
+    <script src="assets/js/main.js"></script>
+    
+    <!-- Firebase Initialization for Role Page -->
+    <script type="module">
+        console.log("⚡ Role Page Firebase Initialization");
+        
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
+            authDomain: "ddquest-614ea.firebaseapp.com",
+            databaseURL: "https://ddquest-614ea-default-rtdb.firebaseio.com",
+            projectId: "ddquest-614ea",
+            storageBucket: "ddquest-614ea.firebasestorage.app",
+            messagingSenderId: "602140742747",
+            appId: "1:602140742747:web:1cbd274462578fde845b7e",
+            measurementId: "G-1CRQVW0WF9"
+        };
+        
+        // Import Firebase v9 modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+        
+        // Global Firebase instances
+        let firebaseApp = null;
+        let firebaseAuth = null;
+        let firestoreDb = null;
+        let isFirebaseInitialized = false;
+        
+        // Update connection status UI
+        function updateConnectionStatus(status, message = '') {
+            const badge = document.getElementById('connectionStatusBadge');
+            
+            if (badge) {
+                badge.style.display = 'flex';
+                
+                switch(status) {
+                    case 'connecting':
+                        badge.innerHTML = '<span class="status-icon">🔄</span><span class="status-text">Connecting to DDQuest...</span>';
+                        badge.style.background = '#F59E0B';
+                        break;
+                        
+                    case 'connected':
+                        badge.innerHTML = '<span class="status-icon">✅</span><span class="status-text">Connected to DDQuest</span>';
+                        badge.style.background = '#10B981';
+                        
+                        // Auto-hide after 5 seconds
+                        setTimeout(() => {
+                            badge.style.opacity = '0';
+                            badge.style.transform = 'translateY(20px)';
+                            setTimeout(() => {
+                                badge.style.display = 'none';
+                            }, 300);
+                        }, 5000);
+                        break;
+                        
+                    case 'disconnected':
+                        badge.innerHTML = '<span class="status-icon">❌</span><span class="status-text">Connection Issue</span>';
+                        badge.style.background = '#EF4444';
+                        badge.style.opacity = '1';
+                        badge.style.transform = 'translateY(0)';
+                        break;
+                }
+            }
+        }
+        
+        // Initialize Firebase
+        async function initializeFirebase() {
+            try {
+                console.log("🚀 Initializing Firebase...");
+                updateConnectionStatus('connecting');
+                
+                // Check if already initialized
+                if (isFirebaseInitialized) {
+                    console.log("✅ Firebase already initialized");
+                    updateConnectionStatus('connected', 'Firebase ready');
+                    return true;
+                }
+                
+                // Initialize Firebase App
+                firebaseApp = initializeApp(firebaseConfig);
+                
+                // Initialize services
+                firebaseAuth = getAuth(firebaseApp);
+                firestoreDb = getFirestore(firebaseApp);
+                
+                // Configure Auth settings
+                firebaseAuth.useDeviceLanguage();
+                
+                console.log("✅ Firebase services initialized!");
+                
+                // Mark as initialized
+                isFirebaseInitialized = true;
+                window.firebaseApp = firebaseApp;
+                window.firebaseAuth = firebaseAuth;
+                window.firestoreDb = firestoreDb;
+                
+                updateConnectionStatus('connected');
+                
+                // Check auth state
+                checkAuthState();
+                
+                return true;
+                
+            } catch (error) {
+                console.error("❌ Firebase initialization failed:", error);
+                updateConnectionStatus('disconnected');
+                return false;
+            }
+        }
+        
+        // Check auth state
+        function checkAuthState() {
+            if (!firebaseAuth) return;
+            
+            onAuthStateChanged(firebaseAuth, async (user) => {
+                if (user) {
+                    console.log("👤 User authenticated:", user.uid.substring(0, 8) + "...");
+                    
+                    // Get user role from Firestore
+                    try {
+                        const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js");
+                        const userDoc = await getDoc(doc(firestoreDb, "users", user.uid));
+                        
+                        if (userDoc.exists()) {
+                            const userData = userDoc.data();
+                            const role = userData.role || 'student';
+                            
+                            console.log("🎯 User role:", role);
+                            
+                            // Redirect based on role
+                            if (role === 'student') {
+                                window.location.href = 'student/dashboard/index.html';
+                            } else if (role === 'admin') {
+                                window.location.href = 'admin/dashboard/index.html';
+                            }
+                        }
+                    } catch (error) {
+                        console.warn("⚠️ Could not fetch user role:", error.message);
+                    }
+                }
+            });
+        }
+        
+        // Initialize Firebase when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("📄 Role page loaded, initializing Firebase...");
+            
+            // Start Firebase initialization after a short delay
+            setTimeout(() => {
+                initializeFirebase().catch(console.error);
+            }, 1000);
+            
+            // Add CSS animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInRight {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+    
+    <!-- Role Page Script -->
+    <script>
+        // Preloader
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const preloader = document.getElementById('preloader');
+                if (preloader) {
+                    preloader.style.opacity = '0';
+                    preloader.style.visibility = 'hidden';
+                }
+            }, 1000);
+        });
+
+        // Role selection effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleCards = document.querySelectorAll('.role-card');
+            
+            roleCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    roleCards.forEach(c => c.classList.remove('highlighted'));
+                    this.classList.add('highlighted');
+                });
+                
+                card.addEventListener('click', function(e) {
+                    if (!e.target.closest('a')) {
+                        const link = this.querySelector('.btn-primary');
+                        if (link) {
+                            link.click();
+                        }
+                    }
+                });
+            });
+
+            // Add animation classes on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe elements
+            document.querySelectorAll('.role-card, .role-help, .role-security').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>
