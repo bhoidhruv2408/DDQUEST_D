@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDQuest • Edit Materials</title>
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Firebase SDK (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4361ee; --primary-glow: rgba(67,97,238,0.4);
+            --secondary: #7209b7; --accent: #4cc9f0;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --dark: #0b1120; --dark-surface: #151f2e; --dark-card: #1e293b;
+            --light: #f8fafc; --light-surface: #f1f5f9; --gray: #64748b;
+            --border-light: rgba(255,255,255,0.1); --border-dark: rgba(0,0,0,0.05);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12),0 1px 2px rgba(0,0,0,0.24);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);
+            --shadow-xl: 0 25px 50px -12px rgba(0,0,0,0.25);
+            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-heading: 'Manrope', var(--font-sans);
+            --radius-sm: 8px; --radius-md: 12px; --radius-lg: 20px;
+            --transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+        }
+        body {
+            font-family: var(--font-sans);
+            background: linear-gradient(135deg, #0f172a 0%, #1a2639 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--light);
+        }
+        body.light-theme {
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
+            color: var(--dark);
+        }
+        body.light-theme .glass-panel {
+            background: #ffffff;
+            border: 1px solid var(--border-dark);
+            box-shadow: 0 8px 30px rgba(16,24,40,0.06);
+            color: var(--dark);
+        }
+        body.light-theme .form-control {
+            background: #fff;
+            color: var(--dark);
+            border: 1px solid rgba(16,24,40,0.06);
+        }
+        body.light-theme .material-card {
+            background: #ffffff;
+            border: 1px solid rgba(16,24,40,0.06);
+            color: var(--dark);
+        }
+        .glass-panel {
+            background: rgba(30,41,59,0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl), 0 0 0 1px rgba(255,255,255,0.05) inset;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .header h1 {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #fff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            background: rgba(76,201,240,0.1);
+            transition: var(--transition);
+        }
+        .back-link:hover {
+            background: rgba(76,201,240,0.2);
+            gap: 12px;
+        }
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            color: white;
+            font-size: 1rem;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+        .filter-select {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            color: white;
+            font-size: 1rem;
+            min-width: 150px;
+        }
+        .filter-select option { background: var(--dark-surface); }
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+        .material-card {
+            background: rgba(30,41,59,0.6);
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        .material-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary);
+        }
+        .material-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        .material-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .material-title i { color: var(--accent); font-size: 0.9rem; }
+        .material-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 16px;
+        }
+        .material-meta span {
+            background: rgba(255,255,255,0.05);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .material-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            border-top: 1px solid var(--border-light);
+            padding-top: 16px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+        .btn-edit {
+            background: rgba(67,97,238,0.2);
+            color: var(--accent);
+        }
+        .btn-edit:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-delete {
+            background: rgba(239,68,68,0.2);
+            color: #f87171;
+        }
+        .btn-delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-view {
+            background: rgba(16,185,129,0.2);
+            color: var(--success);
+        }
+        .btn-view:hover {
+            background: var(--success);
+            color: white;
+        }
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-card {
+            background: rgba(30,41,59,0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 600px;
+            padding: 32px;
+            box-shadow: var(--shadow-xl);
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .modal-header h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 24px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .close-btn:hover { color: var(--danger); }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--gray);
+        }
+        .form-control {
+            width: 100%;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            color: white;
+            font-family: var(--font-sans);
+            font-size: 1rem;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+        }
+        .btn-save {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            flex: 2;
+        }
+        .btn-cancel {
+            background: rgba(255,255,255,0.1);
+            color: var(--light);
+            flex: 1;
+        }
+        .toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; }
+        .toast {
+            background: rgba(30,41,59,0.95);
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease forwards;
+            max-width: 360px;
+        }
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.warning { border-left-color: var(--warning); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .loader {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 40px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: var(--gray);
+        }
+        .empty-state i { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="glass-panel">
+        <div class="header">
+            <h1><i class="fas fa-edit"></i> Manage Materials</h1>
+            <a href="../dashboard/index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+        </div>
+
+        <!-- Search & Filter -->
+        <div class="search-bar">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search by title, subject, category...">
+            <select class="filter-select" id="semesterFilter">
+                <option value="">All Semesters</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+            </select>
+            <select class="filter-select" id="categoryFilter">
+                <option value="">All Categories</option>
+                <option value="Notes">Notes</option>
+                <option value="Question Bank">Question Bank</option>
+                <option value="Lab Manual">Lab Manual</option>
+                <option value="Syllabus">Syllabus</option>
+                <option value="Reference Book">Reference Book</option>
+            </select>
+        </div>
+
+        <!-- Materials Grid -->
+        <div id="materialsContainer">
+            <div class="loader"></div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2><i class="fas fa-pen"></i> Edit Material</h2>
+                <button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control" id="editTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" id="editDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select class="form-control" id="editCategory">
+                        <option value="Notes">Notes</option>
+                        <option value="Question Bank">Question Bank</option>
+                        <option value="Lab Manual">Lab Manual</option>
+                        <option value="Syllabus">Syllabus</option>
+                        <option value="Reference Book">Reference Book</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Semester</label>
+                    <select class="form-control" id="editSemester">
+                        <option value="1">Semester 1</option>
+                        <option value="2">Semester 2</option>
+                        <option value="3">Semester 3</option>
+                        <option value="4">Semester 4</option>
+                        <option value="5">Semester 5</option>
+                        <option value="6">Semester 6</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" class="form-control" id="editSubject">
+                </div>
+                <div class="form-group">
+                    <label>Tags (comma separated)</label>
+                    <input type="text" class="form-control" id="editTags">
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-save">Save Changes</button>
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="edit-materials.js"></script>
+</body>
+</html>

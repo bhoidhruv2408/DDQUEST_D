@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDQuest • Edit Test</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <style>
+    /* ===== GLOBAL STYLES (same as create-test) ===== */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --primary: #4361ee; --primary-glow: rgba(67,97,238,0.4);
+      --secondary: #7209b7; --accent: #4cc9f0;
+      --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+      --dark: #0b1120; --dark-surface: #151f2e; --dark-card: #1e293b;
+      --light: #f8fafc; --light-surface: #f1f5f9; --gray: #64748b;
+      --border-light: rgba(255,255,255,0.1); --border-dark: rgba(0,0,0,0.05);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+      --shadow-xl: 0 25px 50px -12px rgba(0,0,0,0.25);
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-heading: 'Manrope', var(--font-sans);
+      --radius-sm: 8px; --radius-md: 12px; --radius-lg: 20px;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body {
+      font-family: var(--font-sans);
+      background: linear-gradient(135deg, #0f172a 0%, #1a2639 100%);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+      color: var(--light);
+    }
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(12px);
+      border: 1px solid var(--border-light); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl), 0 0 0 1px rgba(255,255,255,0.05) inset;
+      width: 100%; max-width: 800px; padding: 32px;
+    }
+    .header { text-align: center; margin-bottom: 32px; }
+    .header h1 {
+      font-family: var(--font-heading); font-weight: 800; font-size: 2.2rem;
+      background: linear-gradient(135deg, #fff, #cbd5e1); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; letter-spacing: -0.02em; margin-bottom: 8px;
+    }
+    .header p { color: var(--gray); font-size: 0.95rem; }
+    .header p i { color: var(--accent); margin-right: 6px; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px; color: var(--accent);
+      text-decoration: none; font-weight: 500; margin-bottom: 20px; transition: var(--transition);
+    }
+    .back-link:hover { gap: 12px; color: #fff; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 24px; }
+    .full-width { grid-column: span 2; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group label {
+      font-weight: 600; font-size: 0.9rem; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--gray);
+    }
+    .form-group label i { margin-right: 6px; color: var(--accent); }
+    .form-control {
+      background: rgba(0,0,0,0.2); border: 1px solid var(--border-light);
+      border-radius: var(--radius-md); padding: 14px 16px; color: white;
+      font-family: var(--font-sans); font-size: 0.95rem; transition: var(--transition);
+    }
+    .form-control:focus {
+      outline: none; border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(0,0,0,0.3);
+    }
+    .form-control option { background: var(--dark-surface); }
+    .btn-submit {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border: none; color: white; font-weight: 700; font-size: 1.1rem;
+      padding: 18px 32px; border-radius: var(--radius-lg); width: 100%;
+      cursor: pointer; transition: var(--transition); box-shadow: var(--shadow-md);
+      display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 16px;
+    }
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px); box-shadow: var(--shadow-xl), 0 0 20px var(--primary-glow);
+    }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.3); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.1); border: 1px solid var(--border-light);
+      color: white; padding: 12px 24px; border-radius: var(--radius-md);
+      font-weight: 600; cursor: pointer; transition: var(--transition); text-decoration: none;
+      display: inline-block; text-align: center;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+    .toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; max-width: 360px; }
+    .toast {
+      background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(8px);
+      border-left: 4px solid var(--primary); border-radius: var(--radius-md);
+      padding: 16px; box-shadow: var(--shadow-lg); display: flex; align-items: flex-start;
+      gap: 12px; transform: translateX(120%); animation: slideIn 0.3s forwards;
+      border: 1px solid var(--border-light);
+    }
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--danger); }
+    .toast.warning { border-left-color: var(--warning); }
+    .toast.info { border-left-color: var(--info); }
+    @keyframes slideIn { to { transform: translateX(0); } }
+    .toast-icon { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .toast-content { flex: 1; }
+    .toast-title { font-weight: 700; margin-bottom: 4px; }
+    .toast-message { font-size: 0.85rem; color: var(--gray); }
+    .toast-close { background: none; border: none; color: var(--gray); cursor: pointer; padding: 4px; border-radius: 4px; }
+    @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } }
+  </style>
+</head>
+<body>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="glass-panel">
+    <a href="manage-tests.html" class="back-link">
+      <i class="fas fa-arrow-left"></i> Back to Tests
+    </a>
+
+    <div class="header">
+      <h1><i class="fas fa-edit"></i> Edit Test</h1>
+      <p><i class="fas fa-shield-alt"></i> Update test details</p>
+    </div>
+
+    <form id="editTestForm">
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label><i class="fas fa-heading"></i> Test Title *</label>
+          <input type="text" id="title" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-tag"></i> Type *</label>
+          <select id="type" class="form-control" required>
+            <option value="daily">Daily Quiz (25 Q, 50 marks)</option>
+            <option value="weekly">Weekly Test (100 Q, 200 marks)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-clock"></i> Duration (minutes) *</label>
+          <input type="number" id="duration" class="form-control" min="1" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-list-ol"></i> Total Questions *</label>
+          <input type="number" id="totalQuestions" class="form-control" min="1" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-star"></i> Marks per Question *</label>
+          <input type="number" id="marksPerQuestion" class="form-control" min="0.5" step="0.5" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-minus-circle"></i> Negative Marking *</label>
+          <input type="number" id="negativeMarking" class="form-control" min="0" step="0.25" required>
+        </div>
+        <div class="form-group full-width">
+          <label><i class="fas fa-calendar-alt"></i> Active Date (for Daily) *</label>
+          <input type="date" id="activeDate" class="form-control">
+        </div>
+        <div class="form-group full-width" style="flex-direction: row; align-items: center; gap: 20px;">
+          <label style="display: flex; align-items: center; gap: 10px;">
+            <input type="checkbox" id="published"> Publish?
+          </label>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 15px; margin-top: 20px;">
+        <button type="submit" class="btn-submit" id="submitBtn" style="flex: 2;">
+          <i class="fas fa-save"></i> Update Test
+        </button>
+        <a href="#" id="uploadQuestionsBtn" class="btn-secondary" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <i class="fas fa-question-circle"></i> Upload Questions
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Firebase Config (replace with yours)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
+      authDomain: "ddquest-614ea.firebaseapp.com",
+      databaseURL: "https://ddquest-614ea-default-rtdb.firebaseio.com",
+      projectId: "ddquest-614ea",
+      storageBucket: "ddquest-614ea.appspot.com",
+      messagingSenderId: "602140742747",
+      appId: "1:602140742747:web:1cbd274462578fde845b7e"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Toast helper
+    function showToast(message, type = 'info', title = '', duration = 5000) {
+      const container = document.getElementById('toastContainer');
+      const toastId = 'toast-' + Date.now();
+      const icons = { success: 'check-circle', error: 'exclamation-circle', warning: 'exclamation-triangle', info: 'info-circle' };
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`; toast.id = toastId;
+      toast.innerHTML = `
+        <div class="toast-icon"><i class="fas fa-${icons[type] || 'info-circle'}"></i></div>
+        <div class="toast-content">${title ? `<div class="toast-title">${title}</div>` : ''}<div class="toast-message">${message}</div></div>
+        <button class="toast-close" onclick="document.getElementById('${toastId}').remove()"><i class="fas fa-times"></i></button>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => { const el = document.getElementById(toastId); if (el) el.remove(); }, duration);
+    }
+
+    // Get testId from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const testId = urlParams.get('testId');
+    if (!testId) {
+      showToast('No test ID specified', 'error');
+      setTimeout(() => window.location.href = 'manage-tests.html', 2000);
+    }
+
+    // Set the upload questions button link
+    document.getElementById('uploadQuestionsBtn').href = `upload-questions.html?testId=${testId}`;
+
+    // Auth & admin check
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        showToast('Please login as admin', 'error');
+        setTimeout(() => window.location.href = '../../auth/login-admin.html', 2000);
+        return;
+      }
+      try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (!userDoc.exists || !['admin','super_admin','content'].includes(userDoc.data().role)) {
+          showToast('Admin access required', 'error');
+          setTimeout(() => window.location.href = '../../auth/login-admin.html', 2000);
+          return;
+        }
+        // Load test data
+        loadTestData();
+      } catch (e) {
+        console.error(e);
+        showToast('Error checking permissions', 'error');
+      }
+    });
+
+    async function loadTestData() {
+      try {
+        const doc = await db.collection('tests').doc(testId).get();
+        if (!doc.exists) {
+          showToast('Test not found', 'error');
+          setTimeout(() => window.location.href = 'manage-tests.html', 2000);
+          return;
+        }
+        const data = doc.data();
+        document.getElementById('title').value = data.title || '';
+        document.getElementById('type').value = data.type || 'daily';
+        document.getElementById('duration').value = data.duration || '';
+        document.getElementById('totalQuestions').value = data.totalQuestions || '';
+        document.getElementById('marksPerQuestion').value = data.marksPerQuestion || '';
+        document.getElementById('negativeMarking').value = data.negativeMarking || '';
+        document.getElementById('published').checked = data.published || false;
+
+        if (data.activeDate) {
+          // Convert Firestore Timestamp to YYYY-MM-DD
+          const date = data.activeDate.toDate();
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          document.getElementById('activeDate').value = `${year}-${month}-${day}`;
+        }
+
+        // Toggle active date field based on type
+        toggleActiveDate();
+      } catch (e) {
+        console.error(e);
+        showToast('Error loading test', 'error');
+      }
+    }
+
+    function toggleActiveDate() {
+      const typeSelect = document.getElementById('type');
+      const activeDateInput = document.getElementById('activeDate');
+      const activeDateGroup = activeDateInput.closest('.form-group');
+      if (typeSelect.value === 'daily') {
+        activeDateGroup.style.display = 'flex';
+        activeDateInput.required = true;
+      } else {
+        activeDateGroup.style.display = 'flex';
+        activeDateInput.required = false;
+      }
+    }
+
+    document.getElementById('type').addEventListener('change', toggleActiveDate);
+
+    // Handle form submission (update)
+    document.getElementById('editTestForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+
+      const title = document.getElementById('title').value.trim();
+      const type = document.getElementById('type').value;
+      const duration = parseInt(document.getElementById('duration').value);
+      const totalQuestions = parseInt(document.getElementById('totalQuestions').value);
+      const marksPerQuestion = parseFloat(document.getElementById('marksPerQuestion').value);
+      const negativeMarking = parseFloat(document.getElementById('negativeMarking').value);
+      const published = document.getElementById('published').checked;
+      const activeDateInput = document.getElementById('activeDate').value;
+
+      if (!title || !duration || !totalQuestions || !marksPerQuestion || negativeMarking === undefined) {
+        showToast('Please fill all required fields.', 'warning');
+        submitBtn.disabled = false;
+        return;
+      }
+      if (type === 'daily' && !activeDateInput) {
+        showToast('Please select an active date for Daily Quiz.', 'warning');
+        submitBtn.disabled = false;
+        return;
+      }
+
+      const updateData = {
+        title, type, duration, totalQuestions, marksPerQuestion, negativeMarking, published,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      if (activeDateInput) {
+        const [year, month, day] = activeDateInput.split('-').map(Number);
+        const dateObj = new Date(Date.UTC(year, month-1, day));
+        updateData.activeDate = firebase.firestore.Timestamp.fromDate(dateObj);
+      } else {
+        // If no date, remove the field (optional)
+        updateData.activeDate = firebase.firestore.FieldValue.delete();
+      }
+
+      try {
+        await db.collection('tests').doc(testId).update(updateData);
+        showToast('Test updated successfully!', 'success');
+      } catch (err) {
+        console.error(err);
+        showToast(err.message, 'error');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

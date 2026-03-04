@@ -1,0 +1,687 @@
+<!-- E:\DDQUEST\admin\manage-content\upload-material.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDQuest • Upload Material</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    
+    <!-- Firebase SDK (compat) - only for Auth & Firestore (roles) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* Your existing CSS – unchanged, so I'll keep it minimal here for brevity */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --primary:#4361ee; --primary-glow:rgba(67,97,238,0.4); --secondary:#7209b7; --accent:#4cc9f0;
+            --success:#10b981; --danger:#ef4444; --warning:#f59e0b; --dark:#0b1120; --dark-surface:#151f2e;
+            --dark-card:#1e293b; --light:#f8fafc; --light-surface:#f1f5f9; --gray:#64748b;
+            --border-light:rgba(255,255,255,0.1); --border-dark:rgba(0,0,0,0.05);
+            --shadow-sm:0 1px 3px rgba(0,0,0,0.12),0 1px 2px rgba(0,0,0,0.24);
+            --shadow-md:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);
+            --shadow-xl:0 25px 50px -12px rgba(0,0,0,0.25);
+            --font-sans:'Inter',system-ui,-apple-system,sans-serif; --font-heading:'Manrope',var(--font-sans);
+            --radius-sm:8px; --radius-md:12px; --radius-lg:20px; --transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
+        }
+        body { font-family:var(--font-sans); background:linear-gradient(135deg,#0f172a 0%,#1a2639 100%); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; color:var(--light); }
+        body.light-theme { background:linear-gradient(135deg,#f8fafc 0%,#eef2f7 100%); color:var(--dark); }
+        body.light-theme .glass-panel { background:linear-gradient(180deg,#ffffff,#f8fafc); border:1px solid var(--border-dark); box-shadow:0 8px 30px rgba(16,24,40,0.06); color:var(--dark); }
+        body.light-theme .form-control { background:#fff; color:var(--dark); border:1px solid rgba(16,24,40,0.06); }
+        body.light-theme .dropzone { background:rgba(67,97,238,0.03); border-color:rgba(67,97,238,0.12); }
+        .glass-panel { background:rgba(30,41,59,0.8); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--border-light); border-radius:var(--radius-lg); box-shadow:var(--shadow-xl),0 0 0 1px rgba(255,255,255,0.05) inset; width:100%; max-width:900px; padding:32px; }
+        .header { text-align:center; margin-bottom:32px; }
+        .header h1 { font-family:var(--font-heading); font-weight:800; font-size:2.2rem; background:linear-gradient(135deg,#fff,#cbd5e1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:-0.02em; margin-bottom:8px; }
+        .header p { color:var(--gray); font-size:0.95rem; }
+        .header p i { color:var(--accent); margin-right:6px; }
+        .back-link { display:inline-flex; align-items:center; gap:8px; color:var(--accent); text-decoration:none; font-weight:500; margin-bottom:20px; transition:var(--transition); }
+        .back-link:hover { gap:12px; color:#fff; }
+        .form-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; margin-bottom:24px; }
+        .full-width { grid-column:span 2; }
+        .form-group { display:flex; flex-direction:column; gap:8px; }
+        .form-group label { font-weight:600; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--gray); }
+        .form-group label i { margin-right:6px; color:var(--accent); }
+        .form-control { background:rgba(0,0,0,0.2); border:1px solid var(--border-light); border-radius:var(--radius-md); padding:14px 16px; color:white; font-family:var(--font-sans); font-size:0.95rem; transition:var(--transition); }
+        .form-control:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-glow); background:rgba(0,0,0,0.3); }
+        .form-control option { background:var(--dark-surface); }
+        textarea.form-control { resize:vertical; min-height:100px; }
+        .dropzone { border:2px dashed rgba(67,97,238,0.5); border-radius:var(--radius-lg); padding:40px 20px; text-align:center; cursor:pointer; transition:var(--transition); background:rgba(67,97,238,0.02); position:relative; overflow:hidden; }
+        .dropzone:hover { border-color:var(--primary); background:rgba(67,97,238,0.05); transform:scale(1.02); }
+        .dropzone.dragover { border-color:var(--accent); background:rgba(76,201,240,0.1); transform:scale(1.02); }
+        .dropzone i { font-size:48px; color:var(--primary); margin-bottom:12px; filter:drop-shadow(0 0 10px var(--primary-glow)); }
+        .dropzone p { color:var(--gray); font-size:1rem; }
+        .dropzone .small { font-size:0.8rem; opacity:0.7; }
+        .file-preview { margin-top:16px; display:flex; align-items:center; gap:16px; background:rgba(255,255,255,0.03); border-radius:var(--radius-md); padding:12px 16px; border:1px solid var(--border-light); animation:slideUp 0.3s ease; }
+        .file-preview i { font-size:32px; color:var(--accent); }
+        .file-preview .file-details { flex:1; }
+        .file-preview .file-name { font-weight:600; margin-bottom:4px; }
+        .file-preview .file-meta { font-size:0.8rem; color:var(--gray); }
+        .file-preview .remove-file { background:none; border:none; color:var(--danger); cursor:pointer; font-size:18px; padding:8px; border-radius:50%; transition:var(--transition); }
+        .file-preview .remove-file:hover { background:rgba(239,68,68,0.2); transform:scale(1.1); }
+        .image-preview { width:60px; height:60px; border-radius:var(--radius-sm); object-fit:cover; border:2px solid var(--primary); }
+        .progress-container { margin:24px 0 16px; display:none; }
+        .progress-bar { height:10px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden; box-shadow:inset 0 1px 2px rgba(0,0,0,0.2); }
+        .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:10px; transition:width 0.3s ease; box-shadow:0 0 10px var(--primary-glow); }
+        .progress-stats { display:flex; justify-content:space-between; font-size:0.85rem; color:var(--gray); margin-top:6px; }
+        .btn-submit { background:linear-gradient(135deg,var(--primary),var(--secondary)); border:none; color:white; font-weight:700; font-size:1.1rem; padding:18px 32px; border-radius:var(--radius-lg); width:100%; cursor:pointer; transition:var(--transition); box-shadow:var(--shadow-md); display:flex; align-items:center; justify-content:center; gap:12px; margin-top:16px; }
+        .btn-submit:hover:not(:disabled) { transform:translateY(-2px); box-shadow:var(--shadow-xl),0 0 20px var(--primary-glow); }
+        .btn-submit:disabled { opacity:0.5; cursor:not-allowed; filter:grayscale(0.3); }
+        .toast-container { position:fixed; top:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:12px; max-width:360px; }
+        .toast { background:rgba(30,41,59,0.95); backdrop-filter:blur(8px); border-left:4px solid var(--primary); border-radius:var(--radius-md); padding:16px; box-shadow:var(--shadow-lg); display:flex; align-items:flex-start; gap:12px; transform:translateX(120%); animation:slideIn 0.3s cubic-bezier(0.68,-0.55,0.265,1.55) forwards; border:1px solid rgba(255,255,255,0.1); }
+        .toast.success { border-left-color:var(--success); }
+        .toast.error { border-left-color:var(--danger); }
+        .toast.warning { border-left-color:var(--warning); }
+        .toast.info { border-left-color:var(--info); }
+        @keyframes slideIn { to { transform:translateX(0); } }
+        @keyframes slideUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        .toast-icon { width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:18px; }
+        .toast-content { flex:1; }
+        .toast-title { font-weight:700; margin-bottom:4px; }
+        .toast-message { font-size:0.85rem; color:var(--gray); }
+        .toast-close { background:none; border:none; color:var(--gray); cursor:pointer; padding:4px; border-radius:4px; }
+        .theme-toggle { position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); color:var(--light); padding:8px 10px; border-radius:12px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-weight:600; }
+        .theme-toggle i { color:var(--accent); }
+        .preview-modal { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:10000; padding:24px; }
+        .preview-card { width:100%; max-width:900px; height:80vh; background:rgba(15,23,42,0.98); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+        .preview-toolbar { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.03); }
+        .preview-body { flex:1; display:flex; }
+        .preview-frame { flex:1; border:none; width:100%; }
+        .form-control:focus, .dropzone:focus, .btn-submit:focus, .theme-toggle:focus { outline:3px solid rgba(76,201,240,0.12); outline-offset:2px; }
+        @media (max-width:640px) { .form-grid { grid-template-columns:1fr; } .full-width { grid-column:span 1; } .glass-panel { padding:24px; } }
+    </style>
+</head>
+<body>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="glass-panel">
+        <button class="theme-toggle" id="themeToggle" aria-pressed="false" title="Toggle theme">
+            <i class="fas fa-moon"></i>
+            <span id="themeLabel">Dark</span>
+        </button>
+        <a href="../dashboard/index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+
+        <div class="header">
+            <h1><i class="fas fa-cloud-upload-alt"></i> Upload Material</h1>
+            <p><i class="fas fa-shield-alt"></i> Admin only • Secured by Cloudinary + Firestore</p>
+        </div>
+
+        <form id="uploadForm">
+            <div class="form-grid">
+                <!-- Title -->
+                <div class="form-group full-width">
+                    <label><i class="fas fa-heading"></i> Title <span style="color: var(--danger);">*</span></label>
+                    <input type="text" id="title" class="form-control" placeholder="e.g., Data Structures Notes" required>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group full-width">
+                    <label><i class="fas fa-align-left"></i> Description</label>
+                    <textarea id="description" class="form-control" placeholder="Brief description of the material..."></textarea>
+                </div>
+
+                <!-- AI Tag Suggestions -->
+                <div class="form-group full-width" id="aiSuggestGroup">
+                    <label><i class="fas fa-robot"></i> AI Tags (suggested)</label>
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                        <button type="button" id="suggestTagsBtn" class="btn-submit" style="padding:8px 12px;font-size:0.95rem;width:auto;">Suggest Tags</button>
+                        <div id="tagSuggestions" style="display:flex;gap:8px;flex-wrap:wrap;margin-left:6px;"></div>
+                    </div>
+                    <input type="text" id="tagsInput" class="form-control" placeholder="Comma-separated tags (editable)" aria-label="Tags input">
+                </div>
+
+                <!-- Category & Semester -->
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Category <span style="color: var(--danger);">*</span></label>
+                    <select id="category" class="form-control" required>
+                        <option value="" disabled selected>– Select –</option>
+                        <option value="Notes">📘 Notes</option>
+                        <option value="Question Bank">📝 Question Bank</option>
+                        <option value="Lab Manual">🔬 Lab Manual</option>
+                        <option value="Syllabus">📋 Syllabus</option>
+                        <option value="Reference Book">📚 Reference Book</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-layer-group"></i> Semester <span style="color: var(--danger);">*</span></label>
+                    <select id="semester" class="form-control" required>
+                        <option value="" disabled selected>– Select –</option>
+                        <option value="1">1st Semester</option>
+                        <option value="2">2nd Semester</option>
+                        <option value="3">3rd Semester</option>
+                        <option value="4">4th Semester</option>
+                        <option value="5">5th Semester</option>
+                        <option value="6">6th Semester</option>
+                    </select>
+                </div>
+
+                <!-- Branch -->
+                <div class="form-group full-width">
+                    <label><i class="fas fa-code-branch"></i> Branch (optional)</label>
+                    <select id="branch" class="form-control">
+                        <option value="">All Branches</option>
+                        <option value="Computer Science">💻 Computer Science</option>
+                        <option value="Mechanical">⚙️ Mechanical</option>
+                        <option value="Civil">🏗️ Civil</option>
+                        <option value="Electronics">🔌 Electronics</option>
+                        <option value="Electrical">⚡ Electrical</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- File drop zone -->
+            <div class="form-group">
+                <label><i class="fas fa-file"></i> File <span style="color: var(--danger);">*</span></label>
+                <div class="dropzone" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Drag & drop your file here, or click to browse</p>
+                    <p class="small">Supported: PDF, DOCX, PPT, XLS, Images (max 50MB)</p>
+                    <input type="file" id="fileInput" style="display: none;" accept=".pdf,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png">
+                </div>
+
+                <!-- File preview (hidden initially) -->
+                <div id="filePreviewContainer" style="display: none;"></div>
+
+                <!-- Preview modal -->
+                <div class="preview-modal" id="previewModal" role="dialog" aria-modal="true" aria-hidden="true">
+                    <div class="preview-card" role="document">
+                        <div class="preview-toolbar">
+                            <div id="previewTitle" style="font-weight:700;color:var(--light);"></div>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <button id="downloadPreview" class="btn small" style="background:none;border:none;color:var(--accent);cursor:pointer">Download</button>
+                                <button id="closePreview" class="btn small" style="background:none;border:none;color:var(--gray);cursor:pointer">Close</button>
+                            </div>
+                        </div>
+                        <div class="preview-body">
+                            <iframe id="previewFrame" class="preview-frame" src="about:blank" title="File preview"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-stats">
+                    <span id="progressPercent">0%</span>
+                    <span id="progressSpeed"></span>
+                    <button id="cancelUploadBtn" style="margin-left:12px;background:none;border:none;color:var(--danger);cursor:pointer;display:none;">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Submit button -->
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <i class="fas fa-upload"></i> Upload Material
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // ============================================
+        // FIREBASE CONFIG (only for auth & role check)
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
+            authDomain: "ddquest-614ea.firebaseapp.com",
+            projectId: "ddquest-614ea",
+            storageBucket: "ddquest-614ea.appspot.com",
+            messagingSenderId: "602140742747",
+            appId: "1:602140742747:web:1cbd274462578fde845b7e"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const dbFirestore = firebase.firestore(); // for role check
+
+        // ============================================
+        // TOAST NOTIFICATION SYSTEM
+        // ============================================
+        function showToast(message, type = 'info', title = '', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toastId = 'toast-' + Date.now();
+            const icons = { success: 'check-circle', error: 'exclamation-circle', warning: 'exclamation-triangle', info: 'info-circle' };
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.id = toastId;
+            toast.innerHTML = `
+                <div class="toast-icon"><i class="fas fa-${icons[type] || 'info-circle'}"></i></div>
+                <div class="toast-content">
+                    ${title ? `<div class="toast-title">${title}</div>` : ''}
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="document.getElementById('${toastId}').remove()"><i class="fas fa-times"></i></button>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                const el = document.getElementById(toastId);
+                if (el) el.remove();
+            }, duration);
+        }
+
+        // ============================================
+        // ADMIN AUTHENTICATION CHECK
+        // ============================================
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                showToast('You must be logged in as admin', 'error', 'Authentication Required');
+                setTimeout(() => window.location.href = '../../auth/login-admin.html', 2000);
+                return;
+            }
+
+            try {
+                const userDoc = await dbFirestore.collection('users').doc(user.uid).get();
+                if (!userDoc.exists) {
+                    showToast('User account not found', 'error', 'Access Denied');
+                    setTimeout(() => window.location.href = '../../auth/login-admin.html', 2000);
+                    return;
+                }
+                const userData = userDoc.data();
+                if (!['admin', 'super_admin'].includes(userData.role)) {
+                    showToast('Admin privileges required', 'error', 'Access Denied');
+                    setTimeout(() => window.location.href = '../../auth/login-admin.html', 2000);
+                    return;
+                }
+                // Store user UID for uploads
+                window.currentUser = user;
+            } catch (error) {
+                console.error('Auth check error:', error);
+                showToast('Unable to verify permissions', 'error');
+            }
+        });
+
+        // ============================================
+        // FILE UPLOAD UI (now using backend API)
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle
+            const themeToggle = document.getElementById('themeToggle');
+            const themeLabel = document.getElementById('themeLabel');
+            const savedTheme = localStorage.getItem('ddq_theme') || 'dark';
+            function applyTheme(t) {
+                if (t === 'light') {
+                    document.body.classList.add('light-theme');
+                    themeToggle?.setAttribute('aria-pressed', 'true');
+                    if (themeLabel) themeLabel.innerText = 'Light';
+                } else {
+                    document.body.classList.remove('light-theme');
+                    themeToggle?.setAttribute('aria-pressed', 'false');
+                    if (themeLabel) themeLabel.innerText = 'Dark';
+                }
+                localStorage.setItem('ddq_theme', t);
+            }
+            applyTheme(savedTheme);
+            themeToggle?.addEventListener('click', () => {
+                applyTheme(document.body.classList.contains('light-theme') ? 'dark' : 'light');
+            });
+
+            // Elements
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const previewContainer = document.getElementById('filePreviewContainer');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressSpeed = document.getElementById('progressSpeed');
+            const submitBtn = document.getElementById('submitBtn');
+            const uploadForm = document.getElementById('uploadForm');
+            const cancelBtn = document.getElementById('cancelUploadBtn');
+
+            let selectedFile = null;
+            let xhr = null; // for progress tracking
+
+            const MAX_SIZE = 50 * 1024 * 1024;
+            const ALLOWED_TYPES = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.ms-powerpoint',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'image/jpeg', 'image/png'
+            ];
+
+            function formatBytes(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024, dm = 2, sizes = ['B','KB','MB','GB','TB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            }
+
+            // Drag & drop
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileSelect(e.dataTransfer.files[0]);
+                }
+            });
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length) handleFileSelect(fileInput.files[0]);
+            });
+
+            function handleFileSelect(file) {
+                if (file.size > MAX_SIZE) {
+                    showToast(`File exceeds 50MB limit (${(file.size/1024/1024).toFixed(2)} MB)`, 'error', 'File too large');
+                    fileInput.value = '';
+                    return;
+                }
+                if (!ALLOWED_TYPES.includes(file.type) && !file.name.match(/\.(pdf|docx?|pptx?|xlsx?|jpe?g|png)$/i)) {
+                    showToast('File type not allowed.', 'error', 'Invalid type');
+                    fileInput.value = '';
+                    return;
+                }
+                selectedFile = file;
+                renderFilePreview(file);
+            }
+
+            function renderFilePreview(file) {
+                const isImage = file.type.startsWith('image/');
+                const icon = isImage ? 'fa-image' : 'fa-file-pdf';
+                const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                let previewHtml = `
+                    <div class="file-preview" id="filePreview">
+                        <i class="fas ${icon}"></i>
+                        <div class="file-details">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-meta">${sizeMB} MB</div>
+                        </div>
+                        <button type="button" class="remove-file" id="removeFileBtn"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+                if (isImage) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        previewHtml = `
+                            <div class="file-preview" id="filePreview">
+                                <img src="${e.target.result}" class="image-preview" alt="preview" role="button" tabindex="0">
+                                <div class="file-details">
+                                    <div class="file-name">${file.name}</div>
+                                    <div class="file-meta">${sizeMB} MB</div>
+                                </div>
+                                <button type="button" class="remove-file" id="removeFileBtn"><i class="fas fa-times"></i></button>
+                            </div>
+                        `;
+                        previewContainer.innerHTML = previewHtml;
+                        previewContainer.style.display = 'block';
+                        attachRemoveHandler();
+                        attachPreviewOpener();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewContainer.innerHTML = previewHtml;
+                    previewContainer.style.display = 'block';
+                    attachRemoveHandler();
+                    attachPreviewOpener();
+                }
+            }
+
+            function attachRemoveHandler() {
+                document.getElementById('removeFileBtn')?.addEventListener('click', () => {
+                    selectedFile = null;
+                    fileInput.value = '';
+                    previewContainer.style.display = 'none';
+                    previewContainer.innerHTML = '';
+                    if (xhr) { xhr.abort(); xhr = null; }
+                    progressContainer.style.display = 'none';
+                    progressFill.style.width = '0%';
+                    progressPercent.innerText = '0%';
+                    progressSpeed.innerText = '';
+                    submitBtn.disabled = false;
+                    cancelBtn.style.display = 'none';
+                });
+            }
+
+            function attachPreviewOpener() {
+                document.getElementById('filePreview')?.addEventListener('click', openPreviewModal);
+            }
+
+            function openPreviewModal() {
+                const modal = document.getElementById('previewModal');
+                const frame = document.getElementById('previewFrame');
+                const title = document.getElementById('previewTitle');
+                if (!selectedFile) return;
+                title.innerText = selectedFile.name + ' • ' + formatBytes(selectedFile.size);
+                if (selectedFile.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => { frame.src = e.target.result; };
+                    reader.readAsDataURL(selectedFile);
+                } else if (selectedFile.type === 'application/pdf') {
+                    frame.src = URL.createObjectURL(selectedFile);
+                } else {
+                    frame.srcdoc = `<div style="color:#cbd5e1;padding:20px;">Preview not available.</div>`;
+                }
+                modal.style.display = 'flex';
+                document.getElementById('downloadPreview').onclick = () => {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(selectedFile);
+                    a.download = selectedFile.name;
+                    a.click();
+                };
+                document.getElementById('closePreview').onclick = closePreviewModal;
+            }
+
+            function closePreviewModal() {
+                const modal = document.getElementById('previewModal');
+                const frame = document.getElementById('previewFrame');
+                modal.style.display = 'none';
+                frame.src = 'about:blank';
+            }
+
+            // ============================================
+            // FORM SUBMISSION TO BACKEND API
+            // ============================================
+            uploadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                if (!selectedFile) {
+                    showToast('Please select a file to upload.', 'warning', 'Missing File');
+                    return;
+                }
+
+                const title = document.getElementById('title').value.trim();
+                const description = document.getElementById('description').value.trim();
+                const category = document.getElementById('category').value;
+                const semester = document.getElementById('semester').value;
+                const branch = document.getElementById('branch').value;
+                const tags = document.getElementById('tagsInput')?.value || '';
+
+                if (!title || !category || !semester) {
+                    showToast('Please fill all required fields.', 'warning', 'Incomplete Form');
+                    return;
+                }
+
+                const user = auth.currentUser;
+                if (!user) {
+                    showToast('You must be logged in.', 'error', 'Authentication Required');
+                    return;
+                }
+
+                // Prepare FormData
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                formData.append('title', title);
+                formData.append('description', description);
+                formData.append('category', category);
+                formData.append('semester', semester);
+                formData.append('branch', branch);
+                formData.append('tags', tags);
+                formData.append('uploadedBy', user.uid); // send UID to backend
+
+                // Show progress UI
+                progressContainer.style.display = 'block';
+                progressFill.style.width = '0%';
+                progressPercent.innerText = '0%';
+                progressSpeed.innerText = '';
+                submitBtn.disabled = true;
+                cancelBtn.style.display = 'inline';
+
+                // Use XMLHttpRequest for progress tracking
+                xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://localhost:5000/api/upload', true);
+
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percent = (e.loaded / e.total) * 100;
+                        progressFill.style.width = percent + '%';
+                        progressPercent.innerText = Math.round(percent) + '%';
+                        // speed calculation
+                        if (xhr.uploadStartTime) {
+                            const elapsed = (Date.now() - xhr.uploadStartTime) / 1000;
+                            const speed = e.loaded / elapsed;
+                            progressSpeed.innerText = `${formatBytes(speed)}/s`;
+                        }
+                    }
+                });
+
+                xhr.upload.addEventListener('loadstart', () => {
+                    xhr.uploadStartTime = Date.now();
+                });
+
+                xhr.addEventListener('load', () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const result = JSON.parse(xhr.responseText);
+                            if (result.success) {
+                                showToast('Material uploaded successfully!', 'success', 'Upload Complete');
+                                // Reset form
+                                uploadForm.reset();
+                                previewContainer.style.display = 'none';
+                                previewContainer.innerHTML = '';
+                                selectedFile = null;
+                                progressContainer.style.display = 'none';
+                                progressFill.style.width = '0%';
+                                progressPercent.innerText = '0%';
+                                progressSpeed.innerText = '';
+                            } else {
+                                showToast('Upload failed: ' + (result.error || 'Unknown error'), 'error');
+                            }
+                        } catch (err) {
+                            showToast('Invalid server response', 'error');
+                        }
+                    } else {
+                        showToast('Upload failed with status ' + xhr.status, 'error');
+                    }
+                    submitBtn.disabled = false;
+                    cancelBtn.style.display = 'none';
+                    xhr = null;
+                });
+
+                xhr.addEventListener('error', () => {
+                    showToast('Network error – upload failed', 'error');
+                    submitBtn.disabled = false;
+                    cancelBtn.style.display = 'none';
+                    xhr = null;
+                });
+
+                xhr.addEventListener('abort', () => {
+                    showToast('Upload cancelled', 'warning');
+                    submitBtn.disabled = false;
+                    cancelBtn.style.display = 'none';
+                    xhr = null;
+                });
+
+                // Attach cancel handler
+                cancelBtn.onclick = () => {
+                    if (xhr) xhr.abort();
+                };
+
+                xhr.send(formData);
+            });
+
+            // ============================================
+            // AI TAG SUGGESTIONS (simple)
+            // ============================================
+            const suggestBtn = document.getElementById('suggestTagsBtn');
+            const tagSuggestions = document.getElementById('tagSuggestions');
+            const tagsInput = document.getElementById('tagsInput');
+
+            function suggestTagsFromText(title, description) {
+                const text = (title + ' ' + description).toLowerCase();
+                const suggestions = new Set();
+                const mapping = {
+                    'data': ['data-structures','data','algorithms'],
+                    'algorithm': ['algorithms','complexity'],
+                    'network': ['computer-networks','networking'],
+                    'database': ['database','sql','nosql'],
+                    'os': ['operating-system','processes'],
+                    'machine learning': ['machine-learning','ml','ai'],
+                    'deep learning': ['deep-learning','neural-networks'],
+                    'web': ['web','frontend','backend'],
+                    'pdf': ['pdf','document'],
+                    'lab': ['lab-manual','practical'],
+                    'question': ['question-bank','mcq']
+                };
+                for (const key in mapping) {
+                    if (text.includes(key)) mapping[key].forEach(t => suggestions.add(t));
+                }
+                title.split(/\s+/).forEach(tok => {
+                    if (tok.length > 3) suggestions.add(tok.replace(/[^a-z0-9-]/g, ''));
+                });
+                return Array.from(suggestions).slice(0, 8);
+            }
+
+            function renderTagButtons(list) {
+                tagSuggestions.innerHTML = '';
+                list.forEach(tag => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'btn-submit';
+                    btn.style.padding = '6px 10px';
+                    btn.style.fontSize = '0.9rem';
+                    btn.style.background = 'transparent';
+                    btn.style.border = '1px solid rgba(255,255,255,0.06)';
+                    btn.style.color = 'inherit';
+                    btn.textContent = tag;
+                    btn.addEventListener('click', () => {
+                        const current = (tagsInput?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+                        if (!current.includes(tag)) current.push(tag);
+                        if (tagsInput) tagsInput.value = current.join(', ');
+                    });
+                    tagSuggestions.appendChild(btn);
+                });
+            }
+
+            if (suggestBtn) {
+                suggestBtn.addEventListener('click', () => {
+                    const title = document.getElementById('title')?.value || '';
+                    const description = document.getElementById('description')?.value || '';
+                    const suggestions = suggestTagsFromText(title, description);
+                    if (suggestions.length === 0) {
+                        showToast('No suggestions found.', 'info', 'AI');
+                        return;
+                    }
+                    renderTagButtons(suggestions);
+                    showToast('AI suggested tags. Click to add.', 'success', 'AI');
+                });
+            }
+
+            // Close preview on ESC / outside click
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePreviewModal(); });
+            document.getElementById('previewModal')?.addEventListener('click', (e) => {
+                if (e.target.id === 'previewModal') closePreviewModal();
+            });
+        });
+    </script>
+</body>
+</html>
