@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDQuest · Student Profile</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../student.css">
+    <link rel="stylesheet" href="profile.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Initialization -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
+            authDomain: "ddquest-614ea.firebaseapp.com",
+            databaseURL: "https://ddquest-614ea-default-rtdb.firebaseio.com",
+            projectId: "ddquest-614ea",
+            storageBucket: "ddquest-614ea.appspot.com",
+            messagingSenderId: "602140742747",
+            appId: "1:602140742747:web:1cbd274462578fde845b7e",
+            measurementId: "G-1CRQVW0WF9"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+</head>
+<body>
+    <!-- 3D Space Canvas -->
+    <canvas id="spaceCanvas"></canvas>
+
+    <div class="profile-container">
+        <!-- Header -->
+        <div class="profile-header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="navigation-buttons">
+                        <a href="../dashboard/index.html" class="back-btn">
+                            <i class="fas fa-arrow-left"></i> Dashboard
+                        </a>
+                        <button onclick="logoutUser()" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+
+                    <div class="welcome-message">
+                        <h1><span id="greeting">Hello</span>, <span id="userName">Student</span>!</h1>
+                        <p>Manage your profile and personal information.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="container">
+            <div class="profile-card">
+                <div class="profile-card-header">
+                    <h2><i class="fas fa-user-astronaut"></i> Profile Information</h2>
+                    <button id="editToggleBtn" class="btn-edit">
+                        <i class="fas fa-pen"></i> Edit
+                    </button>
+                </div>
+
+                <form id="profileForm">
+                    <!-- Read-only / editable fields -->
+                    <div class="form-grid">
+                        <!-- Full Name -->
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Full Name</label>
+                            <input type="text" id="fullName" class="form-control" placeholder="Your full name" disabled>
+                        </div>
+
+                        <!-- Email (always read-only) -->
+                        <div class="form-group">
+                            <label><i class="fas fa-envelope"></i> Email</label>
+                            <input type="email" id="email" class="form-control" disabled>
+                        </div>
+
+                        <!-- College -->
+                        <div class="form-group">
+                            <label><i class="fas fa-university"></i> College</label>
+                            <input type="text" id="college" class="form-control" placeholder="Your college" disabled>
+                        </div>
+
+                        <!-- Semester -->
+                        <div class="form-group">
+                            <label><i class="fas fa-graduation-cap"></i> Semester</label>
+                            <select id="semester" class="form-control" disabled>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                            </select>
+                        </div>
+
+                        <!-- Branch -->
+                        <div class="form-group">
+                            <label><i class="fas fa-code-branch"></i> Branch</label>
+                            <input type="text" id="branch" class="form-control" placeholder="Your branch" disabled>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="form-group">
+                            <label><i class="fas fa-phone"></i> Phone</label>
+                            <input type="tel" id="phone" class="form-control" placeholder="Contact number" disabled>
+                        </div>
+
+                        <!-- Address (full width) -->
+                        <div class="form-group full-width">
+                            <label><i class="fas fa-map-marker-alt"></i> Address</label>
+                            <textarea id="address" class="form-control" rows="2" placeholder="Your address" disabled></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Action buttons (hidden initially) -->
+                    <div class="form-actions" id="formActions" style="display: none;">
+                        <button type="button" id="cancelBtn" class="btn btn-outline">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" id="saveBtn" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Script -->
+    <script src="profile.js"></script>
+</body>
+</html>

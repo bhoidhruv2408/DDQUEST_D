@@ -3,28 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DDQuest - Student Dashboard</title>
-    
+    <title>DDQuest · Student Dashboard</title>
+
     <!-- Styles -->
     <link rel="stylesheet" href="../../assets/css/main.css">
     <link rel="stylesheet" href="../student.css">
     <link rel="stylesheet" href="dashboard.css">
-    
+
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Favicon -->
+
+    <!-- Favicon (optional – remove if file missing) -->
     <link rel="icon" type="image/svg+xml" href="../../assets/images/logo.svg">
 
-    <!-- Firebase SDK (compat) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Initialization (MUST COME BEFORE dashboard.js) -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
+            authDomain: "ddquest-614ea.firebaseapp.com",
+            databaseURL: "https://ddquest-614ea-default-rtdb.firebaseio.com",
+            projectId: "ddquest-614ea",
+            storageBucket: "ddquest-614ea.appspot.com",
+            messagingSenderId: "602140742747",
+            appId: "1:602140742747:web:1cbd274462578fde845b7e",
+            measurementId: "G-1CRQVW0WF9"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
 </head>
 <body>
+    <!-- 3D Space Canvas -->
+    <canvas id="spaceCanvas"></canvas>
+
     <div class="dashboard-container">
         <!-- Dashboard Header -->
         <div class="dashboard-header">
@@ -35,19 +53,18 @@
                         <a href="../../index.html" class="back-btn">
                             <i class="fas fa-home"></i> Home
                         </a>
-                        
                         <button onclick="logoutUser()" class="logout-btn">
                             <i class="fas fa-sign-out-alt"></i> Logout
                         </button>
                     </div>
-                    
+
                     <!-- Welcome Message -->
                     <div class="welcome-message">
                         <h1><span id="greeting">Welcome</span>, <span id="userName">Student</span>!</h1>
                         <p>Ready to continue your diploma journey? Track your progress and access materials here.</p>
                     </div>
-                    
-                    <!-- User Info -->
+
+                    <!-- User Info Grid -->
                     <div class="user-info-grid">
                         <div class="info-card">
                             <i class="fas fa-envelope"></i>
@@ -56,7 +73,6 @@
                                 <p id="userEmail">student@college.edu.in</p>
                             </div>
                         </div>
-                        
                         <div class="info-card">
                             <i class="fas fa-university"></i>
                             <div class="info-content">
@@ -64,7 +80,6 @@
                                 <p id="userCollege">Your College</p>
                             </div>
                         </div>
-                        
                         <div class="info-card">
                             <i class="fas fa-graduation-cap"></i>
                             <div class="info-content">
@@ -72,7 +87,6 @@
                                 <p id="userSemester">Semester 1</p>
                             </div>
                         </div>
-                        
                         <div class="info-card">
                             <i class="fas fa-code-branch"></i>
                             <div class="info-content">
@@ -81,7 +95,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Current Time & Date -->
                     <div class="time-display">
                         <i class="far fa-clock"></i>
@@ -90,46 +104,35 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Dashboard Content -->
         <div class="dashboard-content">
             <div class="container">
                 <!-- Quick Access -->
                 <h2 class="section-title">Quick Access</h2>
                 <div class="quick-access-grid">
-                    <a href="../semesters/sem1/index.html" class="access-card">
-                        <div class="access-icon">
-                            <i class="fas fa-book-open"></i>
-                        </div>
+                    <a href="../semesters/sem1/index.html" class="access-card" id="materialsLink">
+                        <div class="access-icon"><i class="fas fa-book-open"></i></div>
                         <h3>Study Materials</h3>
                         <p>Access semester-wise study materials, notes, and resources</p>
                     </a>
-                    
                     <a href="../tests/take-test.html" class="access-card">
-                        <div class="access-icon">
-                            <i class="fas fa-clipboard-check"></i>
-                        </div>
+                        <div class="access-icon"><i class="fas fa-clipboard-check"></i></div>
                         <h3>Take Tests</h3>
                         <p>Practice with subject-wise tests and track your progress</p>
                     </a>
-                    
                     <a href="../ddcet/index.html" class="access-card" id="ddcetLink">
-                        <div class="access-icon">
-                            <i class="fas fa-medal"></i>
-                        </div>
+                        <div class="access-icon"><i class="fas fa-medal"></i></div>
                         <h3>DDCET Preparation</h3>
                         <p>Specialized materials and mock tests for DDCET exam</p>
                     </a>
-                    
                     <a href="../profile/index.html" class="access-card">
-                        <div class="access-icon">
-                            <i class="fas fa-user-cog"></i>
-                        </div>
+                        <div class="access-icon"><i class="fas fa-user-cog"></i></div>
                         <h3>My Profile</h3>
                         <p>Update your profile, view progress, and manage account</p>
                     </a>
                 </div>
-                
+
                 <!-- Statistics -->
                 <h2 class="section-title">Your Progress</h2>
                 <div class="stats-grid">
@@ -137,157 +140,136 @@
                         <div class="stat-value" id="testsCompleted">0</div>
                         <div class="stat-label">Tests Completed</div>
                     </div>
-                    
                     <div class="stat-card">
                         <div class="stat-value" id="averageScore">0</div>
                         <div class="stat-label">Average Score</div>
                     </div>
-                    
                     <div class="stat-card">
                         <div class="stat-value" id="studyHours">0</div>
                         <div class="stat-label">Study Hours</div>
                     </div>
-                    
                     <div class="stat-card">
                         <div class="stat-value" id="materialsViewed">0</div>
                         <div class="stat-label">Materials Viewed</div>
                     </div>
                 </div>
-                
+
                 <!-- Progress Rings -->
                 <div class="progress-ring-container">
+                    <svg width="0" height="0">
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#4361ee" />
+                                <stop offset="100%" stop-color="#4cc9f0" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
                     <div class="progress-ring-item">
                         <div class="progress-ring">
                             <svg class="progress-ring-circle" width="120" height="120">
                                 <circle class="progress-ring-bg" cx="60" cy="60" r="54"></circle>
-                                <circle class="progress-ring-fill" cx="60" cy="60" r="54" data-value="25"></circle>
+                                <circle class="progress-ring-fill" cx="60" cy="60" r="54" data-value="25" stroke="url(#gradient)"></circle>
                             </svg>
                             <div class="progress-value" id="dailyGoal">25%</div>
                         </div>
                         <div class="progress-label">Daily Goal</div>
                     </div>
-                    
                     <div class="progress-ring-item">
                         <div class="progress-ring">
                             <svg class="progress-ring-circle" width="120" height="120">
                                 <circle class="progress-ring-bg" cx="60" cy="60" r="54"></circle>
-                                <circle class="progress-ring-fill" cx="60" cy="60" r="54" data-value="40"></circle>
+                                <circle class="progress-ring-fill" cx="60" cy="60" r="54" data-value="40" stroke="url(#gradient)"></circle>
                             </svg>
                             <div class="progress-value" id="courseProgress">40%</div>
                         </div>
                         <div class="progress-label">Course Progress</div>
                     </div>
-                    
                     <div class="progress-ring-item">
                         <div class="progress-ring">
                             <svg class="progress-ring-circle" width="120" height="120">
                                 <circle class="progress-ring-bg" cx="60" cy="60" r="54"></circle>
-                                <circle class="progress-ring-fill" cx="60" cy="60" r="54" data-value="65"></circle>
+                                <circle class="progress-ring-fill" cx="60" cy="60" r="54" data-value="65" stroke="url(#gradient)"></circle>
                             </svg>
                             <div class="progress-value" id="testReadiness">65%</div>
                         </div>
                         <div class="progress-label">Test Readiness</div>
                     </div>
                 </div>
-                
+
                 <!-- Dashboard Grid -->
                 <div class="dashboard-grid">
                     <!-- Upcoming Tests -->
                     <div class="dashboard-widget upcoming-tests">
                         <div class="widget-header">
                             <h3><i class="fas fa-calendar-alt"></i> Upcoming Tests</h3>
-                            <a href="../tests/index.html" class="widget-action">
-                                View All <i class="fas fa-arrow-right"></i>
-                            </a>
+                            <a href="../tests/index.html" class="widget-action">View All <i class="fas fa-arrow-right"></i></a>
                         </div>
                         <div class="test-list" id="upcomingTests">
-                            <!-- Loaded by JavaScript -->
+                            <!-- Loaded by JS -->
                         </div>
                     </div>
-                    
                     <!-- Recommended Materials -->
                     <div class="dashboard-widget recommended-materials">
                         <div class="widget-header">
                             <h3><i class="fas fa-book"></i> Recommended Materials</h3>
-                            <a href="../semesters/sem1/index.html" class="widget-action">
-                                Browse All <i class="fas fa-arrow-right"></i>
-                            </a>
+                            <a href="../semesters/sem1/index.html" class="widget-action">Browse All <i class="fas fa-arrow-right"></i></a>
                         </div>
                         <div class="material-list" id="recommendedMaterials">
-                            <!-- Loaded by JavaScript -->
+                            <!-- Loaded by JS -->
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Recent Activity -->
                 <div class="recent-activity">
                     <div class="widget-header">
                         <h3><i class="fas fa-history"></i> Recent Activity</h3>
-                        <button class="btn btn-outline btn-sm" id="refreshBtn">
-                            <i class="fas fa-sync-alt"></i> Refresh
-                        </button>
+                        <button class="btn btn-outline btn-sm" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
                     </div>
                     <div class="activity-list" id="recentActivity">
-                        <!-- Loaded by JavaScript -->
+                        <!-- Loaded by JS -->
                     </div>
                 </div>
-                
+
                 <!-- Semester Navigation -->
                 <h2 class="section-title">Your Semester</h2>
                 <div class="quick-access-grid" id="semesterLinks">
                     <a href="../semesters/sem1/index.html" class="access-card">
-                        <div class="access-icon" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);">
-                            <i class="fas fa-1"></i>
-                        </div>
+                        <div class="access-icon" style="background: linear-gradient(135deg, #4361ee, #4cc9f0);"><i class="fas fa-1"></i></div>
                         <h3>Semester 1</h3>
-                        <p>Basic engineering subjects and foundation courses</p>
+                        <p>Foundation courses</p>
                     </a>
-                    
                     <a href="../semesters/sem2/index.html" class="access-card">
-                        <div class="access-icon" style="background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);">
-                            <i class="fas fa-2"></i>
-                        </div>
+                        <div class="access-icon" style="background: linear-gradient(135deg, #4895ef, #3a0ca3);"><i class="fas fa-2"></i></div>
                         <h3>Semester 2</h3>
-                        <p>Advanced foundation and core subjects</p>
+                        <p>Basic engineering</p>
                     </a>
-                    
                     <a href="../semesters/sem3/index.html" class="access-card">
-                        <div class="access-icon" style="background: linear-gradient(135deg, #ffd166 0%, #f9c74f 100%);">
-                            <i class="fas fa-3"></i>
-                        </div>
+                        <div class="access-icon" style="background: linear-gradient(135deg, #4cc9f0, #7209b7);"><i class="fas fa-3"></i></div>
                         <h3>Semester 3</h3>
-                        <p>Branch-specific core subjects begin</p>
+                        <p>Core subjects begin</p>
                     </a>
-                    
                     <a href="../semesters/sem4/index.html" class="access-card">
-                        <div class="access-icon" style="background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);">
-                            <i class="fas fa-4"></i>
-                        </div>
+                        <div class="access-icon" style="background: linear-gradient(135deg, #f72585, #b5179e);"><i class="fas fa-4"></i></div>
                         <h3>Semester 4</h3>
-                        <p>Advanced core subjects</p>
+                        <p>Advanced core</p>
                     </a>
-                    
                     <a href="../semesters/sem5/index.html" class="access-card">
-                        <div class="access-icon" style="background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);">
-                            <i class="fas fa-5"></i>
-                        </div>
+                        <div class="access-icon" style="background: linear-gradient(135deg, #7209b7, #4361ee);"><i class="fas fa-5"></i></div>
                         <h3>Semester 5</h3>
-                        <p>Specialization and electives</p>
+                        <p>Specialization</p>
                     </a>
-                    
                     <a href="../semesters/sem6/index.html" class="access-card">
-                        <div class="access-icon" style="background: linear-gradient(135deg, #06d6a0 0%, #1b9e5a 100%);">
-                            <i class="fas fa-6"></i>
-                        </div>
+                        <div class="access-icon" style="background: linear-gradient(135deg, #4361ee, #f72585);"><i class="fas fa-6"></i></div>
                         <h3>Semester 6</h3>
-                        <p>Final semester & DDCET preparation</p>
+                        <p>Final semester</p>
                     </a>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Dashboard Script -->
+
+    <!-- Dashboard Script (must come after Firebase init) -->
     <script src="dashboard.js"></script>
 </body>
 </html>

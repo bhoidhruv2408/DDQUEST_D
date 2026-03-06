@@ -1,0 +1,770 @@
+/* ============================================
+   edit-materials.css – Ultra 3D with Flying Particles
+   Features: Canvas particle background, 3D flip cards,
+   magnetic buttons, parallax, glowing effects
+   ============================================ */
+
+/* ---------- CSS Variables (Themes) ---------- */
+:root {
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --accent: #4cc9f0;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --dark: #0f172a;
+    --dark-light: #1e293b;
+    --dark-lighter: #334155;
+    --light: #f8fafc;
+    --light-dark: #e2e8f0;
+    --gray: #64748b;
+    --gray-light: #94a3b8;
+    --font-primary: 'Inter', sans-serif;
+    --font-heading: 'Manrope', var(--font-primary);
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --transition-normal: 250ms ease;
+    --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1);
+    --bg-dark-gradient: linear-gradient(135deg, #0f172a 0%, #1a2639 100%);
+    --bg-light-gradient: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
+    --glass-dark: rgba(30,41,59,0.8);
+    --glass-light: rgba(255,255,255,0.9);
+}
+
+/* Light theme overrides */
+body.light-theme {
+    --primary: #4361ee;
+    --accent: #0891b2;
+    --dark: #f8fafc;
+    --light: #0b1120;
+    --gray: #475569;
+    background: var(--bg-light-gradient);
+    color: var(--light);
+}
+
+body.light-theme .glass-panel {
+    background: var(--glass-light);
+    border: 1px solid rgba(16,24,40,0.06);
+    color: var(--light);
+}
+
+body.light-theme .form-control {
+    background: #fff;
+    color: var(--light);
+    border: 1px solid rgba(16,24,40,0.06);
+}
+
+body.light-theme .material-card {
+    background: #fff;
+    border: 1px solid rgba(16,24,40,0.06);
+    color: var(--light);
+}
+
+body.light-theme .back-link {
+    color: var(--primary);
+}
+
+body.light-theme .theme-toggle {
+    background: rgba(16,24,40,0.04);
+    color: var(--light);
+}
+
+body.light-theme .toast {
+    background: #fff;
+    color: var(--light);
+    border: 1px solid rgba(16,24,40,0.04);
+}
+
+/* ---------- Global Reset ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-primary);
+    min-height: 100vh;
+    padding: 20px;
+    color: var(--light);
+    transition: background 0.3s ease, color 0.3s ease;
+    perspective: 1200px;
+    overflow-x: hidden;
+    position: relative;
+    background: transparent; /* let canvas show through */
+}
+
+/* ---------- Flying Particles Canvas ---------- */
+.particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ---------- Scrollbar (Webkit) with 3D effect ---------- */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--primary-glow);
+    transition: all 0.3s;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    transform: scaleX(1.2);
+}
+
+/* ---------- 3D Glass Panel (enhanced) ---------- */
+.glass-panel {
+    background: var(--glass-dark);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl), 0 0 0 1px rgba(255,255,255,0.05) inset;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    transform: rotateX(2deg) translateZ(10px) translateY(0);
+    transform-style: preserve-3d;
+    position: relative;
+    animation: panelFloat 6s infinite alternate ease-in-out;
+}
+
+@keyframes panelFloat {
+    0% { transform: rotateX(2deg) translateZ(10px) translateY(0); }
+    100% { transform: rotateX(2deg) translateZ(15px) translateY(-5px); }
+}
+
+.glass-panel:hover {
+    transform: rotateX(0deg) translateZ(30px) translateY(-5px);
+    box-shadow: var(--shadow-xl), 0 0 40px var(--primary-glow);
+}
+
+/* ---------- Header (floating title) ---------- */
+.header h1 {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 2.2rem;
+    background: linear-gradient(135deg, #fff, #cbd5e1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+    animation: float3D 4s infinite alternate;
+    transform-style: preserve-3d;
+}
+
+@keyframes float3D {
+    0% { transform: translateZ(0) rotateY(0deg); }
+    100% { transform: translateZ(20px) rotateY(2deg); }
+}
+
+/* ---------- Back Link with 3D hover ---------- */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    background: rgba(76,201,240,0.1);
+    transition: var(--transition-normal);
+    border: 1px solid transparent;
+    transform: translateZ(0);
+    transform-style: preserve-3d;
+}
+
+.back-link:hover {
+    background: rgba(76,201,240,0.2);
+    border-color: var(--accent);
+    transform: translateX(-8px) translateZ(10px) scale(1.05);
+    gap: 12px;
+    box-shadow: 0 10px 20px -5px rgba(76,201,240,0.3);
+}
+
+/* ---------- Theme Toggle with 3D spin ---------- */
+.theme-toggle {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.04);
+    color: var(--light);
+    padding: 8px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: var(--transition-normal);
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.theme-toggle i {
+    color: var(--accent);
+    transition: transform 0.5s ease;
+}
+
+.theme-toggle:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: var(--primary);
+    transform: translateZ(5px) scale(1.02);
+}
+
+.theme-toggle:hover i {
+    transform: rotate(180deg) scale(1.2);
+}
+
+/* ---------- Search & Filter Bar (3D inputs) ---------- */
+.search-input, .filter-select {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    color: inherit;
+    font-size: 1rem;
+    transition: var(--transition-normal);
+    transform: translateZ(0);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.search-input:focus, .filter-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67,97,238,0.3), 0 5px 15px rgba(67,97,238,0.4);
+    background: rgba(0,0,0,0.3);
+    transform: translateZ(5px) scale(1.02);
+}
+
+/* ---------- Materials Grid (staggered 3D entrance) ---------- */
+.materials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+    perspective: 1000px;
+}
+
+.material-card {
+    background: rgba(30,41,59,0.6);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    transition: var(--transition-slow);
+    transform: translateZ(0) scale(1) rotateY(0deg);
+    animation: cardEntrance 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 0;
+    transform-style: preserve-3d;
+    position: relative;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.material-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-lg);
+    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+}
+
+.material-card:hover::after {
+    opacity: 1;
+}
+
+@keyframes cardEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) translateZ(-50px) rotateX(10deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) translateZ(0) rotateX(0deg);
+    }
+}
+
+.material-card:nth-child(odd) { animation-delay: 0.1s; }
+.material-card:nth-child(even) { animation-delay: 0.2s; }
+
+.material-card:hover {
+    transform: translateY(-10px) translateZ(30px) rotateX(3deg) rotateY(1deg) scale(1.03);
+    box-shadow: var(--shadow-xl), 0 0 30px var(--primary-glow);
+    border-color: var(--primary);
+}
+
+.material-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 10px 20px rgba(67,97,238,0.3);
+    transform: translateZ(0);
+    transition: transform 0.3s;
+}
+
+.material-card:hover .material-icon {
+    transform: translateZ(15px) scale(1.1);
+}
+
+.material-title {
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    transition: transform 0.3s;
+}
+
+.material-card:hover .material-title {
+    transform: translateZ(5px);
+}
+
+.material-meta span {
+    background: rgba(255,255,255,0.05);
+    padding: 4px 10px;
+    border-radius: 20px;
+    transition: var(--transition-normal);
+    display: inline-block;
+}
+
+.material-meta span:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--light);
+    transform: translateZ(5px) scale(1.05);
+}
+
+/* ---------- Buttons with 3D press effect ---------- */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn:active {
+    transform: translateY(2px) translateZ(-2px);
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+.btn-view {
+    background: rgba(16,185,129,0.2);
+    color: var(--success);
+}
+
+.btn-view:hover {
+    background: var(--success);
+    color: white;
+}
+
+.btn-edit {
+    background: rgba(67,97,238,0.2);
+    color: var(--accent);
+}
+
+.btn-edit:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-delete {
+    background: rgba(239,68,68,0.2);
+    color: #f87171;
+}
+
+.btn-delete:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-save {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    flex: 2;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    padding: 14px 28px;
+}
+
+.btn-save:hover {
+    transform: translateY(-3px) translateZ(10px);
+    box-shadow: var(--shadow-xl), 0 0 20px var(--primary-glow);
+}
+
+.btn-cancel {
+    background: rgba(255,255,255,0.1);
+    color: var(--light);
+    flex: 1;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    padding: 14px 28px;
+}
+
+.btn-cancel:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-2px) translateZ(5px);
+}
+
+/* ---------- Modal with 3D flip-in ---------- */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+    perspective: 1200px;
+}
+
+.modal-card {
+    background: rgba(30,41,59,0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 600px;
+    padding: 32px;
+    box-shadow: var(--shadow-xl);
+    transform: rotateY(-10deg) scale(0.8);
+    animation: modalFlipIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    transform-style: preserve-3d;
+}
+
+@keyframes modalFlipIn {
+    0% {
+        opacity: 0;
+        transform: rotateY(-30deg) scale(0.7) translateZ(-100px);
+    }
+    100% {
+        opacity: 1;
+        transform: rotateY(0) scale(1) translateZ(0);
+    }
+}
+
+.modal-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff, #cbd5e1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--gray);
+    font-size: 24px;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    transform: translateZ(0);
+}
+
+.close-btn:hover {
+    color: var(--danger);
+    transform: rotate(90deg) scale(1.2);
+}
+
+/* ---------- Enhanced View Modal ---------- */
+.view-modal-card {
+    max-width: 1100px;
+    width: 95%;
+    height: 90vh;
+    padding: 0;
+    overflow: hidden;
+    animation: viewModalEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    transform-origin: center;
+}
+
+@keyframes viewModalEnter {
+    0% {
+        opacity: 0;
+        transform: rotateY(20deg) scale(0.8) translateZ(-200px);
+    }
+    100% {
+        opacity: 1;
+        transform: rotateY(0) scale(1) translateZ(0);
+    }
+}
+
+.view-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: rgba(0,0,0,0.2);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.view-modal-header h2 {
+    font-size: 1.5rem;
+    margin: 0;
+    background: linear-gradient(135deg, #fff, #cbd5e1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.view-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.view-reload-btn, .view-direct-link {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: var(--light);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    font-size: 1.1rem;
+}
+
+.view-reload-btn:hover, .view-direct-link:hover {
+    background: var(--primary);
+    transform: rotate(15deg) scale(1.1);
+}
+
+.view-direct-link {
+    text-decoration: none;
+}
+
+.view-modal-body {
+    height: calc(100% - 70px);
+    width: 100%;
+    background: #1a1f2e;
+    position: relative;
+}
+
+.iframe-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    color: var(--gray);
+    z-index: 2;
+    transition: opacity 0.3s;
+}
+
+.iframe-loader.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: spin3D 1s infinite linear;
+}
+
+.view-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.view-frame.loaded {
+    opacity: 1;
+}
+
+/* ---------- Form Controls with 3D focus ---------- */
+.form-control {
+    width: 100%;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    color: inherit;
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    transition: var(--transition-normal);
+    transform: translateZ(0);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67,97,238,0.3), 0 5px 15px rgba(67,97,238,0.4);
+    background: rgba(0,0,0,0.3);
+    transform: translateZ(5px) scale(1.01);
+}
+
+/* ---------- Toast Notifications with 3D slide ---------- */
+.toast {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(30,41,59,0.95);
+    color: var(--light);
+    box-shadow: var(--shadow-xl);
+    border-left: 4px solid var(--primary);
+    animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    transform: translateX(120%) translateZ(0);
+    backdrop-filter: blur(8px);
+    transform-style: preserve-3d;
+}
+
+@keyframes toastSlideIn {
+    0% { transform: translateX(120%) translateZ(-20px) rotateY(5deg); }
+    100% { transform: translateX(0) translateZ(0) rotateY(0); }
+}
+
+/* ---------- Loader with 3D spin ---------- */
+.loader {
+    border: 4px solid rgba(255,255,255,0.1);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin3D 1s infinite linear;
+    margin: 40px auto;
+    transform-style: preserve-3d;
+}
+
+@keyframes spin3D {
+    0% { transform: rotate(0deg) rotateX(0deg); }
+    100% { transform: rotate(360deg) rotateX(10deg); }
+}
+
+/* ---------- Empty State with 3D float ---------- */
+.empty-state {
+    text-align: center;
+    padding: 60px;
+    color: var(--gray);
+    animation: emptyFloat 4s infinite alternate;
+}
+
+@keyframes emptyFloat {
+    0% { transform: translateZ(0) translateY(0); }
+    100% { transform: translateZ(20px) translateY(-10px); }
+}
+
+.empty-state i {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+    animation: iconSpin 8s infinite linear;
+}
+
+@keyframes iconSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+/* ---------- Responsive (keep 3D effects minimal on mobile) ---------- */
+@media (max-width: 720px) {
+    .glass-panel {
+        padding: 20px;
+        transform: none;
+        animation: none;
+    }
+    .glass-panel:hover {
+        transform: none;
+    }
+    .header h1 {
+        animation: none;
+    }
+    .material-card {
+        animation: fadeInUp 0.6s ease forwards;
+        transform: none;
+    }
+    .material-card:hover {
+        transform: translateY(-5px) scale(1.02);
+    }
+    .modal-card {
+        animation: fadeIn 0.3s ease;
+        transform: scale(1);
+    }
+    .toast {
+        animation: slideIn 0.3s ease forwards;
+    }
+}

@@ -1,0 +1,279 @@
+/* view-material.css – Space theme for material viewer */
+
+:root {
+    --primary: #4361ee;
+    --primary-glow: rgba(67, 97, 238, 0.4);
+    --accent: #4cc9f0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --dark: #0b1120;
+    --dark-card: #1e293b;
+    --light: #f8fafc;
+    --gray: #94a3b8;
+    --border-light: rgba(255, 255, 255, 0.1);
+    --radius-lg: 24px;
+    --radius-md: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: radial-gradient(ellipse at bottom, #0d1d31 0%, #0c0d13 100%);
+    color: var(--light);
+    min-height: 100vh;
+    perspective: 1200px;
+    overflow-x: hidden;
+    position: relative;
+}
+
+#spaceCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.viewer-container {
+    min-height: 100vh;
+    position: relative;
+    z-index: 2;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.viewer-header {
+    background: rgba(10, 20, 30, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(76, 201, 240, 0.2);
+    padding: 40px 0 30px;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(76, 201, 240, 0.1) inset;
+}
+
+.header-content {
+    position: relative;
+}
+
+.navigation-buttons {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    gap: 15px;
+    z-index: 10;
+}
+
+.logout-btn, .back-btn {
+    background: rgba(15, 25, 35, 0.7);
+    border: 1px solid rgba(76, 201, 240, 0.3);
+    color: #f8fafc;
+    padding: 10px 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: var(--transition);
+    backdrop-filter: blur(10px);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.logout-btn:hover, .back-btn:hover {
+    background: rgba(76, 201, 240, 0.2);
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.welcome-message {
+    margin-top: 40px;
+    animation: fadeInUp 0.8s ease;
+}
+
+.welcome-message h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff, #a0d8ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(76, 201, 240, 0.5);
+}
+
+.welcome-message p {
+    font-size: 1.1rem;
+    color: var(--gray);
+}
+
+.viewer-card {
+    background: rgba(15, 25, 35, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(76, 201, 240, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 30px;
+    margin: 40px 0;
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.5);
+}
+
+.viewer-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btn-outline {
+    background: rgba(76, 201, 240, 0.1);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+}
+
+.btn-outline:hover {
+    background: var(--accent);
+    color: #0a0c14;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--accent);
+}
+
+.iframe-container {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+    background: #1a1f2e;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.iframe-loader {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.5);
+    z-index: 2;
+    transition: opacity 0.3s;
+}
+
+.iframe-loader.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.spinner {
+    border: 4px solid rgba(255,255,255,0.1);
+    border-top: 4px solid var(--accent);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.view-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.view-frame.loaded {
+    opacity: 1;
+}
+
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 360px;
+}
+.toast {
+    background: rgba(15, 25, 35, 0.95);
+    backdrop-filter: blur(10px);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideInRight 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.toast.success { border-left-color: #10b981; }
+.toast.error { border-left-color: #ef4444; }
+.toast.warning { border-left-color: #f59e0b; }
+.toast.info { border-left-color: var(--accent); }
+.toast-icon { font-size: 24px; }
+.toast-content { flex: 1; }
+.toast-title { font-weight: 700; margin-bottom: 4px; }
+.toast-message { font-size: 0.9rem; color: var(--gray); }
+.toast-close {
+    background: none;
+    border: none;
+    color: var(--gray);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px;
+}
+.toast-close:hover { color: #fff; }
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0%); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .navigation-buttons {
+        position: static;
+        margin-top: 20px;
+        flex-direction: column;
+    }
+    .welcome-message h1 { font-size: 2rem; }
+    .iframe-container { height: 60vh; }
+}

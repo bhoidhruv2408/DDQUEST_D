@@ -1,37 +1,25 @@
-// dashboard.js - Student Dashboard (Firebase compat version)
+// dashboard.js – Student Dashboard with 3D space, live data, and online status
 
-// ============================================
-// Global Variables
-// ============================================
-let currentUser = null;
-let userData = null;
-
-// ============================================
-// Firebase Initialization (already done by HTML)
-// ============================================
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Enable offline persistence (optional)
 db.enablePersistence().catch(err => console.warn('Persistence error:', err));
 
-// ============================================
-// DOM Ready
-// ============================================
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("📊 DDQuest Dashboard Initializing...");
+let currentUser = null;
+let userData = null;
 
+document.addEventListener('DOMContentLoaded', function() {
     initLoadingAnimation();
     checkAuthState();
     initEventListeners();
     initAnimations();
     updateTimeDisplay();
     updateGreeting();
+    startOnlineStatusUpdater();
+    initSpaceParticles();
 });
 
-// ============================================
-// Authentication State
-// ============================================
+// ---------- Authentication ----------
 function checkAuthState() {
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
@@ -39,109 +27,87 @@ function checkAuthState() {
             return;
         }
         currentUser = user;
-        console.log("👤 User authenticated:", user.uid);
-
         try {
             await loadUserData(user.uid);
             await loadDashboardData();
             await updateLastLogin(user.uid);
+            await updateLastActive();
             hideLoadingOverlay();
         } catch (error) {
-            console.error("❌ Error during initialization:", error);
-            showToast("Error loading your data. Please refresh.", "error");
+            console.error('Initialization error:', error);
+            showToast('Error loading your data. Please refresh.', 'error');
         }
     });
 }
 
-// ============================================
-// Load User Data from Firestore
-// ============================================
 async function loadUserData(userId) {
-    try {
-        const userDoc = await db.collection("users").doc(userId).get();
-        if (userDoc.exists) {
-            userData = userDoc.data();
-            console.log("✅ User data loaded:", userData);
-
-            if (userData.role !== 'student') {
-                handleNonStudentUser(userData.role);
-                return;
-            }
-
-            localStorage.setItem('userData', JSON.stringify(userData));
-            localStorage.setItem('userId', userId);
-            localStorage.setItem('userRole', userData.role);
-
-            updateUserUI(userData);
-        } else {
-            await createUserDocument(userId);
+    const userDoc = await db.collection('users').doc(userId).get();
+    if (userDoc.exists) {
+        userData = userDoc.data();
+        if (userData.role !== 'student') {
+            handleNonStudentUser(userData.role);
+            return;
         }
-    } catch (error) {
-        console.error("❌ Error loading user data:", error);
-        showToast("Error loading profile. Using cached data.", "warning");
-        const stored = localStorage.getItem('userData');
-        if (stored) {
-            userData = JSON.parse(stored);
-            updateUserUI(userData);
+        // Ensure fullName exists
+        if (!userData.fullName) {
+            const displayName = currentUser.displayName;
+            const emailName = currentUser.email ? currentUser.email.split('@')[0] : 'Student';
+            const newName = (displayName || emailName).replace(/\b\w/g, l => l.toUpperCase());
+            userData.fullName = newName;
+            await db.collection('users').doc(userId).update({ fullName: newName });
         }
+        localStorage.setItem('userData', JSON.stringify(userData));
+        updateUserUI(userData);
+    } else {
+        await createUserDocument(userId);
     }
 }
 
-// Create a basic user document if not exists
 async function createUserDocument(userId) {
     const user = auth.currentUser;
+    let name = user.displayName;
+    if (!name) {
+        name = user.email ? user.email.split('@')[0] : 'Student';
+        name = name.replace(/\b\w/g, l => l.toUpperCase());
+    }
     const basicUserData = {
         uid: userId,
         email: user.email,
-        fullName: user.displayName || user.email.split('@')[0] || 'Student',
+        fullName: name,
         role: 'student',
         college: 'Not specified',
         semester: 1,
         branch: 'Computer Engineering',
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+        lastActive: firebase.firestore.FieldValue.serverTimestamp(),
         isActive: true,
-        stats: {
-            testsCompleted: 0,
-            averageScore: 0,
-            totalScore: 0,
-            studyHours: 0,
-            materialsViewed: 0,
-            streak: 0
-        },
-        progress: {
-            overall: 25,
-            tests: 0,
-            materials: 0
-        }
+        stats: { testsCompleted: 0, averageScore: 0, totalScore: 0, studyHours: 0, materialsViewed: 0, streak: 0 },
+        progress: { overall: 25, tests: 0, materials: 0 }
     };
-    await db.collection("users").doc(userId).set(basicUserData);
+    await db.collection('users').doc(userId).set(basicUserData);
     userData = basicUserData;
     updateUserUI(basicUserData);
     localStorage.setItem('userData', JSON.stringify(basicUserData));
-    console.log("✅ Created new user document");
 }
 
-// ============================================
-// Update UI with User Data
-// ============================================
 function updateUserUI(data) {
     document.getElementById('userName').textContent = data.fullName || 'Student';
     document.getElementById('userEmail').textContent = data.email || '—';
     document.getElementById('userCollege').textContent = data.college || '—';
     document.getElementById('userSemester').textContent = data.semester ? `Semester ${data.semester}` : '—';
     document.getElementById('userBranch').textContent = data.branch || '—';
-
     highlightCurrentSemester(data.semester);
     toggleDDCETOption(data.semester);
+    const materialsLink = document.getElementById('materialsLink');
+    if (materialsLink && data.semester) {
+        materialsLink.href = `../semesters/sem${data.semester}/index.html`;
+    }
 }
 
-// ============================================
-// Load Dashboard Data (Tests, Materials, Activity, Stats)
-// ============================================
+// ---------- Dashboard Data ----------
 async function loadDashboardData() {
     if (!userData) return;
-
     updateStatCards(userData.stats);
     await loadUpcomingTests();
     await loadRecommendedMaterials();
@@ -149,44 +115,39 @@ async function loadDashboardData() {
     updateProgressRings();
 }
 
-// Update statistics cards with animation
 function updateStatCards(stats) {
-    if (!stats) stats = { testsCompleted: 0, averageScore: 0, studyHours: 0, materialsViewed: 0 };
+    stats = stats || { testsCompleted: 0, averageScore: 0, studyHours: 0, materialsViewed: 0 };
     animateNumber('testsCompleted', stats.testsCompleted || 0);
     animateNumber('averageScore', stats.averageScore || 0);
     animateNumber('studyHours', stats.studyHours || 0);
     animateNumber('materialsViewed', stats.materialsViewed || 0);
 }
 
-function animateNumber(elementId, target) {
-    const el = document.getElementById(elementId);
+function animateNumber(id, target) {
+    const el = document.getElementById(id);
     if (!el) return;
     let current = 0;
-    const increment = target / 50 || 0;
+    const inc = Math.ceil(target / 50) || 1;
     const timer = setInterval(() => {
-        current += increment;
+        current += inc;
         if (current >= target) {
             el.textContent = target;
             clearInterval(timer);
         } else {
-            el.textContent = Math.floor(current);
+            el.textContent = current;
         }
     }, 20);
 }
 
-// Upcoming tests
 async function loadUpcomingTests() {
     try {
-        const testsRef = db.collection("tests");
-        const snapshot = await testsRef
-            .where("semester", "==", userData.semester)
-            .where("status", "==", "upcoming")
+        const snap = await db.collection('tests')
+            .where('semester', '==', userData.semester)
+            .where('status', '==', 'upcoming')
             .limit(3)
             .get();
-
         const tests = [];
-        snapshot.forEach(doc => tests.push({ id: doc.id, ...doc.data() }));
-
+        snap.forEach(doc => tests.push({ id: doc.id, ...doc.data() }));
         const container = document.getElementById('upcomingTests');
         if (tests.length === 0) {
             container.innerHTML = `<div class="empty-state"><i class="fas fa-calendar-check"></i><p>No upcoming tests</p></div>`;
@@ -206,62 +167,54 @@ async function loadUpcomingTests() {
             });
             container.innerHTML = html;
         }
-    } catch (error) {
-        console.error("Error loading tests:", error);
+    } catch (e) {
+        console.error(e);
         document.getElementById('upcomingTests').innerHTML = `<div class="empty-state"><p>Unable to load tests</p></div>`;
     }
 }
 
-// Recommended materials
 async function loadRecommendedMaterials() {
     try {
-        const materialsRef = db.collection("materials");
-        const snapshot = await materialsRef
-            .where("semester", "==", userData.semester)
-            .where("status", "==", "published")
+        const snap = await db.collection('materials')
+            .where('semester', '==', userData.semester)
+            .orderBy('createdAt', 'desc')
             .limit(3)
             .get();
-
         const materials = [];
-        snapshot.forEach(doc => materials.push({ id: doc.id, ...doc.data() }));
-
+        snap.forEach(doc => materials.push({ id: doc.id, ...doc.data() }));
         const container = document.getElementById('recommendedMaterials');
         if (materials.length === 0) {
             container.innerHTML = `<div class="empty-state"><i class="fas fa-book"></i><p>No materials yet</p></div>`;
         } else {
             let html = '';
             materials.forEach(m => {
-                const icon = m.type === 'video' ? 'video' : m.type === 'pdf' ? 'file-pdf' : 'file-alt';
                 html += `
                 <div class="material-item">
-                    <i class="fas fa-${icon}"></i>
+                    <i class="fas fa-file-alt"></i>
                     <div class="material-info">
                         <h4>${m.title || 'Material'}</h4>
-                        <p>${m.subject || 'General'}</p>
+                        <p>${m.description ? m.description.substring(0, 60) + '...' : 'No description'}</p>
+                        <a href="../../admin/manage-content/viewer.html?id=${m.id}" target="_blank" class="btn-view-material">View</a>
                     </div>
                 </div>`;
             });
             container.innerHTML = html;
         }
-    } catch (error) {
-        console.error("Error loading materials:", error);
+    } catch (e) {
+        console.error(e);
         document.getElementById('recommendedMaterials').innerHTML = `<div class="empty-state"><p>Unable to load materials</p></div>`;
     }
 }
 
-// Recent activity
 async function loadRecentActivity() {
     try {
-        const activityRef = db.collection("activity");
-        const snapshot = await activityRef
-            .where("userId", "==", currentUser.uid)
-            .orderBy("timestamp", "desc")
+        const snap = await db.collection('activity')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('timestamp', 'desc')
             .limit(5)
             .get();
-
         const activities = [];
-        snapshot.forEach(doc => activities.push(doc.data()));
-
+        snap.forEach(doc => activities.push(doc.data()));
         const container = document.getElementById('recentActivity');
         if (activities.length === 0) {
             container.innerHTML = `
@@ -279,105 +232,90 @@ async function loadRecentActivity() {
                     <div>
                         <h4>${a.title || 'Activity'}</h4>
                         <p>${a.description || ''}</p>
-                        <span>${time}</span>
+                        <span class="activity-time">${time}</span>
                     </div>
                 </div>`;
             });
             container.innerHTML = html;
         }
-    } catch (error) {
-        console.error("Error loading activity:", error);
-        document.getElementById('recentActivity').innerHTML = `
-            <div class="activity-item"><i class="fas fa-sign-in-alt"></i><div><h4>Logged in</h4><p>Welcome back</p><span>Just now</span></div></div>`;
+    } catch (e) {
+        console.error(e);
     }
 }
 
-// Update progress rings
 function updateProgressRings() {
-    const progress = userData?.progress || { overall: 25, tests: 0, materials: 0 };
-    document.getElementById('dailyGoal').textContent = progress.overall + '%';
-    
+    const prog = userData?.progress || { overall: 25, tests: 0 };
+    document.getElementById('dailyGoal').textContent = prog.overall + '%';
+    document.getElementById('courseProgress').textContent = (prog.overall || 0) + '%';
+    document.getElementById('testReadiness').textContent = (prog.tests || 0) + '%';
     const rings = document.querySelectorAll('.progress-ring-fill');
-    rings.forEach(ring => {
-        const value = parseInt(ring.dataset.value) || 0;
-        const radius = ring.r.baseVal.value;
-        const circumference = radius * 2 * Math.PI;
-        ring.style.strokeDasharray = `${circumference} ${circumference}`;
-        ring.style.strokeDashoffset = circumference - (value / 100) * circumference;
+    rings.forEach((r, i) => {
+        let val = i === 0 ? prog.overall : i === 1 ? prog.overall : prog.tests || 65;
+        const rad = r.r.baseVal.value;
+        const circ = rad * 2 * Math.PI;
+        r.style.strokeDasharray = `${circ} ${circ}`;
+        r.style.strokeDashoffset = circ - (val / 100) * circ;
     });
 }
 
-// ============================================
-// Semester & DDCET visibility
-// ============================================
-function toggleDDCETOption(semester) {
-    const ddcetCard = document.getElementById('ddcetLink');
-    if (ddcetCard) {
-        ddcetCard.style.display = (semester >= 6) ? 'block' : 'none';
-    }
+// ---------- Semester Helpers ----------
+function toggleDDCETOption(sem) {
+    const el = document.getElementById('ddcetLink');
+    if (el) el.style.display = (sem >= 6) ? 'block' : 'none';
 }
 
-function highlightCurrentSemester(semester) {
-    document.querySelectorAll('#semesterLinks .access-card').forEach(card => {
-        const h3 = card.querySelector('h3');
-        if (h3 && h3.textContent.includes(`Semester ${semester}`)) {
-            card.style.border = '2px solid #4361ee';
-            card.style.boxShadow = '0 10px 25px rgba(67, 97, 238, 0.2)';
+function highlightCurrentSemester(sem) {
+    document.querySelectorAll('#semesterLinks .access-card').forEach(c => {
+        if (c.querySelector('h3')?.textContent.includes(`Semester ${sem}`)) {
+            c.classList.add('current-semester');
+        } else {
+            c.classList.remove('current-semester');
         }
     });
 }
 
-// ============================================
-// Update last login timestamp
-// ============================================
-async function updateLastLogin(userId) {
-    try {
-        await db.collection("users").doc(userId).update({
-            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-        });
-    } catch (error) {
-        console.warn("Could not update last login:", error);
-    }
+// ---------- Online Status ----------
+let lastActiveInterval;
+function startOnlineStatusUpdater() {
+    if (lastActiveInterval) clearInterval(lastActiveInterval);
+    lastActiveInterval = setInterval(updateLastActive, 120000);
+    window.addEventListener('beforeunload', updateLastActive);
 }
 
-// ============================================
-// Event Listeners
-// ============================================
+async function updateLastActive() {
+    if (!currentUser) return;
+    try {
+        await db.collection('users').doc(currentUser.uid).update({
+            lastActive: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (e) { console.warn(e); }
+}
+
+async function updateLastLogin(uid) {
+    try {
+        await db.collection('users').doc(uid).update({
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (e) { console.warn(e); }
+}
+
+// ---------- Event Listeners ----------
 function initEventListeners() {
     document.querySelector('.logout-btn')?.addEventListener('click', handleLogout);
     document.getElementById('refreshBtn')?.addEventListener('click', () => location.reload());
-
-    // Semester cards – ensure they link correctly
-    document.querySelectorAll('.access-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            const href = card.getAttribute('href');
-            if (!href || href === '#' || href.includes('javascript')) {
-                e.preventDefault();
-                showToast('Feature coming soon!', 'info');
-            }
-        });
-    });
 }
 
-// ============================================
-// Logout
-// ============================================
 async function handleLogout() {
+    await updateLastActive();
     try {
         await auth.signOut();
         localStorage.clear();
         showToast('Logged out', 'success');
         setTimeout(() => window.location.href = '../../auth/login-student.html', 1500);
-    } catch (error) {
-        console.error('Logout error:', error);
-        showToast('Logout failed', 'error');
-    }
+    } catch (e) { showToast('Logout failed', 'error'); }
 }
-window.logoutUser = handleLogout; // for HTML button
+window.logoutUser = handleLogout;
 
-// ============================================
-// Non-student user redirect
-// ============================================
 function handleNonStudentUser(role) {
     showToast(`Logged in as ${role}. Redirecting...`, 'warning');
     setTimeout(() => {
@@ -387,89 +325,135 @@ function handleNonStudentUser(role) {
     }, 2000);
 }
 
-// ============================================
-// Time & Greeting
-// ============================================
+// ---------- Time & Greeting ----------
 function updateTimeDisplay() {
-    const update = () => {
-        const now = new Date();
-        document.getElementById('currentTime').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const upd = () => {
+        const n = new Date();
+        document.getElementById('currentTime').textContent = n.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('currentDate').textContent = n.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     };
-    update();
-    setInterval(update, 60000);
+    upd(); setInterval(upd, 60000);
 }
 
 function updateGreeting() {
-    const hour = new Date().getHours();
-    let greet = 'Good ';
-    if (hour < 12) greet += 'Morning';
-    else if (hour < 18) greet += 'Afternoon';
-    else greet += 'Evening';
-    document.getElementById('greeting').textContent = greet;
+    const h = new Date().getHours();
+    let g = 'Good ';
+    if (h < 12) g += 'Morning';
+    else if (h < 18) g += 'Afternoon';
+    else g += 'Evening';
+    document.getElementById('greeting').textContent = g;
 }
 
-// ============================================
-// Loading animation
-// ============================================
+// ---------- Loading & Animations ----------
 function initLoadingAnimation() {
-    const overlay = document.createElement('div');
-    overlay.className = 'loading-overlay';
-    overlay.innerHTML = `<div class="loader"></div><p>Loading Dashboard...</p>`;
-    document.body.appendChild(overlay);
+    const o = document.createElement('div');
+    o.className = 'loading-overlay';
+    o.innerHTML = `<div class="loader"></div><p>Loading Dashboard...</p>`;
+    document.body.appendChild(o);
     setTimeout(hideLoadingOverlay, 3000);
 }
 function hideLoadingOverlay() {
-    const overlay = document.querySelector('.loading-overlay');
-    if (overlay) overlay.remove();
+    document.querySelector('.loading-overlay')?.remove();
 }
 
 function initAnimations() {
     document.querySelectorAll('.info-card, .access-card, .stat-card').forEach((el, i) => {
-        el.style.animation = `fadeInUp 0.6s ease ${i*0.1}s forwards`;
         el.style.opacity = 0;
+        setTimeout(() => {
+            el.style.transition = 'opacity 0.6s ease';
+            el.style.opacity = 1;
+        }, i * 100);
     });
 }
 
-// ============================================
-// Toast notification
-// ============================================
-function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='error'?'exclamation-circle':type==='warning'?'exclamation-triangle':'info-circle'}"></i> ${message}`;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
+// ---------- 3D Space Particles (Canvas) ----------
+function initSpaceParticles() {
+    const canvas = document.getElementById('spaceCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let w, h, particles = [], count = 150;
+
+    function resize() {
+        w = window.innerWidth;
+        h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * w;
+            this.y = Math.random() * h;
+            this.z = Math.random() * 1000;
+            this.speed = Math.random() * 3 + 0.5;
+            this.size = Math.random() * 2 + 0.5;
+            this.color = `rgba(76, 201, 240, ${Math.random() * 0.5 + 0.2})`;
+        }
+        update() {
+            this.z -= this.speed;
+            if (this.z <= 0) {
+                this.z = 1000;
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+            }
+        }
+        draw() {
+            const scale = 800 / (this.z + 100);
+            const x = (this.x - w / 2) * scale + w / 2;
+            const y = (this.y - h / 2) * scale + h / 2;
+            const s = this.size * scale;
+            ctx.beginPath();
+            ctx.arc(x, y, s, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+        }
+    }
+
+    for (let i = 0; i < count; i++) particles.push(new Particle());
+
+    function animate() {
+        ctx.clearRect(0, 0, w, h);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+    }
+    animate();
 }
 
-// ============================================
-// Helper functions
-// ============================================
-function formatDate(timestamp) {
-    if (!timestamp) return 'TBA';
-    const d = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+// ---------- Toast ----------
+function showToast(msg, type = 'info') {
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i><span class="toast-message">${msg}</span><button class="toast-close" onclick="this.parentElement.remove()">×</button>`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+}
+
+// ---------- Helpers ----------
+function formatDate(ts) {
+    if (!ts) return 'TBA';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
-function formatTimeAgo(timestamp) {
-    if (!timestamp) return 'Just now';
-    const d = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    const seconds = Math.floor((new Date() - d) / 1000);
-    if (seconds < 60) return 'Just now';
-    const mins = Math.floor(seconds / 60);
-    if (mins < 60) return mins + ' min ago';
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return hrs + ' hour' + (hrs > 1 ? 's' : '') + ' ago';
-    const days = Math.floor(hrs / 24);
-    return days + ' day' + (days > 1 ? 's' : '') + ' ago';
+
+function formatTimeAgo(ts) {
+    if (!ts) return 'Just now';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const sec = Math.floor((Date.now() - d) / 1000);
+    if (sec < 60) return 'Just now';
+    if (sec < 3600) return Math.floor(sec / 60) + ' min ago';
+    if (sec < 86400) return Math.floor(sec / 3600) + ' hr ago';
+    return Math.floor(sec / 86400) + ' day ago';
 }
-function getActivityIcon(type) {
+
+function getActivityIcon(t) {
     const icons = {
         test_completed: 'check-circle',
         material_viewed: 'book-open',
         login: 'sign-in-alt',
         profile_update: 'user-edit',
-        test_started: 'play-circle',
-        default: 'circle'
+        test_started: 'play-circle'
     };
-    return icons[type] || icons.default;
+    return icons[t] || 'circle';
 }

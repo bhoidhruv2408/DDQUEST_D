@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Admin Settings · 3D Animated</title>
+    <!-- Absolute paths for Firebase Hosting -->
+    <link rel="stylesheet" href="/admin/system/settings.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Firebase SDK (must come before your script) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="settings-container">
+        <!-- Header -->
+        <header class="settings-header">
+            <h1 class="glow-text"><i class="fas fa-cog"></i> System Settings</h1>
+            <p class="subtitle">Immersive 3D control panel</p>
+        </header>
+
+        <!-- Settings cards grid -->
+        <div class="settings-grid">
+            <!-- General Settings Card -->
+            <div class="settings-card" data-3d="true">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="card-icon"><i class="fas fa-sliders-h"></i></div>
+                        <h2>General</h2>
+                        <p>Site title, language, timezone</p>
+                        <div class="card-status">active</div>
+                    </div>
+                    <div class="card-back">
+                        <h3>General Settings</h3>
+                        <div class="setting-item">
+                            <label>Site Name</label>
+                            <input type="text" id="siteName" value="DDQuest Admin" placeholder="Enter site name">
+                        </div>
+                        <div class="setting-item">
+                            <label>Language</label>
+                            <select id="language">
+                                <option>English</option>
+                                <option>Spanish</option>
+                                <option>French</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>Timezone</label>
+                            <select id="timezone">
+                                <option>UTC+0 (GMT)</option>
+                                <option>UTC+1 (CET)</option>
+                                <option>UTC+5:30 (IST)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appearance Card -->
+            <div class="settings-card" data-3d="true">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="card-icon"><i class="fas fa-paint-brush"></i></div>
+                        <h2>Appearance</h2>
+                        <p>Theme, colors, layout</p>
+                        <div class="card-status">new</div>
+                    </div>
+                    <div class="card-back">
+                        <h3>Appearance</h3>
+                        <div class="setting-item">
+                            <label>Dark Mode</label>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="darkMode" checked>
+                                <label for="darkMode"></label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label>Primary Color</label>
+                            <input type="color" id="primaryColor" value="#6c5ce7">
+                        </div>
+                        <div class="setting-item">
+                            <label>Layout</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="layout" value="grid" checked> Grid</label>
+                                <label><input type="radio" name="layout" value="list"> List</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Card -->
+            <div class="settings-card" data-3d="true">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="card-icon"><i class="fas fa-bell"></i></div>
+                        <h2>Notifications</h2>
+                        <p>Email, push, alerts</p>
+                        <div class="card-status"></div>
+                    </div>
+                    <div class="card-back">
+                        <h3>Notifications</h3>
+                        <div class="setting-item">
+                            <label>Email Alerts</label>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="emailAlerts">
+                                <label for="emailAlerts"></label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label>Push Notifications</label>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="pushNotif" checked>
+                                <label for="pushNotif"></label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label>Quiet Hours</label>
+                            <input type="time" id="quietHours" value="22:00">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Card -->
+            <div class="settings-card" data-3d="true">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="card-icon"><i class="fas fa-shield-alt"></i></div>
+                        <h2>Security</h2>
+                        <p>2FA, session, backup</p>
+                        <div class="card-status">!</div>
+                    </div>
+                    <div class="card-back">
+                        <h3>Security</h3>
+                        <div class="setting-item">
+                            <label>Two-Factor Auth</label>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="twoFA">
+                                <label for="twoFA"></label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label>Session Timeout</label>
+                            <select id="sessionTimeout">
+                                <option>30 minutes</option>
+                                <option>1 hour</option>
+                                <option>4 hours</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>Backup Frequency</label>
+                            <select id="backupFreq">
+                                <option>Daily</option>
+                                <option>Weekly</option>
+                                <option>Monthly</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integrations Card -->
+            <div class="settings-card" data-3d="true">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="card-icon"><i class="fas fa-plug"></i></div>
+                        <h2>Integrations</h2>
+                        <p>APIs, webhooks, services</p>
+                        <div class="card-status">3</div>
+                    </div>
+                    <div class="card-back">
+                        <h3>Integrations</h3>
+                        <div class="setting-item">
+                            <label>API Key</label>
+                            <input type="text" id="apiKey" value="sk-••••••••••" placeholder="API key">
+                        </div>
+                        <div class="setting-item">
+                            <label>Webhook URL</label>
+                            <input type="url" id="webhookUrl" value="https://api.example.com/hook">
+                        </div>
+                        <div class="setting-item">
+                            <label>Enable Slack</label>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="slack">
+                                <label for="slack"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Card -->
+            <div class="settings-card" data-3d="true">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="card-icon"><i class="fas fa-microchip"></i></div>
+                        <h2>Advanced</h2>
+                        <p>Debug, maintenance, logs</p>
+                        <div class="card-status"></div>
+                    </div>
+                    <div class="card-back">
+                        <h3>Advanced</h3>
+                        <div class="setting-item">
+                            <label>Debug Mode</label>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="debugMode">
+                                <label for="debugMode"></label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label>Maintenance Mode</label>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="maintenance">
+                                <label for="maintenance"></label>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label>Clear Cache</label>
+                            <button class="btn-small" id="clearCache"><i class="fas fa-trash-alt"></i> Clear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save button -->
+        <div class="save-section">
+            <button id="saveSettings" class="btn-3d">
+                <span>Save Changes</span>
+                <i class="fas fa-save"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Background floating shapes -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <!-- Settings JavaScript (absolute path) -->
+    <script src="/admin/system/settings.js"></script>
+</body>
+</html>
