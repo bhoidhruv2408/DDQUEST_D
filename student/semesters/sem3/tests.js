@@ -1,19 +1,13 @@
-// syllabus.js – Semester 3 Syllabus with branch filtering
+// tests.js – Semester 3 Tests with branch filtering
 
 const auth = firebase.auth();
 const db = firebase.firestore();
 
 let currentUser = null;
 let studentData = null;
-let syllabusItems = [];
+let allTests = [];
 
-const syllabusGrid = document.getElementById('syllabusGrid');
-const viewModal = document.getElementById('viewModal');
-const viewFrame = document.getElementById('viewFrame');
-const viewModalTitle = document.getElementById('viewModalTitle');
-const viewDirectLink = document.getElementById('viewDirectLink');
-const iframeLoader = document.getElementById('iframeLoader');
-const viewReloadBtn = document.getElementById('viewReloadBtn');
+const testsGrid = document.getElementById('testsGrid');
 
 function showToast(message, type = 'info', title = '', duration = 4000) {
     const container = document.getElementById('toastContainer');
@@ -29,25 +23,6 @@ function showToast(message, type = 'info', title = '', duration = 4000) {
     `;
     container.appendChild(toast);
     setTimeout(() => toast.remove(), duration);
-}
-
-function extractFileId(url) {
-    const patterns = [
-        /\/d\/([a-zA-Z0-9_-]+)/,
-        /id=([a-zA-Z0-9_-]+)/,
-        /\/file\/d\/([a-zA-Z0-9_-]+)/
-    ];
-    for (let pattern of patterns) {
-        const match = url.match(pattern);
-        if (match) return match[1];
-    }
-    return null;
-}
-
-function toPreviewLink(url) {
-    if (!url) return '';
-    const fileId = extractFileId(url);
-    return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : url;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -68,12 +43,12 @@ function checkAuthState() {
         console.log('✅ User authenticated:', user.uid);
         try {
             await loadStudentData(user.uid);
-            await loadSyllabus();
+            await loadTests();
             await updateLastActive();
             startOnlineStatusUpdater();
         } catch (error) {
             console.error('❌ Error loading data:', error);
-            showToast('Failed to load syllabus.', 'error');
+            showToast('Failed to load tests.', 'error');
         }
     });
 }
@@ -91,19 +66,17 @@ async function loadStudentData(uid) {
     }
 }
 
-async function loadSyllabus() {
+async function loadTests() {
     if (!studentData) {
         console.log('⏳ Waiting for student data...');
         return;
     }
 
-    syllabusGrid.innerHTML = '<div class="loader"></div>';
-    console.log('📥 Fetching syllabus materials (will filter for semester 3)...');
+    testsGrid.innerHTML = '<div class="loader"></div>';
+    console.log('📥 Fetching all tests (will filter for semester 3)...');
 
     try {
-        // Fetch all materials with category 'Syllabus' (requires composite index)
-        const snapshot = await db.collection('materials')
-            .where('category', '==', 'Syllabus')
+        const snapshot = await db.collection('tests')
             .orderBy('createdAt', 'desc')
             .get();
 
@@ -114,49 +87,49 @@ async function loadSyllabus() {
         console.log(`🎓 Student branch: "${studentBranch}"`);
 
         // Filter by semester 3 – handle both number and string
-        const filteredBySemester = all.filter(m => {
-            const sem = m.semester;
+        const filteredBySemester = all.filter(t => {
+            const sem = t.semester;
             const isSem3 = sem == 3; // loose equality
             if (!isSem3) {
-                console.log(`🚫 Excluding syllabus "${m.title}" (semester: ${sem}) – not semester 3`);
+                console.log(`🚫 Excluding test "${t.title}" (semester: ${sem}) – not semester 3`);
             }
             return isSem3;
         });
 
-        console.log(`📌 After semester filter: ${filteredBySemester.length} syllabus items remain.`);
+        console.log(`📌 After semester filter: ${filteredBySemester.length} tests remain.`);
 
-        // Filter by branch: include if material has no branch OR branch matches (case‑insensitive)
-        const filtered = filteredBySemester.filter(m => {
-            const materialBranch = (m.branch || '').trim().toLowerCase();
-            const include = !m.branch || materialBranch === studentBranch;
+        // Filter by branch: include if test has no branch OR branch matches
+        const filtered = filteredBySemester.filter(t => {
+            const testBranch = (t.branch || '').trim().toLowerCase();
+            const include = !t.branch || testBranch === studentBranch;
             if (!include) {
-                console.log(`🚫 Excluding syllabus "${m.title}" (branch: "${materialBranch}") – branch mismatch`);
+                console.log(`🚫 Excluding test "${t.title}" (branch: "${testBranch}") – branch mismatch`);
             }
             return include;
         });
 
-        console.log(`✅ After branch filter: ${filtered.length} syllabus items remain.`);
-        syllabusItems = filtered;
+        console.log(`✅ After branch filter: ${filtered.length} tests remain.`);
+        allTests = filtered;
 
         if (filtered.length === 0) {
-            syllabusGrid.innerHTML = `
+            testsGrid.innerHTML = `
                 <div class="empty-state">
-                    <i class="fas fa-file-alt"></i>
-                    <h3>No syllabus found</h3>
-                    <p>Check back later for semester 3 syllabus.</p>
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>No tests found</h3>
+                    <p>Check back later for semester 3 tests.</p>
                 </div>
             `;
             return;
         }
 
-        renderSyllabus(filtered);
+        renderTests(filtered);
 
     } catch (error) {
-        console.error('❌ Error loading syllabus:', error);
+        console.error('❌ Error loading tests:', error);
         if (error.code === 'failed-precondition') {
             const match = error.message.match(/https:[^\s]+/);
             const indexUrl = match ? match[0] : '#';
-            syllabusGrid.innerHTML = `
+            testsGrid.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-database"></i>
                     <h3>Index required</h3>
@@ -164,72 +137,45 @@ async function loadSyllabus() {
                 </div>
             `;
         } else {
-            syllabusGrid.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Failed to load syllabus</h3><p>${error.message}</p></div>`;
+            testsGrid.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Failed to load tests</h3>
+                    <p>${error.message}</p>
+                </div>
+            `;
         }
     }
 }
 
-function renderSyllabus(items) {
+function renderTests(tests) {
     let html = '';
-    items.forEach(item => {
-        const date = item.createdAt ? formatDate(item.createdAt) : 'Recently';
+    tests.forEach(t => {
+        const date = t.createdAt ? formatDate(t.createdAt) : 'Recently';
+        const questions = t.questions ? t.questions.length : (t.questionCount || 0);
+        const duration = t.duration || 60;
+
         html += `
-            <div class="syllabus-card" data-id="${item.id}">
-                <div class="syllabus-icon"><i class="fas fa-file-pdf"></i></div>
-                <h3 class="syllabus-title">${item.title || 'Syllabus'}</h3>
-                <p class="syllabus-description">${item.description || 'Semester 3 syllabus document.'}</p>
-                <div class="syllabus-meta">
-                    <span><i class="fas fa-calendar-alt"></i> ${date}</span>
-                    <span><i class="fas fa-tag"></i> ${item.category || 'Syllabus'}</span>
+            <div class="test-card" data-id="${t.id}">
+                <div class="test-icon">
+                    <i class="fas fa-clipboard-list"></i>
                 </div>
-                <button class="syllabus-link" onclick="viewSyllabus('${item.id}')">
-                    <i class="fas fa-eye"></i> View Syllabus
-                </button>
+                <h3 class="test-title">${t.title || 'Untitled Test'}</h3>
+                <p class="test-description">${t.description || 'No description available.'}</p>
+                <div class="test-meta">
+                    <span><i class="fas fa-clock"></i> ${duration} mins</span>
+                    <span><i class="fas fa-question-circle"></i> ${questions} questions</span>
+                </div>
+                <a href="../../tests/take-test.html?id=${t.id}" class="test-link">
+                    <i class="fas fa-play"></i> Take Test
+                </a>
             </div>
         `;
     });
-    syllabusGrid.innerHTML = html;
+    testsGrid.innerHTML = html;
 }
 
-function viewSyllabus(id) {
-    const item = syllabusItems.find(i => i.id === id);
-    if (!item || !item.link) {
-        showToast('No link available', 'warning');
-        return;
-    }
-    const embedUrl = item.link.includes('/preview') ? item.link : toPreviewLink(item.link);
-    iframeLoader.classList.remove('hidden');
-    viewFrame.classList.remove('loaded');
-    viewFrame.src = embedUrl;
-    viewModalTitle.innerHTML = `<i class="fas fa-eye"></i> ${item.title || 'Syllabus'}`;
-    viewDirectLink.href = item.link.includes('/preview') ? item.link.replace('/preview', '/view?usp=sharing') : item.link;
-    viewModal.style.display = 'flex';
-}
-window.viewSyllabus = viewSyllabus;
-
-viewFrame.addEventListener('load', () => {
-    iframeLoader.classList.add('hidden');
-    viewFrame.classList.add('loaded');
-});
-
-viewReloadBtn.addEventListener('click', () => {
-    iframeLoader.classList.remove('hidden');
-    viewFrame.classList.remove('loaded');
-    const temp = viewFrame.src;
-    viewFrame.src = '';
-    setTimeout(() => { viewFrame.src = temp; }, 50);
-});
-
-function closeViewModal() {
-    viewModal.style.display = 'none';
-    viewFrame.src = 'about:blank';
-}
-window.closeViewModal = closeViewModal;
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && viewModal.style.display === 'flex') closeViewModal();
-});
-
+// ---------- Online status ----------
 let lastActiveInterval;
 function startOnlineStatusUpdater() {
     if (lastActiveInterval) clearInterval(lastActiveInterval);
@@ -244,6 +190,7 @@ async function updateLastActive() {
     } catch (e) { console.warn(e); }
 }
 
+// ---------- Time & greeting ----------
 function updateTimeDisplay() {
     const now = new Date();
     document.getElementById('currentTime').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -265,13 +212,22 @@ window.logoutUser = async function() {
     } catch (error) { console.error('Logout error:', error); }
 };
 
+// ---------- 3D space particles ----------
 function initSpaceParticles() {
     const canvas = document.getElementById('spaceCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let w, h, particles = [], count = 150;
-    function resize() { w = window.innerWidth; h = window.innerHeight; canvas.width = w; canvas.height = h; }
-    window.addEventListener('resize', resize); resize();
+
+    function resize() {
+        w = window.innerWidth;
+        h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
     class Particle {
         constructor() {
             this.x = Math.random() * w;
@@ -283,23 +239,37 @@ function initSpaceParticles() {
         }
         update() {
             this.z -= this.speed;
-            if (this.z <= 0) { this.z = 1000; this.x = Math.random() * w; this.y = Math.random() * h; }
+            if (this.z <= 0) {
+                this.z = 1000;
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+            }
         }
         draw() {
             const scale = 800 / (this.z + 100);
             const x = (this.x - w / 2) * scale + w / 2;
             const y = (this.y - h / 2) * scale + h / 2;
             const s = this.size * scale;
-            ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x, y, s, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
         }
     }
+
     for (let i = 0; i < count; i++) particles.push(new Particle());
-    function animate() { ctx.clearRect(0, 0, w, h); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
+
+    function animate() {
+        ctx.clearRect(0, 0, w, h);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+    }
     animate();
 }
 
-function formatDate(ts) {
-    if (!ts) return 'N/A';
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
+// ---------- Helper ----------
+function formatDate(timestamp) {
+    if (!timestamp) return 'N/A';
+    const d = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }

@@ -1,13 +1,25 @@
-// syllabus.js – Semester 3 Syllabus with branch filtering
+// materials.js – Semester 4 Materials (waits for Firebase)
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+let auth, db, currentUser = null, studentData = null, allMaterials = [];
 
-let currentUser = null;
-let studentData = null;
-let syllabusItems = [];
+// Wait for Firebase to be initialized (if not already)
+function waitForFirebase() {
+    return new Promise((resolve) => {
+        const check = () => {
+            if (firebase.apps.length) {
+                auth = firebase.auth();
+                db = firebase.firestore();
+                resolve();
+            } else {
+                setTimeout(check, 50);
+            }
+        };
+        check();
+    });
+}
 
-const syllabusGrid = document.getElementById('syllabusGrid');
+// DOM elements
+const materialsGrid = document.getElementById('materialsGrid');
 const viewModal = document.getElementById('viewModal');
 const viewFrame = document.getElementById('viewFrame');
 const viewModalTitle = document.getElementById('viewModalTitle');
@@ -15,49 +27,47 @@ const viewDirectLink = document.getElementById('viewDirectLink');
 const iframeLoader = document.getElementById('iframeLoader');
 const viewReloadBtn = document.getElementById('viewReloadBtn');
 
+// ---------- Toast ----------
 function showToast(message, type = 'info', title = '', duration = 4000) {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.innerHTML = `
         <div class="toast-icon"><i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i></div>
-        <div class="toast-content">
-            ${title ? `<div class="toast-title">${title}</div>` : ''}
-            <div class="toast-message">${message}</div>
-        </div>
+        <div class="toast-content">${title ? `<div class="toast-title">${title}</div>` : ''}<div class="toast-message">${message}</div></div>
         <button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
     `;
     container.appendChild(toast);
     setTimeout(() => toast.remove(), duration);
 }
 
+// ---------- Google Drive helpers ----------
 function extractFileId(url) {
-    const patterns = [
-        /\/d\/([a-zA-Z0-9_-]+)/,
-        /id=([a-zA-Z0-9_-]+)/,
-        /\/file\/d\/([a-zA-Z0-9_-]+)/
-    ];
+    const patterns = [ /\/d\/([a-zA-Z0-9_-]+)/, /id=([a-zA-Z0-9_-]+)/, /\/file\/d\/([a-zA-Z0-9_-]+)/ ];
     for (let pattern of patterns) {
         const match = url.match(pattern);
         if (match) return match[1];
     }
     return null;
 }
-
 function toPreviewLink(url) {
     if (!url) return '';
     const fileId = extractFileId(url);
     return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : url;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+// ---------- DOM Ready ----------
+document.addEventListener('DOMContentLoaded', async function() {
     initSpaceParticles();
     updateTimeDisplay();
     setInterval(updateTimeDisplay, 1000);
     updateGreeting();
+
+    await waitForFirebase();          // Wait for Firebase ready
     checkAuthState();
 });
 
+// ---------- Authentication ----------
 function checkAuthState() {
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
@@ -68,12 +78,12 @@ function checkAuthState() {
         console.log('✅ User authenticated:', user.uid);
         try {
             await loadStudentData(user.uid);
-            await loadSyllabus();
+            await loadMaterials();
             await updateLastActive();
             startOnlineStatusUpdater();
         } catch (error) {
             console.error('❌ Error loading data:', error);
-            showToast('Failed to load syllabus.', 'error');
+            showToast('Failed to load materials.', 'error');
         }
     });
 }
@@ -91,145 +101,99 @@ async function loadStudentData(uid) {
     }
 }
 
-async function loadSyllabus() {
-    if (!studentData) {
-        console.log('⏳ Waiting for student data...');
-        return;
-    }
-
-    syllabusGrid.innerHTML = '<div class="loader"></div>';
-    console.log('📥 Fetching syllabus materials (will filter for semester 3)...');
+async function loadMaterials() {
+    if (!studentData) { console.log('⏳ Waiting for student data...'); return; }
+    materialsGrid.innerHTML = '<div class="loader"></div>';
+    console.log('📥 Fetching all materials (will filter for semester 4)...');
 
     try {
-        // Fetch all materials with category 'Syllabus' (requires composite index)
-        const snapshot = await db.collection('materials')
-            .where('category', '==', 'Syllabus')
-            .orderBy('createdAt', 'desc')
-            .get();
-
+        const snapshot = await db.collection('materials').orderBy('createdAt', 'desc').get();
         console.log(`📊 Raw query returned ${snapshot.size} documents.`);
-
         const all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const studentBranch = (studentData.branch || '').trim().toLowerCase();
         console.log(`🎓 Student branch: "${studentBranch}"`);
 
-        // Filter by semester 3 – handle both number and string
+        // Filter by semester 4 (handle number/string)
         const filteredBySemester = all.filter(m => {
             const sem = m.semester;
-            const isSem3 = sem == 3; // loose equality
-            if (!isSem3) {
-                console.log(`🚫 Excluding syllabus "${m.title}" (semester: ${sem}) – not semester 3`);
-            }
-            return isSem3;
+            const isSem4 = sem == 4;
+            if (!isSem4) console.log(`🚫 Excluding "${m.title}" (semester: ${sem}) – not semester 4`);
+            return isSem4;
         });
+        console.log(`📌 After semester filter: ${filteredBySemester.length} materials remain.`);
 
-        console.log(`📌 After semester filter: ${filteredBySemester.length} syllabus items remain.`);
-
-        // Filter by branch: include if material has no branch OR branch matches (case‑insensitive)
+        // Filter by branch (no branch or matching)
         const filtered = filteredBySemester.filter(m => {
             const materialBranch = (m.branch || '').trim().toLowerCase();
             const include = !m.branch || materialBranch === studentBranch;
-            if (!include) {
-                console.log(`🚫 Excluding syllabus "${m.title}" (branch: "${materialBranch}") – branch mismatch`);
-            }
+            if (!include) console.log(`🚫 Excluding "${m.title}" (branch: "${materialBranch}") – branch mismatch`);
             return include;
         });
 
-        console.log(`✅ After branch filter: ${filtered.length} syllabus items remain.`);
-        syllabusItems = filtered;
+        console.log(`✅ After branch filter: ${filtered.length} materials remain.`);
+        allMaterials = filtered;
 
         if (filtered.length === 0) {
-            syllabusGrid.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-file-alt"></i>
-                    <h3>No syllabus found</h3>
-                    <p>Check back later for semester 3 syllabus.</p>
-                </div>
-            `;
+            materialsGrid.innerHTML = `<div class="empty-state"><i class="fas fa-books"></i><h3>No materials found</h3><p>Check back later for semester 4 study materials.</p></div>`;
             return;
         }
-
-        renderSyllabus(filtered);
-
+        renderMaterials(filtered);
     } catch (error) {
-        console.error('❌ Error loading syllabus:', error);
+        console.error('❌ Error loading materials:', error);
         if (error.code === 'failed-precondition') {
             const match = error.message.match(/https:[^\s]+/);
             const indexUrl = match ? match[0] : '#';
-            syllabusGrid.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-database"></i>
-                    <h3>Index required</h3>
-                    <p>Click <a href="${indexUrl}" target="_blank">here</a> to create the missing index, then refresh.</p>
-                </div>
-            `;
+            materialsGrid.innerHTML = `<div class="empty-state"><i class="fas fa-database"></i><h3>Index required</h3><p>Click <a href="${indexUrl}" target="_blank">here</a> to create the missing index, then refresh.</p></div>`;
         } else {
-            syllabusGrid.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Failed to load syllabus</h3><p>${error.message}</p></div>`;
+            materialsGrid.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Failed to load materials</h3><p>${error.message}</p></div>`;
         }
     }
 }
 
-function renderSyllabus(items) {
+function renderMaterials(materials) {
     let html = '';
-    items.forEach(item => {
-        const date = item.createdAt ? formatDate(item.createdAt) : 'Recently';
+    materials.forEach(m => {
+        const date = m.createdAt ? formatDate(m.createdAt) : 'Recently';
+        const icon = 'file-alt';
+        const category = m.category || 'General';
+        const tags = m.tags ? m.tags.join(', ') : '';
         html += `
-            <div class="syllabus-card" data-id="${item.id}">
-                <div class="syllabus-icon"><i class="fas fa-file-pdf"></i></div>
-                <h3 class="syllabus-title">${item.title || 'Syllabus'}</h3>
-                <p class="syllabus-description">${item.description || 'Semester 3 syllabus document.'}</p>
-                <div class="syllabus-meta">
-                    <span><i class="fas fa-calendar-alt"></i> ${date}</span>
-                    <span><i class="fas fa-tag"></i> ${item.category || 'Syllabus'}</span>
-                </div>
-                <button class="syllabus-link" onclick="viewSyllabus('${item.id}')">
-                    <i class="fas fa-eye"></i> View Syllabus
-                </button>
+            <div class="material-card" data-id="${m.id}">
+                <div class="material-icon"><i class="fas fa-${icon}"></i></div>
+                <h3 class="material-title">${m.title || 'Untitled'}</h3>
+                <p class="material-description">${m.description || 'No description available.'}</p>
+                <div class="material-meta"><span><i class="fas fa-calendar-alt"></i> ${date}</span><span><i class="fas fa-tag"></i> ${category}</span></div>
+                ${tags ? `<div style="margin-bottom: 12px; color: var(--gray);"><i class="fas fa-hashtag"></i> ${tags}</div>` : ''}
+                <button class="material-link" onclick="viewMaterial('${m.id}')"><i class="fas fa-eye"></i> View / Download</button>
             </div>
         `;
     });
-    syllabusGrid.innerHTML = html;
+    materialsGrid.innerHTML = html;
 }
 
-function viewSyllabus(id) {
-    const item = syllabusItems.find(i => i.id === id);
-    if (!item || !item.link) {
-        showToast('No link available', 'warning');
-        return;
-    }
-    const embedUrl = item.link.includes('/preview') ? item.link : toPreviewLink(item.link);
+function viewMaterial(id) {
+    const material = allMaterials.find(m => m.id === id);
+    if (!material || !material.link) { showToast('No link available', 'warning'); return; }
+    const embedUrl = material.link.includes('/preview') ? material.link : toPreviewLink(material.link);
     iframeLoader.classList.remove('hidden');
     viewFrame.classList.remove('loaded');
     viewFrame.src = embedUrl;
-    viewModalTitle.innerHTML = `<i class="fas fa-eye"></i> ${item.title || 'Syllabus'}`;
-    viewDirectLink.href = item.link.includes('/preview') ? item.link.replace('/preview', '/view?usp=sharing') : item.link;
+    viewModalTitle.innerHTML = `<i class="fas fa-eye"></i> ${material.title || 'View Material'}`;
+    viewDirectLink.href = material.link.includes('/preview') ? material.link.replace('/preview', '/view?usp=sharing') : material.link;
     viewModal.style.display = 'flex';
 }
-window.viewSyllabus = viewSyllabus;
+window.viewMaterial = viewMaterial;
 
-viewFrame.addEventListener('load', () => {
-    iframeLoader.classList.add('hidden');
-    viewFrame.classList.add('loaded');
-});
-
+viewFrame.addEventListener('load', () => { iframeLoader.classList.add('hidden'); viewFrame.classList.add('loaded'); });
 viewReloadBtn.addEventListener('click', () => {
-    iframeLoader.classList.remove('hidden');
-    viewFrame.classList.remove('loaded');
-    const temp = viewFrame.src;
-    viewFrame.src = '';
-    setTimeout(() => { viewFrame.src = temp; }, 50);
+    iframeLoader.classList.remove('hidden'); viewFrame.classList.remove('loaded');
+    const temp = viewFrame.src; viewFrame.src = ''; setTimeout(() => { viewFrame.src = temp; }, 50);
 });
-
-function closeViewModal() {
-    viewModal.style.display = 'none';
-    viewFrame.src = 'about:blank';
-}
+function closeViewModal() { viewModal.style.display = 'none'; viewFrame.src = 'about:blank'; }
 window.closeViewModal = closeViewModal;
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && viewModal.style.display === 'flex') closeViewModal(); });
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && viewModal.style.display === 'flex') closeViewModal();
-});
-
+// ---------- Online status ----------
 let lastActiveInterval;
 function startOnlineStatusUpdater() {
     if (lastActiveInterval) clearInterval(lastActiveInterval);
@@ -244,6 +208,7 @@ async function updateLastActive() {
     } catch (e) { console.warn(e); }
 }
 
+// ---------- Time & greeting ----------
 function updateTimeDisplay() {
     const now = new Date();
     document.getElementById('currentTime').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -265,13 +230,22 @@ window.logoutUser = async function() {
     } catch (error) { console.error('Logout error:', error); }
 };
 
+// ---------- 3D space particles ----------
 function initSpaceParticles() {
     const canvas = document.getElementById('spaceCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let w, h, particles = [], count = 150;
-    function resize() { w = window.innerWidth; h = window.innerHeight; canvas.width = w; canvas.height = h; }
-    window.addEventListener('resize', resize); resize();
+
+    function resize() {
+        w = window.innerWidth;
+        h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
     class Particle {
         constructor() {
             this.x = Math.random() * w;
@@ -283,23 +257,37 @@ function initSpaceParticles() {
         }
         update() {
             this.z -= this.speed;
-            if (this.z <= 0) { this.z = 1000; this.x = Math.random() * w; this.y = Math.random() * h; }
+            if (this.z <= 0) {
+                this.z = 1000;
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+            }
         }
         draw() {
             const scale = 800 / (this.z + 100);
             const x = (this.x - w / 2) * scale + w / 2;
             const y = (this.y - h / 2) * scale + h / 2;
             const s = this.size * scale;
-            ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x, y, s, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
         }
     }
+
     for (let i = 0; i < count; i++) particles.push(new Particle());
-    function animate() { ctx.clearRect(0, 0, w, h); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
+
+    function animate() {
+        ctx.clearRect(0, 0, w, h);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+    }
     animate();
 }
 
-function formatDate(ts) {
-    if (!ts) return 'N/A';
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
+// ---------- Helper ----------
+function formatDate(timestamp) {
+    if (!timestamp) return 'N/A';
+    const d = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }

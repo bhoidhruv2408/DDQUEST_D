@@ -2,42 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DDQuest · AI‑Powered Dashboard</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>DDQuest · Neo Space</title>
+
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* ===== RESET & VARIABLES ===== */
+        /* ===== NEO VARIABLES ===== */
         :root {
-            --bg: #0a0c10;
-            --surface: #14171c;
-            --surface-light: #1e2228;
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #ec4899;
-            --accent: #8b5cf6;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --text: #e2e8f0;
-            --text-muted: #94a3b8;
-            --border: #2d3748;
-            --gradient-1: linear-gradient(135deg, #6366f1, #8b5cf6);
-            --gradient-2: linear-gradient(135deg, #ec4899, #8b5cf6);
-            --shadow-sm: 0 4px 12px rgba(0,0,0,0.3);
-            --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
-            --shadow-lg: 0 16px 40px rgba(0,0,0,0.5);
-            --shadow-xl: 0 24px 60px rgba(0,0,0,0.6);
+            --bg-deep: #0b0d1a;
+            --bg-surface: #13172b;
+            --bg-card: #1b203b;
+            --primary: #5f4bdb;
+            --primary-glow: #7d6ef5;
+            --secondary: #ff4d6d;
+            --accent: #2dd4bf;
+            --text: #f0f4ff;
+            --text-muted: #a0a8d9;
+            --border: rgba(95, 75, 219, 0.3);
+            --gradient-1: linear-gradient(135deg, #5f4bdb, #ff4d6d);
+            --gradient-2: linear-gradient(135deg, #2dd4bf, #5f4bdb);
+            --gradient-3: linear-gradient(135deg, #fbbf24, #ff4d6d);
+            --shadow-sm: 0 4px 15px rgba(95, 75, 219, 0.3);
+            --shadow-md: 0 8px 30px rgba(95, 75, 219, 0.4);
+            --shadow-lg: 0 16px 50px rgba(95, 75, 219, 0.5);
             --radius-sm: 8px;
             --radius-md: 16px;
             --radius-lg: 24px;
             --radius-xl: 32px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -48,16 +45,16 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--bg);
+            background: var(--bg-deep);
             color: var(--text);
             line-height: 1.6;
             overflow-x: hidden;
+            position: relative;
         }
 
-        h1, h2, h3, h4, h5, h6 {
+        h1, h2, h3, h4 {
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 700;
-            line-height: 1.2;
             letter-spacing: -0.02em;
         }
 
@@ -67,7 +64,7 @@
             padding: 0 24px;
         }
 
-        /* ----- 3D PARTICLE BACKGROUND ----- */
+        /* ===== PARTICLES CANVAS ===== */
         #particle-canvas {
             position: fixed;
             top: 0;
@@ -78,15 +75,15 @@
             pointer-events: none;
         }
 
-        /* ----- NAVBAR (GLASS) ----- */
+        /* ===== GLASS NAVBAR ===== */
         .navbar {
             position: fixed;
             top: 0;
             width: 100%;
-            background: rgba(10, 12, 16, 0.7);
+            background: rgba(11, 13, 26, 0.7);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            border-bottom: 1px solid var(--border);
             z-index: 1000;
             padding: 16px 0;
             transition: var(--transition);
@@ -94,7 +91,7 @@
 
         .navbar.scrolled {
             padding: 12px 0;
-            background: rgba(10, 12, 16, 0.9);
+            background: rgba(11, 13, 26, 0.9);
             box-shadow: var(--shadow-sm);
         }
 
@@ -126,7 +123,7 @@
         }
 
         .logo-text {
-            font-size: 1.6rem;
+            font-size: clamp(1.2rem, 4vw, 1.6rem);
             font-weight: 800;
             background: var(--gradient-1);
             -webkit-background-clip: text;
@@ -151,7 +148,7 @@
 
         .nav-link:hover,
         .nav-link.active {
-            color: var(--primary);
+            color: var(--primary-glow);
         }
 
         .nav-link.active::after {
@@ -174,7 +171,60 @@
             cursor: pointer;
         }
 
-        /* ----- BUTTONS ----- */
+        /* ===== MOBILE MENU (hidden by default) ===== */
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 260px;
+            height: 100%;
+            background: var(--bg-surface);
+            border-left: 1px solid var(--border);
+            z-index: 1001;
+            padding: 40px 20px;
+            transition: right 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-menu a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 1.2rem;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mobile-menu .btn {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        /* ===== BUTTONS ===== */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -188,35 +238,39 @@
             cursor: pointer;
             transition: var(--transition);
             gap: 10px;
-            background: var(--surface-light);
+            background: var(--bg-card);
             color: var(--text);
             box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn-primary {
             background: var(--gradient-1);
             color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn-primary:hover::before {
-            left: 100%;
         }
 
         .btn-primary:hover {
-            transform: translateY(-4px);
+            transform: translateY(-4px) scale(1.02);
             box-shadow: var(--shadow-lg);
         }
 
@@ -232,21 +286,11 @@
             transform: translateY(-4px);
         }
 
-        .btn-lg {
-            padding: 16px 40px;
-            font-size: 1.1rem;
-        }
+        .btn-lg { padding: 16px 40px; font-size: 1.1rem; }
+        .btn-sm { padding: 10px 24px; font-size: 0.9rem; }
+        .btn-block { width: 100%; }
 
-        .btn-sm {
-            padding: 10px 24px;
-            font-size: 0.9rem;
-        }
-
-        .btn-block {
-            width: 100%;
-        }
-
-        /* ----- HERO SECTION (3D) ----- */
+        /* ===== HERO ===== */
         .hero {
             min-height: 100vh;
             padding: 140px 0 80px;
@@ -268,10 +312,10 @@
         }
 
         .hero-title {
-            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-size: clamp(2rem, 6vw, 4rem);
             line-height: 1.1;
             margin-bottom: 24px;
-            text-shadow: 0 10px 20px rgba(99,102,241,0.3);
+            text-shadow: 0 10px 30px rgba(95,75,219,0.5);
         }
 
         .gradient-text {
@@ -279,10 +323,16 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            animation: hue 6s infinite linear;
+        }
+
+        @keyframes hue {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
         }
 
         .hero-subtitle {
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 3vw, 1.2rem);
             color: var(--text-muted);
             margin-bottom: 32px;
             max-width: 550px;
@@ -297,19 +347,20 @@
 
         .hero-stats {
             display: flex;
-            gap: 40px;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
         .stat-item {
-            background: var(--surface);
-            padding: 12px 24px;
+            background: var(--bg-card);
+            padding: 12px 20px;
             border-radius: var(--radius-md);
             border: 1px solid var(--border);
             backdrop-filter: blur(4px);
         }
 
         .stat-number {
-            font-size: 2.5rem;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
             font-weight: 800;
             background: var(--gradient-2);
             -webkit-background-clip: text;
@@ -335,54 +386,35 @@
 
         .floating-card {
             position: absolute;
-            background: var(--surface-light);
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 24px;
-            width: 220px;
-            box-shadow: var(--shadow-xl);
+            padding: 20px;
+            width: 200px;
+            box-shadow: var(--shadow-lg);
             backdrop-filter: blur(10px);
             transition: var(--transition);
             animation: float3d 6s ease-in-out infinite;
         }
 
-        .floating-card i {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 12px;
-        }
-
-        .card-1 {
-            top: 0;
-            left: 0;
-            transform: translateZ(40px) rotateY(5deg);
-        }
-        .card-2 {
-            top: 100px;
-            right: 0;
-            animation-delay: 1.5s;
-            transform: translateZ(60px) rotateY(-3deg);
-        }
-        .card-3 {
-            bottom: 0;
-            left: 20%;
-            animation-delay: 3s;
-            transform: translateZ(20px) rotateY(2deg);
-        }
+        .floating-card i { font-size: 2.5rem; color: var(--primary); margin-bottom: 12px; }
+        .card-1 { top: 0; left: 0; transform: translateZ(40px) rotateY(5deg); }
+        .card-2 { top: 100px; right: 0; animation-delay: 1.5s; transform: translateZ(60px) rotateY(-3deg); }
+        .card-3 { bottom: 0; left: 20%; animation-delay: 3s; transform: translateZ(20px) rotateY(2deg); }
 
         @keyframes float3d {
             0%,100% { transform: translateY(0) rotateY(0deg); }
             50% { transform: translateY(-20px) rotateY(5deg); }
         }
 
-        /* ----- SECTION HEADERS ----- */
+        /* ===== SECTION HEADERS ===== */
         .section-header {
             text-align: center;
             max-width: 700px;
             margin: 0 auto 60px;
         }
         .section-title {
-            font-size: clamp(2rem,4vw,2.8rem);
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
             margin-bottom: 20px;
             background: var(--gradient-1);
             -webkit-background-clip: text;
@@ -390,19 +422,19 @@
             color: transparent;
         }
         .section-subtitle {
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 3vw, 1.2rem);
             color: var(--text-muted);
         }
 
-        /* ----- CARDS (3D TILT) ----- */
-        .features-grid, .semester-grid, .instructor-grid {
+        /* ===== CARDS ===== */
+        .features-grid, .semester-grid, .mentor-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 30px;
         }
 
-        .feature-card, .semester-card, .instructor-card {
-            background: var(--surface);
+        .feature-card, .semester-card, .mentor-card {
+            background: var(--bg-card);
             border-radius: var(--radius-lg);
             padding: 30px;
             border: 1px solid var(--border);
@@ -412,15 +444,25 @@
             transform-style: preserve-3d;
             transform: perspective(800px) rotateX(0deg) rotateY(0deg);
             will-change: transform;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease, box-shadow 0.3s;
         }
 
-        .feature-card:hover, .semester-card:hover, .instructor-card:hover {
-            transform: perspective(800px) rotateX(2deg) rotateY(2deg) translateZ(20px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--primary);
+        .feature-card.visible, .semester-card.visible, .mentor-card.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        .feature-card::before, .semester-card::before {
+        @media (hover: hover) {
+            .feature-card:hover, .semester-card:hover, .mentor-card:hover {
+                transform: perspective(800px) rotateX(2deg) rotateY(2deg) translateZ(20px);
+                box-shadow: var(--shadow-lg);
+                border-color: var(--primary);
+            }
+        }
+
+        .feature-card::before, .semester-card::before, .mentor-card::before {
             content: '';
             position: absolute;
             inset: 0;
@@ -429,11 +471,13 @@
             transition: opacity 0.4s;
             pointer-events: none;
         }
-        .feature-card:hover::before, .semester-card:hover::before {
-            opacity: 0.15;
+        @media (hover: hover) {
+            .feature-card:hover::before, .semester-card:hover::before, .mentor-card:hover::before {
+                opacity: 0.2;
+            }
         }
 
-        .feature-icon, .step-icon, .instructor-avatar {
+        .feature-icon, .step-icon, .mentor-avatar {
             width: 70px;
             height: 70px;
             background: var(--gradient-1);
@@ -448,14 +492,28 @@
             transform: translateZ(20px);
         }
 
-        .feature-card h3, .semester-card h3, .instructor-card h4 {
-            color: var(--text);
-            margin-bottom: 10px;
+        .mentor-avatar {
+            border-radius: 50%;
+            background: var(--gradient-3);
+            font-weight: 700;
+            font-size: 1.8rem;
         }
 
-        .feature-card p, .semester-card p, .instructor-card p {
+        .feature-card h3, .semester-card h3, .mentor-card h4 {
+            color: var(--text);
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .feature-card p, .semester-card p, .mentor-card p {
             color: var(--text-muted);
             font-size: 0.95rem;
+        }
+
+        .mentor-role {
+            color: var(--primary-glow);
+            font-weight: 600;
+            margin-top: 5px;
         }
 
         .feature-link {
@@ -468,15 +526,13 @@
             margin-top: 20px;
             transition: gap 0.3s;
         }
-        .feature-link:hover {
-            gap: 12px;
-        }
+        .feature-link:hover { gap: 12px; }
 
         /* Semester specific */
         .semester-number {
             font-size: 5rem;
             font-weight: 800;
-            opacity: 0.05;
+            opacity: 0.1;
             position: absolute;
             top: 10px;
             right: 20px;
@@ -489,7 +545,7 @@
             margin: 20px 0;
         }
         .semester-topics span {
-            background: var(--surface-light);
+            background: var(--bg-surface);
             padding: 6px 14px;
             border-radius: 30px;
             font-size: 0.8rem;
@@ -497,28 +553,54 @@
             border: 1px solid var(--border);
         }
 
-        /* DDCET */
+        /* ===== STEPS ===== */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        .step {
+            text-align: center;
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .step.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .step:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            top: 30px;
+            right: -30px;
+            font-size: 2rem;
+            color: var(--primary);
+            opacity: 0.3;
+        }
+        @media (max-width:900px){ .step:not(:last-child)::after { display:none; } }
+
+        /* ===== DDCET ===== */
         .ddcet-wrapper {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 60px;
+            gap: 40px;
             align-items: center;
         }
         .ddcet-feature {
             display: flex;
             gap: 15px;
             margin-bottom: 25px;
-            background: var(--surface);
+            background: var(--bg-card);
             padding: 20px;
             border-radius: var(--radius-md);
             border: 1px solid var(--border);
         }
-        .ddcet-feature i {
-            color: var(--success);
-            font-size: 1.5rem;
-        }
+        .ddcet-feature i { color: var(--accent); font-size: 1.5rem; }
         .ddcet-card {
-            background: var(--surface);
+            background: var(--bg-card);
             border-radius: var(--radius-lg);
             border: 1px solid var(--border);
             overflow: hidden;
@@ -536,9 +618,7 @@
             border-radius: 30px;
             font-size: 0.8rem;
         }
-        .ddcet-card-body {
-            padding: 30px;
-        }
+        .ddcet-card-body { padding: 30px; }
         .test-stat {
             display: flex;
             align-items: center;
@@ -548,7 +628,7 @@
         .test-stat i {
             width: 50px;
             height: 50px;
-            background: var(--surface-light);
+            background: var(--bg-surface);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -556,39 +636,21 @@
             color: var(--primary);
         }
 
-        /* How it works */
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 40px;
-            margin-top: 40px;
-        }
-        .step {
-            text-align: center;
-            position: relative;
-        }
-        .step:not(:last-child)::after {
-            content: '→';
-            position: absolute;
-            top: 30px;
-            right: -30px;
-            font-size: 2rem;
-            color: var(--primary);
-            opacity: 0.3;
-        }
-        @media (max-width:900px){ .step:not(:last-child)::after { display:none; } }
-
-        /* FAQ */
-        .faq-grid {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+        /* ===== FAQ ===== */
+        .faq-grid { max-width: 800px; margin: 0 auto; }
         .faq-item {
-            background: var(--surface);
+            background: var(--bg-card);
             border-radius: var(--radius-md);
             margin-bottom: 15px;
             border: 1px solid var(--border);
             overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .faq-item.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
         .faq-question {
             padding: 20px 25px;
@@ -597,9 +659,7 @@
             display: flex;
             justify-content: space-between;
         }
-        .faq-question:hover {
-            background: var(--surface-light);
-        }
+        .faq-question:hover { background: var(--bg-surface); }
         .faq-answer {
             padding: 0 25px 20px;
             color: var(--text-muted);
@@ -607,16 +667,19 @@
         }
         .faq-item.active .faq-answer { display: block; }
 
-        /* CTA */
+        /* ===== CTA ===== */
         .cta-modern {
             background: var(--gradient-1);
             border-radius: var(--radius-xl);
-            padding: 70px 40px;
+            padding: 60px 30px;
             text-align: center;
             color: white;
             margin: 40px 0;
-            box-shadow: var(--shadow-xl);
+            box-shadow: var(--shadow-lg);
             transform: perspective(800px) rotateX(0.5deg);
+        }
+        .cta-modern h2 {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
         }
         .cta-modern .btn {
             background: white;
@@ -624,11 +687,11 @@
             margin-top: 30px;
         }
 
-        /* Footer */
+        /* ===== FOOTER ===== */
         .footer {
-            background: var(--surface);
+            background: var(--bg-surface);
             border-top: 1px solid var(--border);
-            padding: 80px 0 30px;
+            padding: 60px 0 30px;
         }
         .footer-content {
             display: grid;
@@ -636,18 +699,11 @@
             gap: 40px;
             margin-bottom: 60px;
         }
-        .footer-description {
-            color: var(--text-muted);
-            margin: 20px 0;
-        }
-        .social-links {
-            display: flex;
-            gap: 15px;
-        }
+        .footer-description { color: var(--text-muted); margin: 20px 0; }
+        .social-links { display: flex; gap: 15px; }
         .social-link {
-            width: 40px;
-            height: 40px;
-            background: var(--surface-light);
+            width: 40px; height: 40px;
+            background: var(--bg-card);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -661,20 +717,14 @@
             color: white;
             transform: translateY(-3px);
         }
-        .footer-links {
-            list-style: none;
-        }
-        .footer-links li {
-            margin-bottom: 12px;
-        }
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 12px; }
         .footer-links a {
             color: var(--text-muted);
             text-decoration: none;
             transition: color 0.3s;
         }
-        .footer-links a:hover {
-            color: var(--primary);
-        }
+        .footer-links a:hover { color: var(--primary); }
         .footer-contact li {
             display: flex;
             gap: 15px;
@@ -688,13 +738,12 @@
             color: var(--text-muted);
         }
 
-        /* Back to top */
+        /* ===== BACK TO TOP ===== */
         #backToTop {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            width: 50px;
-            height: 50px;
+            width: 50px; height: 50px;
             background: var(--gradient-1);
             border-radius: 50%;
             display: flex;
@@ -709,34 +758,13 @@
             z-index: 999;
             box-shadow: var(--shadow-lg);
         }
-        #backToTop.show {
-            opacity: 1;
-            visibility: visible;
-        }
+        #backToTop.show { opacity: 1; visibility: visible; }
 
-        /* Connection badge */
-        .connection-badge {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            padding: 8px 20px;
-            border-radius: 40px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text);
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: var(--shadow-md);
-            z-index: 999;
-        }
-
-        /* Preloader */
+        /* ===== PRELOADER ===== */
         .preloader {
             position: fixed;
             inset: 0;
-            background: var(--bg);
+            background: var(--bg-deep);
             z-index: 9999;
             display: flex;
             align-items: center;
@@ -744,23 +772,18 @@
             transition: opacity 0.5s;
         }
         .preloader .logo-icon {
-            width: 80px;
-            height: 80px;
+            width: 80px; height: 80px;
             font-size: 2rem;
             margin: 0 auto 20px;
         }
 
-        /* Responsive */
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 992px) {
-            .hero .container,
-            .ddcet-wrapper {
+            .hero .container, .ddcet-wrapper {
                 grid-template-columns: 1fr;
                 text-align: center;
             }
-            .hero-buttons,
-            .hero-stats {
-                justify-content: center;
-            }
+            .hero-buttons, .hero-stats { justify-content: center; }
             .floating-cards { display: none; }
             .footer-content { grid-template-columns: 1fr 1fr; }
         }
@@ -768,25 +791,63 @@
             .nav-links { display: none; }
             .mobile-menu-btn { display: block; }
             .footer-content { grid-template-columns: 1fr; }
+            .hero-buttons .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .hero-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .stat-item {
+                flex: 1;
+                min-width: 120px;
+            }
+            .features-grid, .semester-grid, .mentor-grid {
+                grid-template-columns: 1fr;
+            }
+            .ddcet-wrapper {
+                gap: 30px;
+            }
+            .ddcet-card {
+                transform: none;
+            }
+        }
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            .hero-stats {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .stat-item {
+                width: 100%;
+            }
+            .cta-modern {
+                padding: 40px 20px;
+            }
+            .footer-content {
+                gap: 30px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Particle canvas -->
     <canvas id="particle-canvas"></canvas>
 
     <!-- Preloader -->
     <div class="preloader" id="preloader">
         <div>
             <div class="logo-icon">DQ</div>
-            <p style="color:var(--text);">Loading DDQuest...</p>
+            <p style="color:var(--text);">Igniting the future...</p>
         </div>
     </div>
 
     <!-- Navbar -->
     <nav class="navbar" id="navbar">
         <div class="container">
-            <a href="index.html" class="logo">
+            <a href="#" class="logo">
                 <div class="logo-icon">DQ</div>
                 <div class="logo-text">DDQuest</div>
             </a>
@@ -795,38 +856,47 @@
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#semesters" class="nav-link">Semesters</a>
                 <a href="#ddcet" class="nav-link">DDCET</a>
-                <a href="#instructors" class="nav-link">Mentors</a>
+                <a href="#mentors" class="nav-link">Mentors</a>
                 <a href="#faq" class="nav-link">FAQ</a>
-                <a href="role.html" class="btn btn-primary btn-sm"><i class="fas fa-rocket"></i> Get Started</a>
+                <a href="role.html" class="btn btn-primary btn-sm"><i class="fas fa-rocket"></i> Launch</a>
             </div>
             <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
         </div>
     </nav>
 
-    <!-- Mobile Menu (placeholder) -->
-    <div class="mobile-menu" id="mobileMenu"></div>
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#semesters" class="nav-link">Semesters</a>
+        <a href="#ddcet" class="nav-link">DDCET</a>
+        <a href="#mentors" class="nav-link">Mentors</a>
+        <a href="#faq" class="nav-link">FAQ</a>
+        <a href="role.html" class="btn btn-primary btn-sm"><i class="fas fa-rocket"></i> Launch</a>
+    </div>
 
     <!-- Hero -->
     <section class="hero" id="home">
         <div class="container">
             <div class="hero-content">
-                <h1 class="hero-title">Master Your <span class="gradient-text">Diploma Journey</span> with AI</h1>
-                <p class="hero-subtitle">Complete platform for diploma engineering students. Semester-wise materials, DDCET prep, mock tests & progress tracking.</p>
+                <h1 class="hero-title">Master the <span class="gradient-text">Neo Frontier</span> of Diploma</h1>
+                <p class="hero-subtitle">AI‑powered platform with immersive learning, DDCET prep & futuristic mentors.</p>
                 <div class="hero-buttons">
-                    <a href="auth/signup-student.html" class="btn btn-primary btn-lg"><i class="fas fa-user-graduate"></i> Start Free</a>
-                    <a href="#features" class="btn btn-outline btn-lg"><i class="fas fa-play-circle"></i> Watch Demo</a>
+                    <a href="auth/signup-student.html" class="btn btn-primary btn-lg"><i class="fas fa-user-astronaut"></i> Start Journey</a>
+                    <a href="#features" class="btn btn-outline btn-lg"><i class="fas fa-play-circle"></i> Watch Trailer</a>
                 </div>
                 <div class="hero-stats">
-                    <div class="stat-item"><span class="stat-number" data-count="5000">0</span><span class="stat-label">Active Students</span></div>
-                    <div class="stat-item"><span class="stat-number" data-count="10000">0</span><span class="stat-label">Practice Qs</span></div>
-                    <div class="stat-item"><span class="stat-number" data-count="95">0</span><span class="stat-label">Success Rate</span></div>
+                    <div class="stat-item"><span class="stat-number" data-count="5000">0</span><span class="stat-label">Explorers</span></div>
+                    <div class="stat-item"><span class="stat-number" data-count="10000">0</span><span class="stat-label">Quests</span></div>
+                    <div class="stat-item"><span class="stat-number" data-count="98">0</span><span class="stat-label">Success</span></div>
                 </div>
             </div>
             <div class="hero-image">
                 <div class="floating-cards">
-                    <div class="floating-card card-1"><i class="fas fa-book"></i><h4>Study Materials</h4><p>All semesters</p></div>
-                    <div class="floating-card card-2"><i class="fas fa-trophy"></i><h4>DDCET Prep</h4><p>Exam focused</p></div>
-                    <div class="floating-card card-3"><i class="fas fa-chart-line"></i><h4>Track Progress</h4><p>Analytics</p></div>
+                    <div class="floating-card card-1"><i class="fas fa-rocket"></i><h4>Interactive</h4><p>3D modules</p></div>
+                    <div class="floating-card card-2"><i class="fas fa-trophy"></i><h4>DDCET Arena</h4><p>Mock battles</p></div>
+                    <div class="floating-card card-3"><i class="fas fa-brain"></i><h4>AI Mentor</h4><p>24/7 guide</p></div>
                 </div>
             </div>
         </div>
@@ -836,31 +906,31 @@
     <section class="section-padding" id="features">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Everything You Need to Excel</h2>
-                <p class="section-subtitle">AI-powered tools tailored for diploma students</p>
+                <h2 class="section-title">Neo Features</h2>
+                <p class="section-subtitle">Everything you need to conquer your exams</p>
             </div>
             <div class="features-grid">
-                <div class="feature-card"><div class="feature-icon"><i class="fas fa-graduation-cap"></i></div><h3>Semester-wise Materials</h3><p>Structured notes and PYQs for all semesters.</p><a href="#semesters" class="feature-link">Explore →</a></div>
-                <div class="feature-card"><div class="feature-icon"><i class="fas fa-trophy"></i></div><h3>DDCET Special Prep</h3><p>MCQs, 200-mark sample papers, weekly tests.</p><a href="#ddcet" class="feature-link">Start DDCET →</a></div>
-                <div class="feature-card"><div class="feature-icon"><i class="fas fa-chart-line"></i></div><h3>Smart Progress Tracking</h3><p>Analytics to identify weak areas.</p><a href="#" class="feature-link">View Analytics →</a></div>
-                <div class="feature-card"><div class="feature-icon"><i class="fas fa-clock"></i></div><h3>Weekly Test Series</h3><p>Real exam pattern, instant results.</p><a href="#" class="feature-link">Take Tests →</a></div>
-                <div class="feature-card"><div class="feature-icon"><i class="fas fa-mobile-alt"></i></div><h3>Mobile Friendly</h3><p>Optimized for all devices.</p><a href="#" class="feature-link">Mobile App →</a></div>
-                <div class="feature-card"><div class="feature-icon"><i class="fas fa-users"></i></div><h3>Community Support</h3><p>Discuss doubts in forums.</p><a href="#" class="feature-link">Join Community →</a></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-graduation-cap"></i></div><h3>Semester Hubs</h3><p>Organised notes & PYQs.</p><a href="#semesters" class="feature-link">Explore →</a></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-trophy"></i></div><h3>DDCET War Room</h3><p>Full‑length mock tests.</p><a href="#ddcet" class="feature-link">Enter →</a></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-chart-line"></i></div><h3>Progress Nebula</h3><p>Track your growth.</p><a href="#" class="feature-link">View →</a></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-clock"></i></div><h3>Weekly Challenges</h3><p>New tests every week.</p><a href="#" class="feature-link">Join →</a></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-mobile-alt"></i></div><h3>Zero‑G Mobile</h3><p>Learn anywhere.</p><a href="#" class="feature-link">Try →</a></div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-users"></i></div><h3>Mentor Constellations</h3><p>Expert guidance.</p><a href="#mentors" class="feature-link">Meet →</a></div>
             </div>
         </div>
     </section>
 
     <!-- How It Works -->
-    <section class="section-padding" style="background:var(--surface);">
+    <section class="section-padding" style="background:var(--bg-surface);">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">How It Works</h2>
-                <p class="section-subtitle">Start your success journey in three simple steps</p>
+                <h2 class="section-title">Your Flight Plan</h2>
+                <p class="section-subtitle">Three steps to mastery</p>
             </div>
             <div class="steps">
-                <div class="step"><div class="step-icon"><i class="fas fa-user-plus"></i></div><h3>1. Sign Up Free</h3><p>Create your account in seconds</p></div>
-                <div class="step"><div class="step-icon"><i class="fas fa-book-open"></i></div><h3>2. Choose Semester</h3><p>Access your branch materials</p></div>
-                <div class="step"><div class="step-icon"><i class="fas fa-chart-simple"></i></div><h3>3. Start Learning</h3><p>Practice and track progress</p></div>
+                <div class="step"><div class="step-icon"><i class="fas fa-user-astronaut"></i></div><h3>1. Create Account</h3><p>Free & instant</p></div>
+                <div class="step"><div class="step-icon"><i class="fas fa-rocket"></i></div><h3>2. Choose Semester</h3><p>Access your content</p></div>
+                <div class="step"><div class="step-icon"><i class="fas fa-trophy"></i></div><h3>3. Start Winning</h3><p>Practice & improve</p></div>
             </div>
         </div>
     </section>
@@ -869,70 +939,73 @@
     <section class="section-padding" id="semesters">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Complete Semester Coverage</h2>
-                <p class="section-subtitle">From basics to advanced topics</p>
+                <h2 class="section-title">Semester Portals</h2>
+                <p class="section-subtitle">1 → 6, all branches</p>
             </div>
             <div class="semester-grid">
-                <div class="semester-card" data-sem="1"><div class="semester-number">01</div><h3>Semester 1</h3><p>Basic Maths, Physics, English</p><div class="semester-topics"><span>Mathematics</span><span>Physics</span><span>English</span></div><a href="#" class="btn btn-outline btn-sm">Explore</a></div>
-                <div class="semester-card" data-sem="2"><div class="semester-number">02</div><h3>Semester 2</h3><p>Applied Maths, Drawing, Electronics</p><div class="semester-topics"><span>Maths II</span><span>Drawing</span><span>Electronics</span></div><a href="#" class="btn btn-outline btn-sm">Explore</a></div>
-                <div class="semester-card" data-sem="3"><div class="semester-number">03</div><h3>Semester 3</h3><p>Programming, Circuits, Mechanics</p><div class="semester-topics"><span>Programming</span><span>Circuits</span><span>Mechanics</span></div><a href="#" class="btn btn-outline btn-sm">Explore</a></div>
-                <div class="semester-card" data-sem="4"><div class="semester-number">04</div><h3>Semester 4</h3><p>DBMS, Networks, Theory</p><div class="semester-topics"><span>DBMS</span><span>Networks</span><span>Theory</span></div><a href="#" class="btn btn-outline btn-sm">Explore</a></div>
-                <div class="semester-card" data-sem="5"><div class="semester-number">05</div><h3>Semester 5</h3><p>Projects, Electives, Labs</p><div class="semester-topics"><span>Projects</span><span>Electives</span><span>Labs</span></div><a href="#" class="btn btn-outline btn-sm">Explore</a></div>
-                <div class="semester-card" data-sem="6"><div class="semester-number">06</div><h3>Semester 6 + DDCET</h3><p>Final sem + entrance prep</p><div class="semester-topics"><span>Final Proj</span><span>DDCET</span><span>Placement</span></div><a href="#ddcet" class="btn btn-primary btn-sm">Start DDCET</a></div>
+                <div class="semester-card"><div class="semester-number">01</div><h3>Sem 1</h3><p>Foundation</p><div class="semester-topics"><span>Maths</span><span>Physics</span></div><a href="#" class="btn btn-outline btn-sm">Explore</a></div>
+                <div class="semester-card"><div class="semester-number">02</div><h3>Sem 2</h3><p>Basics</p><div class="semester-topics"><span>Maths II</span><span>Drawing</span></div><a href="#" class="btn btn-outline btn-sm">Explore</a></div>
+                <div class="semester-card"><div class="semester-number">03</div><h3>Sem 3</h3><p>Core</p><div class="semester-topics"><span>Programming</span><span>Circuits</span></div><a href="#" class="btn btn-outline btn-sm">Explore</a></div>
+                <div class="semester-card"><div class="semester-number">04</div><h3>Sem 4</h3><p>Advanced</p><div class="semester-topics"><span>DBMS</span><span>Networks</span></div><a href="#" class="btn btn-outline btn-sm">Explore</a></div>
+                <div class="semester-card"><div class="semester-number">05</div><h3>Sem 5</h3><p>Spec.</p><div class="semester-topics"><span>Projects</span><span>Electives</span></div><a href="#" class="btn btn-outline btn-sm">Explore</a></div>
+                <div class="semester-card"><div class="semester-number">06</div><h3>Sem 6 + DDCET</h3><p>Final</p><div class="semester-topics"><span>DDCET</span><span>Placement</span></div><a href="#ddcet" class="btn btn-primary btn-sm">Prep</a></div>
             </div>
         </div>
     </section>
 
     <!-- DDCET -->
-    <section class="section-padding" style="background:var(--surface);" id="ddcet">
+    <section class="section-padding" style="background:var(--bg-surface);" id="ddcet">
         <div class="container">
             <div class="ddcet-wrapper">
                 <div>
-                    <h2 class="section-title">DDCET Exam <span class="gradient-text">Preparation</span></h2>
-                    <p class="section-subtitle">Specialized prep for Diploma to Degree entrance</p>
+                    <h2 class="section-title">DDCET <span class="gradient-text">Battlefield</span></h2>
+                    <p class="section-subtitle">Mock tests, rank predictors & more</p>
                     <div class="ddcet-features">
-                        <div class="ddcet-feature"><i class="fas fa-check-circle" style="color:var(--success);"></i><div><h4>200 Marks Sample Papers</h4><p>Complete mock tests</p></div></div>
-                        <div class="ddcet-feature"><i class="fas fa-check-circle" style="color:var(--success);"></i><div><h4>Weekly Test Series</h4><p>Performance analysis</p></div></div>
-                        <div class="ddcet-feature"><i class="fas fa-check-circle" style="color:var(--success);"></i><div><h4>Subject-wise MCQs</h4><p>Thousand+ questions</p></div></div>
-                        <div class="ddcet-feature"><i class="fas fa-check-circle" style="color:var(--success);"></i><div><h4>Rank Predictor</h4><p>Predict your rank</p></div></div>
+                        <div class="ddcet-feature"><i class="fas fa-check-circle"></i><div><h4>200‑marks mock</h4></div></div>
+                        <div class="ddcet-feature"><i class="fas fa-check-circle"></i><div><h4>Weekly series</h4></div></div>
+                        <div class="ddcet-feature"><i class="fas fa-check-circle"></i><div><h4>Subject MCQs</h4></div></div>
                     </div>
-                    <div class="ddcet-buttons"><a href="role.html" class="btn btn-primary btn-lg"><i class="fas fa-play"></i> Start DDCET Prep</a><a href="#" class="btn btn-outline btn-lg"><i class="fas fa-download"></i> Syllabus</a></div>
                 </div>
                 <div class="ddcet-card">
-                    <div class="ddcet-card-header"><h4>DDCET Mock Test</h4><span class="badge">New</span></div>
+                    <div class="ddcet-card-header"><h4>Free Mock</h4><span class="badge">New</span></div>
                     <div class="ddcet-card-body">
-                        <div class="test-stat"><i class="fas fa-question-circle"></i><div><h5>100 Questions</h5><p>MCQs & Descriptive</p></div></div>
-                        <div class="test-stat"><i class="fas fa-clock"></i><div><h5>3 Hours</h5><p>Duration</p></div></div>
-                        <div class="test-stat"><i class="fas fa-star"></i><div><h5>200 Marks</h5><p>Max Score</p></div></div>
-                        <button class="btn btn-primary btn-block" onclick="showFeatureMessage()"><i class="fas fa-play"></i> Take Free Mock Test</button>
+                        <div class="test-stat"><i class="fas fa-question-circle"></i><div><h5>100 Qs</h5></div></div>
+                        <div class="test-stat"><i class="fas fa-clock"></i><div><h5>3 hours</h5></div></div>
+                        <button class="btn btn-primary btn-block" onclick="alert('🚀 Mock test coming soon!')"><i class="fas fa-play"></i> Start Free</button>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Instructors -->
-    <section class="section-padding" id="instructors">
+    <!-- Mentors -->
+    <section class="section-padding" id="mentors">
         <div class="container">
-            <div class="section-header"><h2 class="section-title">Meet Your Mentors</h2><p class="section-subtitle">Learn from diploma experts</p></div>
-            <div class="instructor-grid">
-                <div class="instructor-card"><div class="instructor-avatar">RP</div><h4>Raj Patel</h4><p class="instructor-role" style="color:var(--primary);">Electrical Engg.</p><p>10+ years teaching experience</p></div>
-                <div class="instructor-card"><div class="instructor-avatar">PS</div><h4>Priya Sharma</h4><p class="instructor-role" style="color:var(--primary);">Computer Engg.</p><p>DDCET rank 12</p></div>
-                <div class="instructor-card"><div class="instructor-avatar">AK</div><h4>Amit Kumar</h4><p class="instructor-role" style="color:var(--primary);">Mechanical Engg.</p><p>Subject matter expert</p></div>
-                <div class="instructor-card"><div class="instructor-avatar">SD</div><h4>Sneha Desai</h4><p class="instructor-role" style="color:var(--primary);">Civil Engg.</p><p>Curriculum designer</p></div>
+            <div class="section-header">
+                <h2 class="section-title">Your Neo Mentors</h2>
+                <p class="section-subtitle">Guiding you through the diploma galaxy</p>
+            </div>
+            <div class="mentor-grid">
+                <div class="mentor-card"><div class="mentor-avatar">BD</div><h4>Bhoi Dhruv</h4><p class="mentor-role">AI Architect</p><p>Full‑stack developer & education visionary.</p></div>
+                <div class="mentor-card"><div class="mentor-avatar">DV</div><h4>Dhobi Ved</h4><p class="mentor-role">DDCET Strategist</p><p>Ranked #12 in DDCET, 3+ years mentoring.</p></div>
+                <div class="mentor-card"><div class="mentor-avatar">PP</div><h4>Patel Prince</h4><p class="mentor-role">Content Captain</p><p>Curated 10,000+ practice questions.</p></div>
+                <div class="mentor-card"><div class="mentor-avatar">DJ</div><h4>Dhobi Jaynam</h4><p class="mentor-role">3D Learning Expert</p><p>Creates immersive study modules.</p></div>
             </div>
         </div>
     </section>
 
     <!-- FAQ -->
-    <section class="section-padding" style="background:var(--surface);" id="faq">
+    <section class="section-padding" style="background:var(--bg-surface);" id="faq">
         <div class="container">
-            <div class="section-header"><h2 class="section-title">Frequently Asked Questions</h2><p class="section-subtitle">Got questions? We've got answers.</p></div>
+            <div class="section-header">
+                <h2 class="section-title">Nebula FAQ</h2>
+                <p class="section-subtitle">Quick answers</p>
+            </div>
             <div class="faq-grid">
-                <div class="faq-item active"><div class="faq-question">Is DDQuest really free? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Yes, all study materials and basic tests are free. We also offer premium mock tests for advanced preparation.</div></div>
-                <div class="faq-item"><div class="faq-question">Can I access on mobile? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Absolutely! The platform is fully responsive and works on all devices.</div></div>
-                <div class="faq-item"><div class="faq-question">How often are tests updated? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">We release new DDCET mock tests every week based on latest exam patterns.</div></div>
-                <div class="faq-item"><div class="faq-question">Do you cover all branches? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Yes, we have content for Computer, Electrical, Mechanical, Civil, and Electronics branches.</div></div>
+                <div class="faq-item active"><div class="faq-question">Is it really free? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Yes, all core materials are free. Premium tests optional.</div></div>
+                <div class="faq-item"><div class="faq-question">Works on mobile? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Absolutely – fully responsive.</div></div>
+                <div class="faq-item"><div class="faq-question">DDCET updates? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">Weekly new mocks based on latest pattern.</div></div>
+                <div class="faq-item"><div class="faq-question">All branches? <i class="fas fa-chevron-down"></i></div><div class="faq-answer">CS, Mech, Electrical, Civil, Electronics.</div></div>
             </div>
         </div>
     </section>
@@ -941,8 +1014,8 @@
     <section class="section-padding">
         <div class="container">
             <div class="cta-modern">
-                <h2>Ready to Boost Your Grades?</h2>
-                <p>Join 5,000+ diploma students already mastering their subjects.</p>
+                <h2>Ready to Launch?</h2>
+                <p>Join 5,000+ students already orbiting success.</p>
                 <a href="auth/signup-student.html" class="btn btn-lg">Sign Up Free →</a>
             </div>
         </div>
@@ -953,106 +1026,72 @@
         <div class="container">
             <div class="footer-content">
                 <div>
-                    <div class="footer-logo"><div class="logo-icon">DQ</div><div class="logo-text" style="font-size:1.8rem;">DDQuest</div></div>
-                    <p class="footer-description">Your trusted companion for diploma engineering education.</p>
+                    <div class="logo-icon" style="margin-bottom:10px;">DQ</div>
+                    <p class="footer-description">Your cosmic guide to diploma engineering.</p>
                     <div class="social-links">
-                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
                         <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
                     </div>
                 </div>
-                <div><h4>Quick Links</h4><ul class="footer-links"><li><a href="#home">Home</a></li><li><a href="#features">Features</a></li><li><a href="#semesters">Semesters</a></li><li><a href="#ddcet">DDCET</a></li></ul></div>
-                <div><h4>Resources</h4><ul class="footer-links"><li><a href="#">Study Materials</a></li><li><a href="#">Practice Tests</a></li><li><a href="#">DDCET Guide</a></li><li><a href="#">Progress Analytics</a></li></ul></div>
-                <div><h4>Contact</h4><ul class="footer-contact"><li><i class="fas fa-envelope"></i> support@ddquest.com</li><li><i class="fas fa-phone"></i> +91 98765 43210</li><li><i class="fas fa-map-marker-alt"></i> Mumbai, India</li></ul></div>
+                <div><h4>Explore</h4><ul class="footer-links"><li><a href="#home">Home</a></li><li><a href="#features">Features</a></li><li><a href="#semesters">Semesters</a></li><li><a href="#ddcet">DDCET</a></li></ul></div>
+                <div><h4>Resources</h4><ul class="footer-links"><li><a href="#">Study Materials</a></li><li><a href="#">Mock Tests</a></li><li><a href="#">DDCET Guide</a></li></ul></div>
+                <div><h4>Contact</h4><ul class="footer-contact"><li><i class="fas fa-envelope"></i> support@ddquest.space</li><li><i class="fas fa-phone"></i> +91 98765 43210</li></ul></div>
             </div>
-            <div class="footer-bottom"><p>&copy; 2025 DDQuest. All rights reserved.</p></div>
+            <div class="footer-bottom"><p>&copy; 2026 DDQuest. All rights reserved.</p></div>
         </div>
     </footer>
 
     <!-- Back to Top -->
     <button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-arrow-up"></i></button>
 
-    <!-- Connection Status -->
-    <div class="connection-badge" id="connectionStatusBadge" style="display:none;"><span class="status-icon">🔄</span><span class="status-text">Connecting...</span></div>
-    <div id="firebaseNotification" style="position:fixed;top:20px;right:20px;padding:12px 24px;border-radius:12px;background:#10B981;color:white;z-index:9999;display:none;"></div>
-    <button id="firebaseRetryBtn" style="position:fixed;bottom:80px;right:20px;padding:12px 24px;background:#3B82F6;color:white;border:none;border-radius:40px;cursor:pointer;z-index:9999;display:none;" onclick="retryFirebaseConnection()">🔄 Retry Connection</button>
-
-    <!-- Firebase & Main Scripts (your original code) -->
-    <script type="module">
-        // Firebase config
-        const firebaseConfig = {
-            apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
-            authDomain: "ddquest-614ea.firebaseapp.com",
-            databaseURL: "https://ddquest-614ea-default-rtdb.firebaseio.com",
-            projectId: "ddquest-614ea",
-            storageBucket: "ddquest-614ea.appspot.com",
-            messagingSenderId: "602140742747",
-            appId: "1:602140742747:web:1cbd274462578fde845b7e",
-            measurementId: "G-1CRQVW0WF9"
-        };
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-
-        async function initializeFirebase() {
-            try {
-                updateConnectionStatus('connecting');
-                const app = initializeApp(firebaseConfig);
-                const auth = getAuth(app);
-                const firestore = getFirestore(app);
-                const database = getDatabase(app);
-                window.firebaseApp = app; window.firebaseAuth = auth; window.firestoreDb = firestore; window.realtimeDb = database;
-                onAuthStateChanged(auth, (user) => { window.currentUser = user; });
-                onValue(ref(database, '.info/connected'), (snap) => {
-                    if (snap.val() === true) {
-                        updateConnectionStatus('connected', 'Connected to DDQuest');
-                        window.dispatchEvent(new CustomEvent('firebase-ready', {detail:{app,auth,firestore,database}}));
-                    } else updateConnectionStatus('disconnected','Connection lost');
-                });
-            } catch(e) { updateConnectionStatus('disconnected','Failed to connect'); }
-        }
-
-        function updateConnectionStatus(status, msg='') {
-            const badge = document.getElementById('connectionStatusBadge');
-            const notification = document.getElementById('firebaseNotification');
-            const retry = document.getElementById('firebaseRetryBtn');
-            if (!badge) return;
-            badge.style.display = 'flex';
-            if (status==='connecting') { badge.innerHTML='<span class="status-icon">🔄</span><span class="status-text">Connecting...</span>'; badge.style.background='#F59E0B'; if(retry) retry.style.display='none'; }
-            else if (status==='connected') { badge.innerHTML='<span class="status-icon">✅</span><span class="status-text">Connected</span>'; badge.style.background='#10B981'; if(retry) retry.style.display='none'; setTimeout(()=>{ badge.style.opacity='0'; setTimeout(()=>badge.style.display='none',300); },4000); }
-            else { badge.innerHTML='<span class="status-icon">❌</span><span class="status-text">Connection Issue</span>'; badge.style.background='#EF4444'; if(retry) retry.style.display='block'; }
-            if (notification && msg) { notification.textContent = msg; notification.style.display='block'; setTimeout(()=>notification.style.display='none',5000); }
-        }
-        window.retryFirebaseConnection = async () => { await initializeFirebase(); };
-        document.addEventListener('DOMContentLoaded', ()=>setTimeout(initializeFirebase,1000));
-    </script>
-
     <script>
-        // Particle canvas
+        // Particle canvas with performance tuning
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
         let particles = [];
+        let shootingStars = [];
 
-        function initParticles() {
+        // Determine particle count based on screen width
+        const isMobile = window.innerWidth <= 768;
+        const particleCount = isMobile ? 30 : 80;
+        const shootingStarInterval = isMobile ? 4000 : 2000; // fewer shooting stars on mobile
+
+        function initCanvas() {
             width = window.innerWidth;
             height = window.innerHeight;
             canvas.width = width;
             canvas.height = height;
-            for (let i = 0; i < 60; i++) {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) {
                 particles.push({
                     x: Math.random() * width,
                     y: Math.random() * height,
                     z: Math.random() * 300,
-                    size: Math.random() * 2 + 1,
-                    color: `rgba(99, 102, 241, ${Math.random() * 0.3})`
+                    size: Math.random() * 2.5 + 0.5,
+                    color: `rgba(95, 75, 219, ${Math.random() * 0.4 + 0.2})`
                 });
             }
         }
 
+        function createShootingStar() {
+            shootingStars.push({
+                x: Math.random() * width,
+                y: 0,
+                length: Math.random() * 80 + 40,
+                speed: Math.random() * 8 + 4,
+                angle: Math.random() * 0.5 + 0.2,
+                opacity: 1
+            });
+        }
+
+        setInterval(() => {
+            if (width && height) createShootingStar();
+        }, shootingStarInterval);
+
         function animateParticles() {
+            if (!ctx) return;
             ctx.clearRect(0, 0, width, height);
             const scrollY = window.scrollY;
             particles.forEach(p => {
@@ -1064,11 +1103,23 @@
                 ctx.fillStyle = p.color;
                 ctx.fill();
             });
+            shootingStars = shootingStars.filter(star => {
+                ctx.beginPath();
+                ctx.moveTo(star.x, star.y);
+                ctx.lineTo(star.x - star.length * Math.cos(star.angle), star.y + star.length * Math.sin(star.angle));
+                ctx.strokeStyle = `rgba(255, 255, 255, ${star.opacity})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                star.x += star.speed;
+                star.y += star.speed * 0.5;
+                star.opacity -= 0.005;
+                return star.opacity > 0 && star.x < width + 200;
+            });
             requestAnimationFrame(animateParticles);
         }
 
-        window.addEventListener('resize', initParticles);
-        initParticles();
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
         animateParticles();
 
         // Preloader
@@ -1077,7 +1128,18 @@
             setTimeout(() => document.getElementById('preloader').style.display = 'none', 1300);
         });
 
-        // Counters
+        // Scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.2, rootMargin: '0px 0px -50px 0px' });
+
+        document.querySelectorAll('.feature-card, .semester-card, .mentor-card, .step, .faq-item').forEach(el => observer.observe(el));
+
+        // Counter animation
         function animateCounters() {
             document.querySelectorAll('.stat-number').forEach(c => {
                 let target = +c.dataset.count;
@@ -1093,12 +1155,13 @@
             });
         }
 
-        const observer = new IntersectionObserver((entries) => {
+        const statsObserver = new IntersectionObserver((entries) => {
             entries.forEach(e => {
                 if (e.isIntersecting) animateCounters();
             });
         }, { threshold: 0.5 });
-        observer.observe(document.querySelector('.hero-stats'));
+        const statsEl = document.querySelector('.hero-stats');
+        if (statsEl) statsObserver.observe(statsEl);
 
         // FAQ toggle
         document.querySelectorAll('.faq-question').forEach(q => {
@@ -1109,34 +1172,45 @@
 
         // Back to top
         window.addEventListener('scroll', () => {
-            document.getElementById('backToTop').classList.toggle('show', window.scrollY > 500);
+            const btn = document.getElementById('backToTop');
+            if (btn) btn.classList.toggle('show', window.scrollY > 500);
         });
 
-        // 3D tilt effect (cards)
-        const cards = document.querySelectorAll('.feature-card, .semester-card, .instructor-card, .ddcet-card');
-        cards.forEach(card => {
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                const rotateX = (y - centerY) / 20;
-                const rotateY = (centerX - x) / 20;
-                card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
-            });
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateZ(0)';
-            });
-        });
+        // Mobile menu
+        const mobileBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileOverlay = document.getElementById('mobileMenuOverlay');
 
-        function showFeatureMessage() {
-            alert('🎯 This feature is coming soon!');
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileOverlay.classList.remove('active');
         }
 
-        // Mobile menu placeholder
-        document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
-            alert('Mobile menu would open – implement as needed.');
+        if (mobileBtn) {
+            mobileBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('active');
+                mobileOverlay.classList.toggle('active');
+            });
+        }
+
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', closeMobileMenu);
+        }
+
+        // Close mobile menu when a link is clicked
+        document.querySelectorAll('.mobile-menu a').forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
         });
     </script>
 </body>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDQuest · Semester 4</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../../../assets/css/main.css">
+    <link rel="stylesheet" href="../../student.css">
+    <link rel="stylesheet" href="sem4.css">
+
+    <!-- Fonts & Icons (async) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+
+    <!-- Firebase SDK (defer) -->
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Initialization -->
+    <script>
+        window.addEventListener('load', function() {
+            const firebaseConfig = {
+                apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
+                authDomain: "ddquest-614ea.firebaseapp.com",
+                databaseURL: "https://ddquest-614ea-default-rtdb.firebaseio.com",
+                projectId: "ddquest-614ea",
+                storageBucket: "ddquest-614ea.appspot.com",
+                messagingSenderId: "602140742747",
+                appId: "1:602140742747:web:1cbd274462578fde845b7e",
+                measurementId: "G-1CRQVW0WF9"
+            };
+            firebase.initializeApp(firebaseConfig);
+        });
+    </script>
+</head>
+<body>
+    <!-- 3D Space Canvas -->
+    <canvas id="spaceCanvas"></canvas>
+
+    <div class="semester-container">
+        <!-- Header -->
+        <div class="semester-header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="navigation-buttons">
+                        <a href="../../dashboard/index.html" class="back-btn">
+                            <i class="fas fa-arrow-left"></i> Dashboard
+                        </a>
+                        <button onclick="logoutUser()" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+
+                    <div class="welcome-message">
+                        <h1><span id="greeting">Hello</span>, <span id="userName">Student</span>!</h1>
+                        <p>Semester 4 – Advanced Core</p>
+                    </div>
+
+                    <!-- Current Time & Date -->
+                    <div class="time-display">
+                        <i class="far fa-clock"></i>
+                        <span id="currentTime"></span> • <span id="currentDate"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Semester Content -->
+        <div class="container">
+            <!-- Cards Grid -->
+            <div class="cards-grid">
+                <a href="materials.html" class="card">
+                    <div class="card-icon"><i class="fas fa-book-open"></i></div>
+                    <h3>Study Materials</h3>
+                    <p>Access notes, e‑books, and resources for all subjects.</p>
+                    <span class="card-badge">12 items</span>
+                </a>
+
+                <a href="syllabus.html" class="card">
+                    <div class="card-icon"><i class="fas fa-list-alt"></i></div>
+                    <h3>Syllabus</h3>
+                    <p>Detailed syllabus and subject breakdown for Semester 4.</p>
+                    <span class="card-badge">View</span>
+                </a>
+
+                <a href="tests.html" class="card">
+                    <div class="card-icon"><i class="fas fa-clipboard-check"></i></div>
+                    <h3>Tests</h3>
+                    <p>Practice tests, quizzes, and previous year papers.</p>
+                    <span class="card-badge">4 tests</span>
+                </a>
+            </div>
+
+            <!-- Recent Materials Preview -->
+            <div class="recent-section">
+                <h2 class="section-title">Recent Materials</h2>
+                <div class="recent-list" id="recentMaterials">
+                    <!-- Loaded by JS -->
+                </div>
+            </div>
+
+            <!-- Upcoming Tests Preview -->
+            <div class="recent-section">
+                <h2 class="section-title">Upcoming Tests</h2>
+                <div class="recent-list" id="upcomingTests">
+                    <!-- Loaded by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Semester Script -->
+    <script defer src="sem4.js"></script>
+</body>
+</html>

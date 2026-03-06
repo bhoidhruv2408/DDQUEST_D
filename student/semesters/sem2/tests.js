@@ -1,4 +1,4 @@
-// tests.js – Semester 2 Tests
+// tests.js – Semester 2 Tests with branch filtering and debugging
 
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -40,38 +40,66 @@ function checkAuthState() {
             return;
         }
         currentUser = user;
+        console.log('✅ User authenticated:', user.uid);
         try {
             await loadStudentData(user.uid);
             await loadTests();
             await updateLastActive();
             startOnlineStatusUpdater();
         } catch (error) {
-            console.error('Error loading data:', error);
+            console.error('❌ Error loading data:', error);
             showToast('Failed to load tests.', 'error');
         }
     });
 }
 
 async function loadStudentData(uid) {
+    console.log('📥 Loading student data...');
     const userDoc = await db.collection('users').doc(uid).get();
     if (userDoc.exists) {
         studentData = userDoc.data();
+        console.log('✅ Student data loaded:', studentData);
         document.getElementById('userName').textContent = studentData.fullName || 'Student';
     } else {
+        console.warn('⚠️ No user document found');
         document.getElementById('userName').textContent = 'Student';
     }
 }
 
 async function loadTests() {
-    if (!studentData) return;
+    if (!studentData) {
+        console.log('⏳ Waiting for student data...');
+        return;
+    }
+
     testsGrid.innerHTML = '<div class="loader"></div>';
+    console.log('📥 Fetching tests for semester 2...');
+
     try {
         const snapshot = await db.collection('tests')
             .where('semester', '==', 2)
             .orderBy('createdAt', 'desc')
             .get();
-        allTests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (allTests.length === 0) {
+
+        console.log(`📊 Query returned ${snapshot.size} test documents.`);
+        const all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const studentBranch = (studentData.branch || '').trim().toLowerCase();
+        console.log(`🎓 Student branch: "${studentBranch}"`);
+
+        // Filter by branch: include if test has no branch OR branch matches
+        const filtered = all.filter(t => {
+            const testBranch = (t.branch || '').trim().toLowerCase();
+            const include = !t.branch || testBranch === studentBranch;
+            if (!include) {
+                console.log(`🚫 Excluding test "${t.title}" (branch: "${testBranch}") – branch mismatch`);
+            }
+            return include;
+        });
+
+        console.log(`✅ After branch filter: ${filtered.length} tests remain.`);
+        allTests = filtered;
+
+        if (filtered.length === 0) {
             testsGrid.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-clipboard-list"></i>
@@ -81,9 +109,11 @@ async function loadTests() {
             `;
             return;
         }
-        renderTests(allTests);
+
+        renderTests(filtered);
+
     } catch (error) {
-        console.error('Error loading tests:', error);
+        console.error('❌ Error loading tests:', error);
         if (error.code === 'failed-precondition') {
             const match = error.message.match(/https:[^\s]+/);
             const indexUrl = match ? match[0] : '#';
@@ -95,7 +125,13 @@ async function loadTests() {
                 </div>
             `;
         } else {
-            testsGrid.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Failed to load tests</h3><p>${error.message}</p></div>`;
+            testsGrid.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Failed to load tests</h3>
+                    <p>${error.message}</p>
+                </div>
+            `;
         }
     }
 }
@@ -124,5 +160,80 @@ function renderTests(tests) {
     testsGrid.innerHTML = html;
 }
 
-// Online status, time, logout, particles, etc. (same as before)
-// (Include all the same helper functions from the sem1 tests.js)
+// ---------- Online status ----------
+let lastActiveInterval;
+function startOnlineStatusUpdater() {
+    if (lastActiveInterval) clearInterval(lastActiveInterval);
+    lastActiveInterval = setInterval(updateLastActive, 120000);
+    window.addEventListener('beforeunload', updateLastActive);
+}
+async function updateLastActive() {
+    if (!currentUser) return;
+    try {
+        await db.collection('users').doc(currentUser.uid).update({ lastActive: firebase.firestore.FieldValue.serverTimestamp() });
+        console.log('🕒 lastActive updated');
+    } catch (e) { console.warn(e); }
+}
+
+// ---------- Time & greeting ----------
+function updateTimeDisplay() {
+    const now = new Date();
+    document.getElementById('currentTime').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+function updateGreeting() {
+    const h = new Date().getHours();
+    let g = 'Good ';
+    if (h < 12) g += 'Morning';
+    else if (h < 18) g += 'Afternoon';
+    else g += 'Evening';
+    document.getElementById('greeting').textContent = g;
+}
+window.logoutUser = async function() {
+    await updateLastActive();
+    try {
+        await auth.signOut();
+        window.location.href = '../../../auth/login-student.html';
+    } catch (error) { console.error('Logout error:', error); }
+};
+
+// ---------- 3D space particles ----------
+function initSpaceParticles() {
+    const canvas = document.getElementById('spaceCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let w, h, particles = [], count = 150;
+    function resize() { w = window.innerWidth; h = window.innerHeight; canvas.width = w; canvas.height = h; }
+    window.addEventListener('resize', resize); resize();
+    class Particle {
+        constructor() {
+            this.x = Math.random() * w;
+            this.y = Math.random() * h;
+            this.z = Math.random() * 1000;
+            this.speed = Math.random() * 3 + 0.5;
+            this.size = Math.random() * 2 + 0.5;
+            this.color = `rgba(76, 201, 240, ${Math.random() * 0.5 + 0.2})`;
+        }
+        update() {
+            this.z -= this.speed;
+            if (this.z <= 0) { this.z = 1000; this.x = Math.random() * w; this.y = Math.random() * h; }
+        }
+        draw() {
+            const scale = 800 / (this.z + 100);
+            const x = (this.x - w / 2) * scale + w / 2;
+            const y = (this.y - h / 2) * scale + h / 2;
+            const s = this.size * scale;
+            ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill();
+        }
+    }
+    for (let i = 0; i < count; i++) particles.push(new Particle());
+    function animate() { ctx.clearRect(0, 0, w, h); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
+    animate();
+}
+
+// ---------- Helper ----------
+function formatDate(timestamp) {
+    if (!timestamp) return 'N/A';
+    const d = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}

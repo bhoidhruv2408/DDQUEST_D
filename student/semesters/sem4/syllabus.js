@@ -1,11 +1,22 @@
-// syllabus.js – Semester 3 Syllabus with branch filtering
+// syllabus.js – Semester 4 Syllabus (waits for Firebase)
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+let auth, db, currentUser = null, studentData = null, syllabusItems = [];
 
-let currentUser = null;
-let studentData = null;
-let syllabusItems = [];
+// Wait for Firebase to be initialized
+function waitForFirebase() {
+    return new Promise((resolve) => {
+        const check = () => {
+            if (firebase.apps.length) {
+                auth = firebase.auth();
+                db = firebase.firestore();
+                resolve();
+            } else {
+                setTimeout(check, 50);
+            }
+        };
+        check();
+    });
+}
 
 const syllabusGrid = document.getElementById('syllabusGrid');
 const viewModal = document.getElementById('viewModal');
@@ -15,6 +26,7 @@ const viewDirectLink = document.getElementById('viewDirectLink');
 const iframeLoader = document.getElementById('iframeLoader');
 const viewReloadBtn = document.getElementById('viewReloadBtn');
 
+// ---------- Toast ----------
 function showToast(message, type = 'info', title = '', duration = 4000) {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
@@ -31,6 +43,7 @@ function showToast(message, type = 'info', title = '', duration = 4000) {
     setTimeout(() => toast.remove(), duration);
 }
 
+// ---------- Google Drive helpers ----------
 function extractFileId(url) {
     const patterns = [
         /\/d\/([a-zA-Z0-9_-]+)/,
@@ -50,14 +63,18 @@ function toPreviewLink(url) {
     return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : url;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+// ---------- DOM Ready ----------
+document.addEventListener('DOMContentLoaded', async function() {
     initSpaceParticles();
     updateTimeDisplay();
     setInterval(updateTimeDisplay, 1000);
     updateGreeting();
+
+    await waitForFirebase();          // Wait for Firebase ready
     checkAuthState();
 });
 
+// ---------- Authentication ----------
 function checkAuthState() {
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
@@ -91,6 +108,7 @@ async function loadStudentData(uid) {
     }
 }
 
+// ---------- Load Syllabus (semester 4) ----------
 async function loadSyllabus() {
     if (!studentData) {
         console.log('⏳ Waiting for student data...');
@@ -98,10 +116,10 @@ async function loadSyllabus() {
     }
 
     syllabusGrid.innerHTML = '<div class="loader"></div>';
-    console.log('📥 Fetching syllabus materials (will filter for semester 3)...');
+    console.log('📥 Fetching syllabus materials (will filter for semester 4)...');
 
     try {
-        // Fetch all materials with category 'Syllabus' (requires composite index)
+        // Query: category == 'Syllabus', order by createdAt
         const snapshot = await db.collection('materials')
             .where('category', '==', 'Syllabus')
             .orderBy('createdAt', 'desc')
@@ -113,19 +131,19 @@ async function loadSyllabus() {
         const studentBranch = (studentData.branch || '').trim().toLowerCase();
         console.log(`🎓 Student branch: "${studentBranch}"`);
 
-        // Filter by semester 3 – handle both number and string
+        // Filter by semester 4 (loose equality)
         const filteredBySemester = all.filter(m => {
             const sem = m.semester;
-            const isSem3 = sem == 3; // loose equality
-            if (!isSem3) {
-                console.log(`🚫 Excluding syllabus "${m.title}" (semester: ${sem}) – not semester 3`);
+            const isSem4 = sem == 4;
+            if (!isSem4) {
+                console.log(`🚫 Excluding syllabus "${m.title}" (semester: ${sem}) – not semester 4`);
             }
-            return isSem3;
+            return isSem4;
         });
 
         console.log(`📌 After semester filter: ${filteredBySemester.length} syllabus items remain.`);
 
-        // Filter by branch: include if material has no branch OR branch matches (case‑insensitive)
+        // Filter by branch: include if no branch OR branch matches
         const filtered = filteredBySemester.filter(m => {
             const materialBranch = (m.branch || '').trim().toLowerCase();
             const include = !m.branch || materialBranch === studentBranch;
@@ -143,7 +161,7 @@ async function loadSyllabus() {
                 <div class="empty-state">
                     <i class="fas fa-file-alt"></i>
                     <h3>No syllabus found</h3>
-                    <p>Check back later for semester 3 syllabus.</p>
+                    <p>Check back later for semester 4 syllabus.</p>
                 </div>
             `;
             return;
@@ -177,7 +195,7 @@ function renderSyllabus(items) {
             <div class="syllabus-card" data-id="${item.id}">
                 <div class="syllabus-icon"><i class="fas fa-file-pdf"></i></div>
                 <h3 class="syllabus-title">${item.title || 'Syllabus'}</h3>
-                <p class="syllabus-description">${item.description || 'Semester 3 syllabus document.'}</p>
+                <p class="syllabus-description">${item.description || 'Semester 4 syllabus document.'}</p>
                 <div class="syllabus-meta">
                     <span><i class="fas fa-calendar-alt"></i> ${date}</span>
                     <span><i class="fas fa-tag"></i> ${item.category || 'Syllabus'}</span>
@@ -191,6 +209,7 @@ function renderSyllabus(items) {
     syllabusGrid.innerHTML = html;
 }
 
+// ---------- View Modal ----------
 function viewSyllabus(id) {
     const item = syllabusItems.find(i => i.id === id);
     if (!item || !item.link) {
@@ -230,6 +249,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && viewModal.style.display === 'flex') closeViewModal();
 });
 
+// ---------- Online Status ----------
 let lastActiveInterval;
 function startOnlineStatusUpdater() {
     if (lastActiveInterval) clearInterval(lastActiveInterval);
@@ -244,6 +264,7 @@ async function updateLastActive() {
     } catch (e) { console.warn(e); }
 }
 
+// ---------- Time & Greeting ----------
 function updateTimeDisplay() {
     const now = new Date();
     document.getElementById('currentTime').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -265,13 +286,22 @@ window.logoutUser = async function() {
     } catch (error) { console.error('Logout error:', error); }
 };
 
+// ---------- 3D Space Particles ----------
 function initSpaceParticles() {
     const canvas = document.getElementById('spaceCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let w, h, particles = [], count = 150;
-    function resize() { w = window.innerWidth; h = window.innerHeight; canvas.width = w; canvas.height = h; }
-    window.addEventListener('resize', resize); resize();
+
+    function resize() {
+        w = window.innerWidth;
+        h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
     class Particle {
         constructor() {
             this.x = Math.random() * w;
@@ -283,23 +313,37 @@ function initSpaceParticles() {
         }
         update() {
             this.z -= this.speed;
-            if (this.z <= 0) { this.z = 1000; this.x = Math.random() * w; this.y = Math.random() * h; }
+            if (this.z <= 0) {
+                this.z = 1000;
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+            }
         }
         draw() {
             const scale = 800 / (this.z + 100);
             const x = (this.x - w / 2) * scale + w / 2;
             const y = (this.y - h / 2) * scale + h / 2;
             const s = this.size * scale;
-            ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x, y, s, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
         }
     }
+
     for (let i = 0; i < count; i++) particles.push(new Particle());
-    function animate() { ctx.clearRect(0, 0, w, h); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
+
+    function animate() {
+        ctx.clearRect(0, 0, w, h);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+    }
     animate();
 }
 
-function formatDate(ts) {
-    if (!ts) return 'N/A';
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
+// ---------- Helper ----------
+function formatDate(timestamp) {
+    if (!timestamp) return 'N/A';
+    const d = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
