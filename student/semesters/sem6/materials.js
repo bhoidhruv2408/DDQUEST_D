@@ -1,8 +1,8 @@
-// tests.js – Semester 5 Tests (waits for Firebase)
+// materials.js – Semester 6 Materials with strict filtering
 
-let auth, db, currentUser = null, studentData = null, allTests = [];
+let auth, db, currentUser = null, studentData = null, allMaterials = [];
 
-// Wait for Firebase to be initialized
+// Wait for Firebase to be initialized (if needed)
 function waitForFirebase() {
     return new Promise((resolve) => {
         const check = () => {
@@ -18,7 +18,14 @@ function waitForFirebase() {
     });
 }
 
-const testsGrid = document.getElementById('testsGrid');
+// DOM elements
+const materialsGrid = document.getElementById('materialsGrid');
+const viewModal = document.getElementById('viewModal');
+const viewFrame = document.getElementById('viewFrame');
+const viewModalTitle = document.getElementById('viewModalTitle');
+const viewDirectLink = document.getElementById('viewDirectLink');
+const iframeLoader = document.getElementById('iframeLoader');
+const viewReloadBtn = document.getElementById('viewReloadBtn');
 
 // ---------- Toast ----------
 function showToast(message, type = 'info', title = '', duration = 4000) {
@@ -27,23 +34,16 @@ function showToast(message, type = 'info', title = '', duration = 4000) {
     toast.className = `toast ${type}`;
     toast.innerHTML = `
         <div class="toast-icon"><i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i></div>
-        <div class="toast-content">
-            ${title ? `<div class="toast-title">${title}</div>` : ''}
-            <div class="toast-message">${message}</div>
-        </div>
+        <div class="toast-content">${title ? `<div class="toast-title">${title}</div>` : ''}<div class="toast-message">${message}</div></div>
         <button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
     `;
     container.appendChild(toast);
     setTimeout(() => toast.remove(), duration);
 }
 
-// ---------- Google Drive helpers (for possible future use) ----------
+// ---------- Google Drive helpers ----------
 function extractFileId(url) {
-    const patterns = [
-        /\/d\/([a-zA-Z0-9_-]+)/,
-        /id=([a-zA-Z0-9_-]+)/,
-        /\/file\/d\/([a-zA-Z0-9_-]+)/
-    ];
+    const patterns = [ /\/d\/([a-zA-Z0-9_-]+)/, /id=([a-zA-Z0-9_-]+)/, /\/file\/d\/([a-zA-Z0-9_-]+)/ ];
     for (let pattern of patterns) {
         const match = url.match(pattern);
         if (match) return match[1];
@@ -70,20 +70,17 @@ document.addEventListener('DOMContentLoaded', async function() {
 // ---------- Authentication ----------
 function checkAuthState() {
     auth.onAuthStateChanged(async (user) => {
-        if (!user) {
-            window.location.href = '../../../auth/login-student.html';
-            return;
-        }
+        if (!user) { window.location.href = '../../../auth/login-student.html'; return; }
         currentUser = user;
         console.log('✅ User authenticated:', user.uid);
         try {
             await loadStudentData(user.uid);
-            await loadTests();
+            await loadMaterials();
             await updateLastActive();
             startOnlineStatusUpdater();
         } catch (error) {
             console.error('❌ Error loading data:', error);
-            showToast('Failed to load tests.', 'error');
+            showToast('Failed to load materials.', 'error');
         }
     });
 }
@@ -101,117 +98,99 @@ async function loadStudentData(uid) {
     }
 }
 
-// ---------- Load Tests (semester 5) ----------
-async function loadTests() {
-    if (!studentData) {
-        console.log('⏳ Waiting for student data...');
-        return;
-    }
-
-    testsGrid.innerHTML = '<div class="loader"></div>';
-    console.log('📥 Fetching all tests (will filter for semester 5)...');
+async function loadMaterials() {
+    if (!studentData) { console.log('⏳ Waiting for student data...'); return; }
+    materialsGrid.innerHTML = '<div class="loader"></div>';
+    console.log('📥 Fetching all materials (will filter for semester 6)...');
 
     try {
-        const snapshot = await db.collection('tests')
-            .orderBy('createdAt', 'desc')
-            .get();
-
+        const snapshot = await db.collection('materials').orderBy('createdAt', 'desc').get();
         console.log(`📊 Raw query returned ${snapshot.size} documents.`);
-
         const all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const studentBranch = (studentData.branch || '').trim().toLowerCase();
         console.log(`🎓 Student branch: "${studentBranch}"`);
 
-        // Filter by semester 5 (loose equality)
-        const filteredBySemester = all.filter(t => {
-            const sem = t.semester;
-            const isSem5 = sem == 5;
-            if (!isSem5) {
-                console.log(`🚫 Excluding test "${t.title}" (semester: ${sem}) – not semester 5`);
-            }
-            return isSem5;
+        // Filter by semester 6 (handle number/string)
+        const filteredBySemester = all.filter(m => {
+            const sem = m.semester;
+            const isSem6 = sem == 6;
+            if (!isSem6) console.log(`🚫 Excluding "${m.title}" (semester: ${sem}) – not semester 6`);
+            return isSem6;
         });
+        console.log(`📌 After semester filter: ${filteredBySemester.length} materials remain.`);
 
-        console.log(`📌 After semester filter: ${filteredBySemester.length} tests remain.`);
-
-        // Filter by branch: include if test has no branch OR branch matches
-        const filtered = filteredBySemester.filter(t => {
-            const testBranch = (t.branch || '').trim().toLowerCase();
-            const include = !t.branch || testBranch === studentBranch;
-            if (!include) {
-                console.log(`🚫 Excluding test "${t.title}" (branch: "${testBranch}") – branch mismatch`);
-            }
+        // Filter by branch (no branch or matching)
+        const filtered = filteredBySemester.filter(m => {
+            const materialBranch = (m.branch || '').trim().toLowerCase();
+            const include = !m.branch || materialBranch === studentBranch;
+            if (!include) console.log(`🚫 Excluding "${m.title}" (branch: "${materialBranch}") – branch mismatch`);
             return include;
         });
 
-        console.log(`✅ After branch filter: ${filtered.length} tests remain.`);
-        allTests = filtered;
+        console.log(`✅ After branch filter: ${filtered.length} materials remain.`);
+        allMaterials = filtered;
 
         if (filtered.length === 0) {
-            testsGrid.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-clipboard-list"></i>
-                    <h3>No tests found</h3>
-                    <p>Check back later for semester 5 tests.</p>
-                </div>
-            `;
+            materialsGrid.innerHTML = `<div class="empty-state"><i class="fas fa-books"></i><h3>No materials found</h3><p>Check back later for semester 6 study materials.</p></div>`;
             return;
         }
-
-        renderTests(filtered);
-
+        renderMaterials(filtered);
     } catch (error) {
-        console.error('❌ Error loading tests:', error);
+        console.error('❌ Error loading materials:', error);
         if (error.code === 'failed-precondition') {
             const match = error.message.match(/https:[^\s]+/);
             const indexUrl = match ? match[0] : '#';
-            testsGrid.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-database"></i>
-                    <h3>Index required</h3>
-                    <p>Click <a href="${indexUrl}" target="_blank">here</a> to create the missing index, then refresh.</p>
-                </div>
-            `;
+            materialsGrid.innerHTML = `<div class="empty-state"><i class="fas fa-database"></i><h3>Index required</h3><p>Click <a href="${indexUrl}" target="_blank">here</a> to create the missing index, then refresh.</p></div>`;
         } else {
-            testsGrid.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Failed to load tests</h3>
-                    <p>${error.message}</p>
-                </div>
-            `;
+            materialsGrid.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Failed to load materials</h3><p>${error.message}</p></div>`;
         }
     }
 }
 
-function renderTests(tests) {
+function renderMaterials(materials) {
     let html = '';
-    tests.forEach(t => {
-        const date = t.createdAt ? formatDate(t.createdAt) : 'Recently';
-        const questions = t.questions ? t.questions.length : (t.questionCount || 0);
-        const duration = t.duration || 60;
-
+    materials.forEach(m => {
+        const date = m.createdAt ? formatDate(m.createdAt) : 'Recently';
+        const icon = 'file-alt';
+        const category = m.category || 'General';
+        const tags = m.tags ? m.tags.join(', ') : '';
         html += `
-            <div class="test-card" data-id="${t.id}">
-                <div class="test-icon">
-                    <i class="fas fa-clipboard-list"></i>
-                </div>
-                <h3 class="test-title">${t.title || 'Untitled Test'}</h3>
-                <p class="test-description">${t.description || 'No description available.'}</p>
-                <div class="test-meta">
-                    <span><i class="fas fa-clock"></i> ${duration} mins</span>
-                    <span><i class="fas fa-question-circle"></i> ${questions} questions</span>
-                </div>
-                <a href="../../tests/take-test.html?id=${t.id}" class="test-link">
-                    <i class="fas fa-play"></i> Take Test
-                </a>
+            <div class="material-card" data-id="${m.id}">
+                <div class="material-icon"><i class="fas fa-${icon}"></i></div>
+                <h3 class="material-title">${m.title || 'Untitled'}</h3>
+                <p class="material-description">${m.description || 'No description available.'}</p>
+                <div class="material-meta"><span><i class="fas fa-calendar-alt"></i> ${date}</span><span><i class="fas fa-tag"></i> ${category}</span></div>
+                ${tags ? `<div style="margin-bottom: 12px; color: var(--gray);"><i class="fas fa-hashtag"></i> ${tags}</div>` : ''}
+                <button class="material-link" onclick="viewMaterial('${m.id}')"><i class="fas fa-eye"></i> View / Download</button>
             </div>
         `;
     });
-    testsGrid.innerHTML = html;
+    materialsGrid.innerHTML = html;
 }
 
-// ---------- Online Status ----------
+function viewMaterial(id) {
+    const material = allMaterials.find(m => m.id === id);
+    if (!material || !material.link) { showToast('No link available', 'warning'); return; }
+    const embedUrl = material.link.includes('/preview') ? material.link : toPreviewLink(material.link);
+    iframeLoader.classList.remove('hidden');
+    viewFrame.classList.remove('loaded');
+    viewFrame.src = embedUrl;
+    viewModalTitle.innerHTML = `<i class="fas fa-eye"></i> ${material.title || 'View Material'}`;
+    viewDirectLink.href = material.link.includes('/preview') ? material.link.replace('/preview', '/view?usp=sharing') : material.link;
+    viewModal.style.display = 'flex';
+}
+window.viewMaterial = viewMaterial;
+
+viewFrame.addEventListener('load', () => { iframeLoader.classList.add('hidden'); viewFrame.classList.add('loaded'); });
+viewReloadBtn.addEventListener('click', () => {
+    iframeLoader.classList.remove('hidden'); viewFrame.classList.remove('loaded');
+    const temp = viewFrame.src; viewFrame.src = ''; setTimeout(() => { viewFrame.src = temp; }, 50);
+});
+function closeViewModal() { viewModal.style.display = 'none'; viewFrame.src = 'about:blank'; }
+window.closeViewModal = closeViewModal;
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && viewModal.style.display === 'flex') closeViewModal(); });
+
+// ---------- Online status ----------
 let lastActiveInterval;
 function startOnlineStatusUpdater() {
     if (lastActiveInterval) clearInterval(lastActiveInterval);
@@ -226,7 +205,7 @@ async function updateLastActive() {
     } catch (e) { console.warn(e); }
 }
 
-// ---------- Time & Greeting ----------
+// ---------- Time & greeting ----------
 function updateTimeDisplay() {
     const now = new Date();
     document.getElementById('currentTime').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -248,7 +227,7 @@ window.logoutUser = async function() {
     } catch (error) { console.error('Logout error:', error); }
 };
 
-// ---------- 3D Space Particles ----------
+// ---------- 3D space particles ----------
 function initSpaceParticles() {
     const canvas = document.getElementById('spaceCanvas');
     if (!canvas) return;

@@ -1,0 +1,342 @@
+/* Additional styles for Create DDCET Test page, extending admin.css */
+
+.create-test-container {
+    display: flex;
+    min-height: 100vh;
+    background: var(--light);
+}
+
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    transition: margin-left var(--transition-normal);
+}
+
+.content-area {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.widget {
+    background: var(--light);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--light-dark);
+    overflow: hidden;
+}
+
+.dark-mode .widget {
+    background: var(--dark-light);
+    border-color: var(--glass-border);
+}
+
+.widget-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--light-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dark-mode .widget-header {
+    border-bottom-color: var(--glass-border);
+}
+
+.widget-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dark-mode .widget-header h3 {
+    color: var(--light);
+}
+
+.widget-body {
+    padding: 24px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 8px;
+}
+
+.dark-mode .form-group label {
+    color: var(--light);
+}
+
+.required {
+    color: var(--danger);
+    margin-left: 4px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--light);
+    border: 2px solid var(--light-dark);
+    border-radius: var(--radius-md);
+    color: var(--dark);
+    font-size: 14px;
+    transition: all var(--transition-fast);
+}
+
+.dark-mode .form-control {
+    background: var(--dark-light);
+    border-color: var(--glass-border);
+    color: var(--light);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(199, 162, 75, 0.2);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.marking-scheme {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.badge.correct {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--success);
+    border: 1px solid var(--success);
+}
+
+.badge.wrong {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+}
+
+.badge.unattempt {
+    background: rgba(100, 116, 139, 0.2);
+    color: var(--gray);
+    border: 1px solid var(--gray);
+}
+
+.text-muted {
+    color: var(--gray);
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.upload-status {
+    margin: 16px 0;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    background: var(--light-dark);
+    color: var(--dark);
+    font-size: 14px;
+    display: none;
+}
+
+.dark-mode .upload-status {
+    background: var(--dark-lighter);
+    color: var(--light);
+}
+
+.upload-status.success {
+    display: block;
+    border-left: 4px solid var(--success);
+}
+
+.upload-status.error {
+    display: block;
+    border-left: 4px solid var(--danger);
+}
+
+.json-example {
+    background: var(--dark-lighter);
+    padding: 16px;
+    border-radius: var(--radius-md);
+    color: var(--light);
+    font-size: 12px;
+    overflow-x: auto;
+    margin-top: 16px;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+/* Questions List */
+.question-card {
+    background: var(--light-dark);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid transparent;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.dark-mode .question-card {
+    background: var(--dark-lighter);
+}
+
+.question-card:hover {
+    border-color: var(--primary);
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.question-number {
+    font-weight: 700;
+    color: var(--primary);
+    background: rgba(199, 162, 75, 0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+.question-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    color: var(--gray);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.btn-icon:hover {
+    background: var(--light);
+    color: var(--primary);
+}
+
+.dark-mode .btn-icon:hover {
+    background: var(--dark-light);
+}
+
+.question-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--dark);
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.dark-mode .question-text {
+    color: var(--light);
+}
+
+.options-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--light);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: var(--dark);
+}
+
+.dark-mode .option-item {
+    background: var(--dark-light);
+    color: var(--light);
+}
+
+.option-item.correct {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid var(--success);
+}
+
+.option-prefix {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.explanation {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: var(--info);
+    border-left: 3px solid var(--info);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--gray);
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+    }
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+    .options-list {
+        grid-template-columns: 1fr;
+    }
+}

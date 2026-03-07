@@ -1,4 +1,4 @@
-// tests.js – Semester 5 Tests (waits for Firebase)
+// tests.js – Semester 6 Tests (waits for Firebase)
 
 let auth, db, currentUser = null, studentData = null, allTests = [];
 
@@ -101,7 +101,7 @@ async function loadStudentData(uid) {
     }
 }
 
-// ---------- Load Tests (semester 5) ----------
+// ---------- Load Tests (semester 6) ----------
 async function loadTests() {
     if (!studentData) {
         console.log('⏳ Waiting for student data...');
@@ -109,7 +109,7 @@ async function loadTests() {
     }
 
     testsGrid.innerHTML = '<div class="loader"></div>';
-    console.log('📥 Fetching all tests (will filter for semester 5)...');
+    console.log('📥 Fetching all tests (will filter for semester 6)...');
 
     try {
         const snapshot = await db.collection('tests')
@@ -122,14 +122,14 @@ async function loadTests() {
         const studentBranch = (studentData.branch || '').trim().toLowerCase();
         console.log(`🎓 Student branch: "${studentBranch}"`);
 
-        // Filter by semester 5 (loose equality)
+        // Filter by semester 6 (loose equality)
         const filteredBySemester = all.filter(t => {
             const sem = t.semester;
-            const isSem5 = sem == 5;
-            if (!isSem5) {
-                console.log(`🚫 Excluding test "${t.title}" (semester: ${sem}) – not semester 5`);
+            const isSem6 = sem == 6;
+            if (!isSem6) {
+                console.log(`🚫 Excluding test "${t.title}" (semester: ${sem}) – not semester 6`);
             }
-            return isSem5;
+            return isSem6;
         });
 
         console.log(`📌 After semester filter: ${filteredBySemester.length} tests remain.`);
@@ -152,7 +152,7 @@ async function loadTests() {
                 <div class="empty-state">
                     <i class="fas fa-clipboard-list"></i>
                     <h3>No tests found</h3>
-                    <p>Check back later for semester 5 tests.</p>
+                    <p>Check back later for semester 6 tests.</p>
                 </div>
             `;
             return;

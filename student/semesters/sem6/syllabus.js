@@ -1,15 +1,14 @@
-// tests.js – Semester 5 Tests (waits for Firebase)
+// syllabus.js – Semester 6 Syllabus (adapted from Semester 5)
 
-let auth, db, currentUser = null, studentData = null, allTests = [];
-
-// Wait for Firebase to be initialized
+// Wait for Firebase to be ready
 function waitForFirebase() {
     return new Promise((resolve) => {
         const check = () => {
-            if (firebase.apps.length) {
-                auth = firebase.auth();
-                db = firebase.firestore();
-                resolve();
+            if (window.firebase && firebase.apps.length) {
+                resolve({
+                    auth: firebase.auth(),
+                    db: firebase.firestore()
+                });
             } else {
                 setTimeout(check, 50);
             }
@@ -18,7 +17,15 @@ function waitForFirebase() {
     });
 }
 
-const testsGrid = document.getElementById('testsGrid');
+let auth, db, currentUser = null, studentData = null, syllabusItems = [];
+
+const syllabusGrid = document.getElementById('syllabusGrid');
+const viewModal = document.getElementById('viewModal');
+const viewFrame = document.getElementById('viewFrame');
+const viewModalTitle = document.getElementById('viewModalTitle');
+const viewDirectLink = document.getElementById('viewDirectLink');
+const iframeLoader = document.getElementById('iframeLoader');
+const viewReloadBtn = document.getElementById('viewReloadBtn');
 
 // ---------- Toast ----------
 function showToast(message, type = 'info', title = '', duration = 4000) {
@@ -37,7 +44,7 @@ function showToast(message, type = 'info', title = '', duration = 4000) {
     setTimeout(() => toast.remove(), duration);
 }
 
-// ---------- Google Drive helpers (for possible future use) ----------
+// ---------- Google Drive helpers ----------
 function extractFileId(url) {
     const patterns = [
         /\/d\/([a-zA-Z0-9_-]+)/,
@@ -50,6 +57,7 @@ function extractFileId(url) {
     }
     return null;
 }
+
 function toPreviewLink(url) {
     if (!url) return '';
     const fileId = extractFileId(url);
@@ -58,12 +66,16 @@ function toPreviewLink(url) {
 
 // ---------- DOM Ready ----------
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log("🚀 Syllabus page loading...");
     initSpaceParticles();
     updateTimeDisplay();
     setInterval(updateTimeDisplay, 1000);
     updateGreeting();
 
-    await waitForFirebase();          // Wait for Firebase ready
+    const fb = await waitForFirebase();
+    auth = fb.auth;
+    db = fb.db;
+    console.log("✅ Firebase ready");
     checkAuthState();
 });
 
@@ -78,12 +90,12 @@ function checkAuthState() {
         console.log('✅ User authenticated:', user.uid);
         try {
             await loadStudentData(user.uid);
-            await loadTests();
+            await loadSyllabus();
             await updateLastActive();
             startOnlineStatusUpdater();
         } catch (error) {
             console.error('❌ Error loading data:', error);
-            showToast('Failed to load tests.', 'error');
+            showToast('Failed to load syllabus.', 'error');
         }
     });
 }
@@ -101,71 +113,71 @@ async function loadStudentData(uid) {
     }
 }
 
-// ---------- Load Tests (semester 5) ----------
-async function loadTests() {
+// ---------- Load Syllabus (semester 6) ----------
+async function loadSyllabus() {
     if (!studentData) {
         console.log('⏳ Waiting for student data...');
+        setTimeout(loadSyllabus, 200);
         return;
     }
 
-    testsGrid.innerHTML = '<div class="loader"></div>';
-    console.log('📥 Fetching all tests (will filter for semester 5)...');
+    syllabusGrid.innerHTML = '<div class="loader"></div>';
+    console.log('📥 Fetching syllabus materials for semester 6...');
 
     try {
-        const snapshot = await db.collection('tests')
+        // Query: category == 'Syllabus', order by createdAt
+        const snapshot = await db.collection('materials')
+            .where('category', '==', 'Syllabus')
             .orderBy('createdAt', 'desc')
             .get();
 
-        console.log(`📊 Raw query returned ${snapshot.size} documents.`);
+        console.log(`📊 Raw query returned ${snapshot.size} syllabus documents.`);
+
+        if (snapshot.empty) {
+            syllabusGrid.innerHTML = `<div class="empty-state"><i class="fas fa-file-alt"></i><h3>No syllabus found</h3><p>No syllabus documents exist in the database.</p></div>`;
+            return;
+        }
 
         const all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const studentBranch = (studentData.branch || '').trim().toLowerCase();
         console.log(`🎓 Student branch: "${studentBranch}"`);
 
-        // Filter by semester 5 (loose equality)
-        const filteredBySemester = all.filter(t => {
-            const sem = t.semester;
-            const isSem5 = sem == 5;
-            if (!isSem5) {
-                console.log(`🚫 Excluding test "${t.title}" (semester: ${sem}) – not semester 5`);
-            }
-            return isSem5;
+        // Filter by semester 6
+        const filteredBySemester = all.filter(m => {
+            const sem = m.semester;
+            return sem == 6;
         });
 
-        console.log(`📌 After semester filter: ${filteredBySemester.length} tests remain.`);
+        console.log(`📌 After semester 6 filter: ${filteredBySemester.length} syllabus items remain.`);
 
-        // Filter by branch: include if test has no branch OR branch matches
-        const filtered = filteredBySemester.filter(t => {
-            const testBranch = (t.branch || '').trim().toLowerCase();
-            const include = !t.branch || testBranch === studentBranch;
-            if (!include) {
-                console.log(`🚫 Excluding test "${t.title}" (branch: "${testBranch}") – branch mismatch`);
-            }
-            return include;
+        // Filter by branch
+        const filtered = filteredBySemester.filter(m => {
+            const materialBranch = (m.branch || '').trim().toLowerCase();
+            return !m.branch || materialBranch === studentBranch;
         });
 
-        console.log(`✅ After branch filter: ${filtered.length} tests remain.`);
-        allTests = filtered;
+        console.log(`✅ After branch filter: ${filtered.length} syllabus items remain.`);
+        syllabusItems = filtered;
 
         if (filtered.length === 0) {
-            testsGrid.innerHTML = `
+            syllabusGrid.innerHTML = `
                 <div class="empty-state">
-                    <i class="fas fa-clipboard-list"></i>
-                    <h3>No tests found</h3>
-                    <p>Check back later for semester 5 tests.</p>
+                    <i class="fas fa-file-alt"></i>
+                    <h3>No syllabus for semester 6</h3>
+                    <p>Check back later or contact your admin.</p>
                 </div>
             `;
             return;
         }
 
-        renderTests(filtered);
+        renderSyllabus(filtered);
 
     } catch (error) {
-        console.error('❌ Error loading tests:', error);
+        console.error('❌ Error loading syllabus:', error);
         if (error.code === 'failed-precondition') {
-            const match = error.message.match(/https:[^\s]+/);
+            const match = error.message.match(/https:\/\/console\.firebase\.google\.com[^\s]+/);
             const indexUrl = match ? match[0] : '#';
-            testsGrid.innerHTML = `
+            syllabusGrid.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-database"></i>
                     <h3>Index required</h3>
@@ -173,43 +185,72 @@ async function loadTests() {
                 </div>
             `;
         } else {
-            testsGrid.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Failed to load tests</h3>
-                    <p>${error.message}</p>
-                </div>
-            `;
+            syllabusGrid.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Failed to load syllabus</h3><p>${error.message}</p></div>`;
         }
     }
 }
 
-function renderTests(tests) {
+function renderSyllabus(items) {
     let html = '';
-    tests.forEach(t => {
-        const date = t.createdAt ? formatDate(t.createdAt) : 'Recently';
-        const questions = t.questions ? t.questions.length : (t.questionCount || 0);
-        const duration = t.duration || 60;
-
+    items.forEach(item => {
+        const date = item.createdAt ? formatDate(item.createdAt) : 'Recently';
         html += `
-            <div class="test-card" data-id="${t.id}">
-                <div class="test-icon">
-                    <i class="fas fa-clipboard-list"></i>
+            <div class="syllabus-card" data-id="${item.id}">
+                <div class="syllabus-icon"><i class="fas fa-file-pdf"></i></div>
+                <h3 class="syllabus-title">${item.title || 'Syllabus'}</h3>
+                <p class="syllabus-description">${item.description || 'Semester 6 syllabus document.'}</p>
+                <div class="syllabus-meta">
+                    <span><i class="fas fa-calendar-alt"></i> ${date}</span>
+                    <span><i class="fas fa-tag"></i> ${item.category || 'Syllabus'}</span>
                 </div>
-                <h3 class="test-title">${t.title || 'Untitled Test'}</h3>
-                <p class="test-description">${t.description || 'No description available.'}</p>
-                <div class="test-meta">
-                    <span><i class="fas fa-clock"></i> ${duration} mins</span>
-                    <span><i class="fas fa-question-circle"></i> ${questions} questions</span>
-                </div>
-                <a href="../../tests/take-test.html?id=${t.id}" class="test-link">
-                    <i class="fas fa-play"></i> Take Test
-                </a>
+                <button class="syllabus-link" onclick="viewSyllabus('${item.id}')">
+                    <i class="fas fa-eye"></i> View Syllabus
+                </button>
             </div>
         `;
     });
-    testsGrid.innerHTML = html;
+    syllabusGrid.innerHTML = html;
 }
+
+// ---------- View Modal ----------
+function viewSyllabus(id) {
+    const item = syllabusItems.find(i => i.id === id);
+    if (!item || !item.link) {
+        showToast('No link available', 'warning');
+        return;
+    }
+    const embedUrl = item.link.includes('/preview') ? item.link : toPreviewLink(item.link);
+    iframeLoader.classList.remove('hidden');
+    viewFrame.classList.remove('loaded');
+    viewFrame.src = embedUrl;
+    viewModalTitle.innerHTML = `<i class="fas fa-eye"></i> ${item.title || 'Syllabus'}`;
+    viewDirectLink.href = item.link.includes('/preview') ? item.link.replace('/preview', '/view?usp=sharing') : item.link;
+    viewModal.style.display = 'flex';
+}
+window.viewSyllabus = viewSyllabus;
+
+viewFrame.addEventListener('load', () => {
+    iframeLoader.classList.add('hidden');
+    viewFrame.classList.add('loaded');
+});
+
+viewReloadBtn.addEventListener('click', () => {
+    iframeLoader.classList.remove('hidden');
+    viewFrame.classList.remove('loaded');
+    const temp = viewFrame.src;
+    viewFrame.src = '';
+    setTimeout(() => { viewFrame.src = temp; }, 50);
+});
+
+function closeViewModal() {
+    viewModal.style.display = 'none';
+    viewFrame.src = 'about:blank';
+}
+window.closeViewModal = closeViewModal;
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && viewModal.style.display === 'flex') closeViewModal();
+});
 
 // ---------- Online Status ----------
 let lastActiveInterval;
@@ -250,7 +291,7 @@ window.logoutUser = async function() {
 
 // ---------- 3D Space Particles ----------
 function initSpaceParticles() {
-    const canvas = document.getElementById('spaceCanvas');
+    const canvas = document.getElementById('spaceCanvas'); // matches HTML canvas id
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let w, h, particles = [], count = 150;

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDQuest · Create DDCET Test</title>
+    
+    <!-- Core Styles (reuse dashboard theme) -->
+    <link rel="stylesheet" href="../admin.css">
+    <link rel="stylesheet" href="create-ddcet-test.css">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK (same as dashboard) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+</head>
+<body class="dark-mode">
+    <!-- Spark Canvas (optional) -->
+    <canvas id="sparkCanvas"></canvas>
+
+    <!-- Toast Container (reused) -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Main Container -->
+    <div class="create-test-container">
+        <!-- Sidebar (same as dashboard, but simplified for this page) -->
+        <div class="admin-sidebar glass-premium" id="adminSidebar">
+            <!-- Sidebar content - you can reuse from dashboard or include a simplified version -->
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo">DQ</div>
+                    <h2>DDQuest<span class="admin-badge">Pro</span></h2>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar" id="adminAvatar">
+                    <i class="fas fa-user-shield"></i>
+                    <div class="user-status online"></div>
+                </div>
+                <div class="user-info">
+                    <h4 id="adminName">Loading...</h4>
+                    <span class="user-role" id="adminRole"><i class="fas fa-shield-alt"></i> Administrator</span>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-section">
+                    <h3 class="section-title">DDCET Management</h3>
+                    <a href="create-ddcet-test.html" class="menu-item active">
+                        <i class="fas fa-pen-alt"></i> Create DDCET Test
+                    </a>
+                    <a href="ddcet-analytics.html" class="menu-item">
+                        <i class="fas fa-chart-bar"></i> DDCET Analytics
+                    </a>
+                    <a href="ddcet-materials.html" class="menu-item">
+                        <i class="fas fa-book"></i> DDCET Materials
+                    </a>
+                    <a href="schedule-weekly.html" class="menu-item">
+                        <i class="fas fa-calendar-alt"></i> Schedule Weekly
+                    </a>
+                </div>
+                <div class="menu-section">
+                    <a href="../index.html" class="menu-item">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent">
+            <!-- Top Bar -->
+            <div class="top-bar glass-premium">
+                <div class="breadcrumb">
+                    <h1><i class="fas fa-pen-alt"></i> Create DDCET Test</h1>
+                    <nav>
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-right"></i>
+                        <span>DDCET Management</span>
+                        <i class="fas fa-chevron-right"></i>
+                        <span class="current">Create Test</span>
+                    </nav>
+                </div>
+                <div class="top-bar-actions">
+                    <button class="btn-quantum" onclick="publishTest()" id="publishBtn">
+                        <i class="fas fa-cloud-upload-alt"></i> Publish Test
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Test Details Form -->
+                <div class="widget glass-premium">
+                    <div class="widget-header">
+                        <h3><i class="fas fa-info-circle"></i> Test Details</h3>
+                    </div>
+                    <div class="widget-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Test Title <span class="required">*</span></label>
+                                <input type="text" id="testTitle" placeholder="e.g., DDCET Full Mock Test 1" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Duration (minutes)</label>
+                                <input type="number" id="testDuration" value="120" min="1" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description / Instructions</label>
+                            <textarea id="testDescription" rows="3" placeholder="Write any instructions for students..." class="form-control"></textarea>
+                        </div>
+                        <div class="marking-scheme">
+                            <span class="badge correct">+2 Correct</span>
+                            <span class="badge wrong">-0.5 Wrong</span>
+                            <span class="badge unattempt">0 Unattempted</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload JSON -->
+                <div class="widget glass-premium">
+                    <div class="widget-header">
+                        <h3><i class="fas fa-file-upload"></i> Upload Questions (JSON)</h3>
+                        <button class="btn-refresh" onclick="document.getElementById('jsonFile').click()">
+                            <i class="fas fa-upload"></i> Choose File
+                        </button>
+                    </div>
+                    <div class="widget-body">
+                        <p class="text-muted">Upload a JSON file with an array of questions. Each question should have: <code>question</code>, <code>options</code> (array of 4 strings), <code>correct</code> (0-based index), <code>explanation</code> (optional).</p>
+                        <input type="file" id="jsonFile" accept=".json" style="display: none;" onchange="handleJSONUpload(event)">
+                        <div id="uploadStatus" class="upload-status"></div>
+                        <pre class="json-example">
+{
+  "questions": [
+    {
+      "question": "What is the capital of France?",
+      "options": ["Berlin", "Madrid", "Paris", "Rome"],
+      "correct": 2,
+      "explanation": "Paris is the capital of France."
+    }
+  ]
+}
+                        </pre>
+                    </div>
+                </div>
+
+                <!-- Manual Question Entry -->
+                <div class="widget glass-premium">
+                    <div class="widget-header">
+                        <h3><i class="fas fa-plus-circle"></i> Add Question Manually</h3>
+                    </div>
+                    <div class="widget-body">
+                        <div class="form-group">
+                            <label>Question</label>
+                            <textarea id="manualQuestion" rows="2" class="form-control" placeholder="Enter question text..."></textarea>
+                        </div>
+                        <div class="options-grid">
+                            <div class="form-group">
+                                <label>Option A</label>
+                                <input type="text" id="optA" class="form-control" placeholder="Option A">
+                            </div>
+                            <div class="form-group">
+                                <label>Option B</label>
+                                <input type="text" id="optB" class="form-control" placeholder="Option B">
+                            </div>
+                            <div class="form-group">
+                                <label>Option C</label>
+                                <input type="text" id="optC" class="form-control" placeholder="Option C">
+                            </div>
+                            <div class="form-group">
+                                <label>Option D</label>
+                                <input type="text" id="optD" class="form-control" placeholder="Option D">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Correct Option</label>
+                                <select id="correctOption" class="form-control">
+                                    <option value="0">A</option>
+                                    <option value="1">B</option>
+                                    <option value="2">C</option>
+                                    <option value="3">D</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Explanation (optional)</label>
+                                <input type="text" id="explanation" class="form-control" placeholder="Why this answer?">
+                            </div>
+                        </div>
+                        <button class="btn-quantum" onclick="addManualQuestion()">
+                            <i class="fas fa-plus"></i> Add to List
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Questions List -->
+                <div class="widget glass-premium">
+                    <div class="widget-header">
+                        <h3><i class="fas fa-list"></i> Questions (<span id="questionCount">0</span>)</h3>
+                        <button class="btn-refresh" onclick="clearAllQuestions()" title="Clear all questions">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                    <div class="widget-body" id="questionsContainer">
+                        <div class="empty-state" id="emptyQuestions">
+                            <i class="fas fa-question-circle"></i>
+                            <p>No questions added yet. Upload a JSON file or add manually.</p>
+                        </div>
+                        <!-- Questions will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="create-ddcet-test.js"></script>
+    <!-- Spark Canvas (same as dashboard) -->
+    <script>
+        (function() {
+            const canvas = document.getElementById('sparkCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let width, height, particles = [], shootingStars = [];
+            const isMobile = window.innerWidth <= 768;
+            const pCount = isMobile ? 35 : 90;
+            function initCanvas() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                particles = [];
+                for (let i = 0; i < pCount; i++) {
+                    particles.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        size: Math.random() * 3.5 + 0.8,
+                        speedX: (Math.random() - 0.5) * 0.2,
+                        speedY: (Math.random() - 0.5) * 0.1,
+                        color: `rgba(199, 162, 75, ${Math.random() * 0.5 + 0.2})`,
+                        glow: Math.random() * 0.8 + 0.2
+                    });
+                }
+            }
+            function createShootingStar() {
+                shootingStars.push({
+                    x: Math.random() * width * 0.9,
+                    y: 0,
+                    length: Math.random() * 100 + 60,
+                    speed: Math.random() * 8 + 5,
+                    angle: Math.random() * 0.5 + 0.2,
+                    opacity: 0.9,
+                    width: Math.random() * 3 + 1.5
+                });
+            }
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+                for (let p of particles) {
+                    p.x += p.speedX; p.y += p.speedY;
+                    if (p.x < 0) p.x = width; if (p.x > width) p.x = 0;
+                    if (p.y < 0) p.y = height; if (p.y > height) p.y = 0;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.shadowColor = '#c7a24b';
+                    ctx.shadowBlur = 8 * p.glow;
+                    ctx.fill();
+                }
+                ctx.shadowBlur = 0;
+                shootingStars = shootingStars.filter(star => {
+                    ctx.beginPath();
+                    ctx.moveTo(star.x, star.y);
+                    const endX = star.x - star.length * Math.cos(star.angle);
+                    const endY = star.y + star.length * Math.sin(star.angle);
+                    ctx.lineTo(endX, endY);
+                    ctx.strokeStyle = `rgba(255, 235, 190, ${star.opacity})`;
+                    ctx.lineWidth = star.width;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#ffd966';
+                    ctx.stroke();
+                    star.x += star.speed; star.y += star.speed * 0.4;
+                    star.opacity -= 0.004;
+                    return star.opacity > 0 && star.x < width + 200;
+                });
+                ctx.shadowBlur = 0;
+                requestAnimationFrame(draw);
+            }
+            window.addEventListener('resize', initCanvas);
+            initCanvas();
+            draw();
+            setInterval(createShootingStar, isMobile ? 3500 : 1800);
+        })();
+    </script>
+</body>
+</html>

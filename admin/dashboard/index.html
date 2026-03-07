@@ -2,14 +2,1441 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DDQuest - Professional Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>DDQuest · Admin Dashboard (Gold Edition)</title>
     
-    <!-- Core Styles -->
-    <link rel="stylesheet" href="../../assets/css/main.css">
-    <link rel="stylesheet" href="../admin.css">
-    
-    <!-- Premium UI Libraries -->
+    <!-- Core Styles (inline CSS below) -->
+    <style>
+        /* ====================================
+           PREMIUM GOLD DASHBOARD THEME
+           All animations & responsive styles
+        ==================================== */
+        :root {
+            /* Primary Gold Palette */
+            --primary: #c7a24b;
+            --primary-dark: #9e7c35;
+            --primary-light: #e6c779;
+            --accent: #ffd966;
+            --accent-dark: #b88b2e;
+
+            /* Status Colors */
+            --success: #10b981;
+            --success-dark: #059669;
+            --warning: #f59e0b;
+            --warning-dark: #d97706;
+            --danger: #ef4444;
+            --danger-dark: #dc2626;
+            --info: #3b82f6;
+            --info-dark: #2563eb;
+
+            /* Neutral Colors (dark theme) */
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --dark-lighter: #334155;
+            --light: #f8fafc;
+            --light-dark: #e2e8f0;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --gray-dark: #475569;
+
+            /* Glass & Shadows */
+            --glass-bg: rgba(0, 0, 0, 0.3);
+            --glass-border: rgba(199, 162, 75, 0.25);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+            /* Typography */
+            --font-primary: 'Inter', sans-serif;
+            --font-heading: 'Manrope', var(--font-primary);
+
+            /* Spacing */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-2xl: 24px;
+
+            /* Transitions */
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+            /* Z-index */
+            --z-sidebar: 100;
+            --z-topbar: 200;
+            --z-modal: 1000;
+            --z-toast: 10000;
+        }
+
+        .dark-mode {
+            --dark: #f8fafc;
+            --dark-light: #e2e8f0;
+            --dark-lighter: #cbd5e1;
+            --light: #0f172a;
+            --light-dark: #1e293b;
+            --glass-bg: rgba(15, 23, 42, 0.7);
+            --glass-border: rgba(199, 162, 75, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--light);
+            color: var(--dark);
+            transition: background-color var(--transition-normal);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ===== SPARK CANVAS ===== */
+        #sparkCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .dashboard-container {
+            display: none;
+            min-height: 100vh;
+            background: var(--light);
+        }
+
+        /* ===== GLASS MORPHISM PREMIUM ===== */
+        .glass-premium {
+            background: linear-gradient(135deg, 
+                rgba(0, 0, 0, 0.3) 0%,
+                rgba(0, 0, 0, 0.1) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+                        inset 0 0 32px rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-premium::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(199, 162, 75, 0.1),
+                transparent);
+            transition: 0.5s;
+        }
+
+        .glass-premium:hover::before {
+            left: 100%;
+        }
+
+        /* ===== HOLOGRAPHIC EFFECT ===== */
+        .holographic {
+            background: linear-gradient(45deg,
+                rgba(199, 162, 75, 0.1) 0%,
+                rgba(255, 217, 102, 0.1) 25%,
+                rgba(158, 124, 53, 0.1) 50%,
+                rgba(199, 162, 75, 0.1) 75%,
+                rgba(255, 217, 102, 0.1) 100%);
+            background-size: 400% 400%;
+            animation: holographic-shift 8s ease infinite;
+        }
+
+        @keyframes holographic-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* ===== QUANTUM GRID BACKGROUND ===== */
+        .quantum-grid {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quantum-grid::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(199, 162, 75, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(199, 162, 75, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            animation: grid-pulse 20s linear infinite;
+        }
+
+        @keyframes grid-pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+            100% { opacity: 0.3; }
+        }
+
+        /* ===== DATA STREAM EFFECT ===== */
+        .data-stream {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .data-stream::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg,
+                transparent,
+                var(--primary-light),
+                var(--primary),
+                var(--primary-dark),
+                transparent);
+            animation: data-flow 3s linear infinite;
+        }
+
+        @keyframes data-flow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* ===== PREMIUM STAT CARDS ===== */
+        .stat-card-premium {
+            background: linear-gradient(135deg,
+                rgba(199, 162, 75, 0.1) 0%,
+                rgba(158, 124, 53, 0.1) 100%);
+            border-radius: 20px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(199, 162, 75, 0.2);
+        }
+
+        .stat-card-premium::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light), var(--primary-dark));
+        }
+
+        .stat-card-premium:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card-premium .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #0a0e1a;
+            margin-bottom: 20px;
+        }
+
+        /* ===== PROGRESS BARS (animated) ===== */
+        .progress-premium {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-premium {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                var(--primary) 0%,
+                var(--primary-light) 50%,
+                var(--primary-dark) 100%);
+            background-size: 200% 100%;
+            animation: progress-shimmer 2s linear infinite;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar-premium::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent);
+            animation: progress-shine 2s ease-in-out infinite;
+        }
+
+        @keyframes progress-shimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes progress-shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* ===== ENHANCED TABLES ===== */
+        .table-premium {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(199, 162, 75, 0.2);
+        }
+
+        .table-premium thead {
+            background: linear-gradient(90deg,
+                rgba(199, 162, 75, 0.2),
+                rgba(158, 124, 53, 0.2));
+        }
+
+        .table-premium th {
+            padding: 20px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(199, 162, 75, 0.2);
+        }
+
+        .table-premium td {
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(199, 162, 75, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .table-premium tbody tr:hover td {
+            background: rgba(199, 162, 75, 0.1);
+            transform: translateX(5px);
+        }
+
+        /* ===== PREMIUM BUTTONS ===== */
+        .btn-quantum {
+            background: linear-gradient(135deg, 
+                var(--primary) 0%,
+                var(--primary-dark) 50%,
+                var(--primary) 100%);
+            background-size: 200% 200%;
+            border: none;
+            color: #0a0e1a;
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-quantum::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent);
+            transition: 0.5s;
+        }
+
+        .btn-quantum:hover::before {
+            left: 100%;
+        }
+
+        .btn-quantum:hover {
+            background-position: 100% 100%;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(199, 162, 75, 0.4);
+        }
+
+        /* ===== CUSTOM SCROLLBAR PREMIUM ===== */
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg,
+                var(--primary),
+                var(--primary-light),
+                var(--primary-dark));
+            border-radius: 10px;
+            border: 3px solid rgba(15, 23, 42, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg,
+                var(--primary-dark),
+                var(--primary),
+                var(--accent));
+        }
+
+        /* ===== LOADING OVERLAY ===== */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+        }
+
+        .loading-content {
+            text-align: center;
+            padding: 40px;
+            border-radius: var(--radius-xl);
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .loading-logo {
+            font-size: 48px;
+            margin-bottom: 24px;
+            color: var(--primary-light);
+        }
+
+        .loading-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: var(--font-heading);
+        }
+
+        .loading-subtitle {
+            font-size: 16px;
+            color: var(--gray-light);
+            margin-bottom: 32px;
+            max-width: 400px;
+        }
+
+        .loading-progress {
+            width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .loading-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== TOAST NOTIFICATIONS ===== */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: var(--z-toast);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 400px;
+        }
+
+        .toast {
+            background: var(--light);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transform: translateX(120%);
+            animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+            border-left: 4px solid var(--primary);
+            max-width: 400px;
+            border: 1px solid var(--light-dark);
+        }
+
+        .dark-mode .toast {
+            background: var(--dark-light);
+            border: 1px solid var(--glass-border);
+        }
+
+        .toast-success { border-left-color: var(--success); }
+        .toast-error { border-left-color: var(--danger); }
+        .toast-warning { border-left-color: var(--warning); }
+        .toast-info { border-left-color: var(--info); }
+
+        @keyframes slideIn {
+            to { transform: translateX(0); }
+        }
+
+        .toast-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #0a0e1a;
+            flex-shrink: 0;
+        }
+
+        .toast-success .toast-icon { background: var(--success); color: white; }
+        .toast-error .toast-icon { background: var(--danger); color: white; }
+        .toast-warning .toast-icon { background: var(--warning); color: white; }
+        .toast-info .toast-icon { background: var(--info); color: white; }
+
+        /* ===== SIDEBAR STYLES ===== */
+        .admin-sidebar {
+            width: 280px;
+            background: var(--light);
+            border-right: 1px solid var(--light-dark);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: var(--z-sidebar);
+            display: flex;
+            flex-direction: column;
+            transition: transform var(--transition-normal);
+        }
+
+        .dark-mode .admin-sidebar {
+            background: var(--dark-light);
+            border-right: 1px solid var(--glass-border);
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--light-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dark-mode .sidebar-header {
+            border-bottom-color: var(--glass-border);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0a0e1a;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .logo-container h2 {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        .dark-mode .logo-container h2 {
+            color: var(--light);
+        }
+
+        .admin-badge {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            color: #0a0e1a;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-toggle {
+            background: transparent;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            color: var(--gray);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--light-dark);
+            color: var(--dark);
+        }
+
+        .dark-mode .sidebar-toggle:hover {
+            background: var(--dark-lighter);
+            color: var(--light);
+        }
+
+        .sidebar-user {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid var(--light-dark);
+        }
+
+        .dark-mode .sidebar-user {
+            border-bottom-color: var(--glass-border);
+        }
+
+        .user-avatar {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0a0e1a;
+            font-size: 24px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .user-status {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--success);
+            border: 2px solid var(--light);
+        }
+
+        .dark-mode .user-status {
+            border-color: var(--dark-light);
+        }
+
+        .user-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .dark-mode .user-info h4 {
+            color: var(--light);
+        }
+
+        .user-role {
+            font-size: 13px;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dark-mode .user-role {
+            color: var(--gray-light);
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .menu-section {
+            margin-bottom: 32px;
+        }
+
+        .menu-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray);
+            margin-bottom: 16px;
+            padding-left: 12px;
+        }
+
+        .dark-mode .section-title {
+            color: var(--gray-light);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            color: var(--gray-dark);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            margin-bottom: 4px;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+
+        .menu-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .menu-item i {
+            width: 20px;
+            font-size: 16px;
+            color: var(--gray);
+        }
+
+        .menu-item:hover {
+            background: var(--light-dark);
+            color: var(--dark);
+        }
+
+        .menu-item:hover i {
+            color: var(--primary);
+        }
+
+        .dark-mode .menu-item:hover {
+            background: var(--dark-lighter);
+            color: var(--light);
+        }
+
+        .menu-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #0a0e1a;
+            border: 1px solid var(--primary);
+        }
+
+        .menu-item.active i {
+            color: #0a0e1a;
+        }
+
+        .menu-item.logout-btn {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .menu-item.logout-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger-dark);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--light-dark);
+        }
+
+        .dark-mode .sidebar-footer {
+            border-top-color: var(--glass-border);
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .system-status span {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .dark-mode .system-status span {
+            color: var(--gray-light);
+        }
+
+        .version {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .dark-mode .version {
+            color: var(--gray-light);
+        }
+
+        /* ===== TOP BAR ===== */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            transition: margin-left var(--transition-normal);
+        }
+
+        .top-bar {
+            background: var(--light);
+            border-bottom: 1px solid var(--light-dark);
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: var(--z-topbar);
+        }
+
+        .dark-mode .top-bar {
+            background: var(--dark-light);
+            border-bottom-color: var(--glass-border);
+        }
+
+        .breadcrumb {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .breadcrumb h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--dark);
+            font-family: var(--font-heading);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dark-mode .breadcrumb h1 {
+            color: var(--light);
+        }
+
+        .breadcrumb h1 i {
+            color: var(--primary);
+        }
+
+        .breadcrumb nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .dark-mode .breadcrumb nav {
+            color: var(--gray-light);
+        }
+
+        .breadcrumb .current {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-quick-action {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #0a0e1a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all var(--transition-normal);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-quick-action:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* ===== DASHBOARD CONTENT ===== */
+        .dashboard-content {
+            padding: 32px;
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--light);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            border: 1px solid var(--light-dark);
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark-mode .stat-card {
+            background: var(--dark-light);
+            border-color: var(--glass-border);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .stat-card.stat-success::before {
+            background: linear-gradient(90deg, var(--success), var(--success-dark));
+        }
+
+        .stat-card.stat-warning::before {
+            background: linear-gradient(90deg, var(--warning), var(--warning-dark));
+        }
+
+        .stat-card.stat-danger::before {
+            background: linear-gradient(90deg, var(--danger), var(--danger-dark));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            background: rgba(199, 162, 75, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .stat-card.stat-success .stat-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .stat-card.stat-warning .stat-icon {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .stat-card.stat-danger .stat-icon {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .stat-trend.negative {
+            color: var(--danger);
+        }
+
+        .stat-content h3 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 8px;
+            font-family: var(--font-heading);
+        }
+
+        .dark-mode .stat-content h3 {
+            color: var(--light);
+        }
+
+        .stat-content p {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 16px;
+        }
+
+        .dark-mode .stat-content p {
+            color: var(--gray-light);
+        }
+
+        .stat-progress {
+            width: 100%;
+            height: 6px;
+            background: var(--light-dark);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .dark-mode .stat-progress {
+            background: var(--dark-lighter);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-widget {
+            background: var(--light);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--light-dark);
+            overflow: hidden;
+        }
+
+        .dark-mode .dashboard-widget {
+            background: var(--dark-light);
+            border-color: var(--glass-border);
+        }
+
+        .widget-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--light-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dark-mode .widget-header {
+            border-bottom-color: var(--glass-border);
+        }
+
+        .widget-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dark-mode .widget-header h3 {
+            color: var(--light);
+        }
+
+        .btn-refresh {
+            background: transparent;
+            border: 1px solid var(--light-dark);
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            color: var(--gray);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-refresh:hover {
+            background: var(--light-dark);
+            color: var(--dark);
+            border-color: var(--gray);
+        }
+
+        .dark-mode .btn-refresh:hover {
+            background: var(--dark-lighter);
+            color: var(--light);
+        }
+
+        .view-all {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+
+        .view-all:hover {
+            color: var(--primary-dark);
+        }
+
+        /* Activity List */
+        .activity-list {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            background: var(--light-dark);
+            transition: all var(--transition-fast);
+        }
+
+        .dark-mode .activity-item {
+            background: var(--dark-lighter);
+        }
+
+        .activity-item:hover {
+            background: rgba(199, 162, 75, 0.1);
+            border-color: rgba(199, 162, 75, 0.2);
+        }
+
+        .activity-item i {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-md);
+            background: var(--primary);
+            color: #0a0e1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .activity-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .activity-text {
+            font-size: 14px;
+            color: var(--dark);
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .dark-mode .activity-text {
+            color: var(--light);
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .dark-mode .activity-time {
+            color: var(--gray-light);
+        }
+
+        /* Action Grid */
+        .action-grid {
+            padding: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+        }
+
+        .action-item {
+            background: var(--light);
+            border: 2px solid var(--light-dark);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+
+        .dark-mode .action-item {
+            background: var(--dark-light);
+            border-color: var(--glass-border);
+        }
+
+        .action-item:hover {
+            border-color: var(--primary);
+            background: rgba(199, 162, 75, 0.05);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .dark-mode .action-item:hover {
+            background: rgba(199, 162, 75, 0.1);
+        }
+
+        .action-item i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .action-item span {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+            text-align: center;
+        }
+
+        .dark-mode .action-item span {
+            color: var(--light);
+        }
+
+        /* Table */
+        .users-table {
+            padding: 0;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table thead {
+            background: var(--light-dark);
+        }
+
+        .dark-mode .table thead {
+            background: var(--dark-lighter);
+        }
+
+        .table th {
+            padding: 16px 24px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--light-dark);
+        }
+
+        .dark-mode .table th {
+            color: var(--light);
+            border-bottom-color: var(--glass-border);
+        }
+
+        .table td {
+            padding: 16px 24px;
+            color: var(--gray-dark);
+            border-bottom: 1px solid var(--light-dark);
+            font-size: 14px;
+        }
+
+        .dark-mode .table td {
+            color: var(--gray-light);
+            border-bottom-color: var(--glass-border);
+        }
+
+        .table tbody tr:hover {
+            background: rgba(199, 162, 75, 0.05);
+        }
+
+        .dark-mode .table tbody tr:hover {
+            background: rgba(199, 162, 75, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .action-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            .admin-sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .stats-overview {
+                grid-template-columns: 1fr;
+            }
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+            .top-bar {
+                padding: 20px;
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+            .dashboard-content {
+                padding: 20px;
+            }
+            .breadcrumb h1 {
+                font-size: 20px;
+            }
+        }
+
+        /* Custom Scrollbar (fallback) */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-dark);
+            border-radius: 4px;
+        }
+
+        .dark-mode ::-webkit-scrollbar-track {
+            background: var(--dark-lighter);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray);
+            border-radius: 4px;
+        }
+
+        .dark-mode ::-webkit-scrollbar-thumb {
+            background: var(--gray-dark);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Utility classes */
+        .mobile-menu-toggle {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: flex;
+            }
+        }
+
+        .semester-badge {
+            background: rgba(199, 162, 75, 0.2);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+        }
+    </style>
+
+    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -26,1197 +1453,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
-    
-    <style>
-        /* ========================
-           PREMIUM VARIABLES & RESET
-        ======================== */
-        :root {
-            /* Premium Color Palette */
-            --primary: #4361ee;
-            --primary-dark: #3a0ca3;
-            --primary-light: #4895ef;
-            --secondary: #7209b7;
-            --secondary-dark: #560bad;
-            --accent: #4cc9f0;
-            --accent-dark: #3a86ff;
-            
-            /* Status Colors */
-            --success: #10b981;
-            --success-dark: #059669;
-            --warning: #f59e0b;
-            --warning-dark: #d97706;
-            --danger: #ef4444;
-            --danger-dark: #dc2626;
-            --info: #3b82f6;
-            --info-dark: #2563eb;
-            
-            /* Neutral Colors */
-            --dark: #0f172a;
-            --dark-light: #1e293b;
-            --dark-lighter: #334155;
-            --light: #f8fafc;
-            --light-dark: #e2e8f0;
-            --gray: #64748b;
-            --gray-light: #94a3b8;
-            --gray-dark: #475569;
-            
-            /* Glass Morphism */
-            --glass-bg: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            
-            /* Typography */
-            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            --font-heading: 'Manrope', var(--font-primary);
-            
-            /* Spacing */
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 20px;
-            --radius-2xl: 24px;
-            
-            /* Transitions */
-            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
-            
-            /* Shadows */
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            
-            /* Z-index */
-            --z-sidebar: 100;
-            --z-topbar: 200;
-            --z-modal: 1000;
-            --z-toast: 10000;
-        }
-        
-        /* Dark Mode Variables */
-        .dark-mode {
-            --dark: #f8fafc;
-            --dark-light: #e2e8f0;
-            --dark-lighter: #cbd5e1;
-            --light: #0f172a;
-            --light-dark: #1e293b;
-            --glass-bg: rgba(15, 23, 42, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.05);
-        }
-        
-        /* Reset & Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: var(--font-primary);
-            background: var(--light);
-            color: var(--dark);
-            transition: background-color var(--transition-normal);
-            overflow-x: hidden;
-        }
-        
-        .dashboard-container {
-            display: none;
-            min-height: 100vh;
-            background: var(--light);
-        }
-        
-        /* ========================
-           PREMIUM LOADING OVERLAY
-        ======================== */
-        #loadingOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            color: white;
-        }
-        
-        .loading-content {
-            text-align: center;
-            padding: 40px;
-            border-radius: var(--radius-xl);
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .loading-logo {
-            font-size: 48px;
-            margin-bottom: 24px;
-            color: var(--accent);
-        }
-        
-        .loading-title {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 12px;
-            background: linear-gradient(90deg, var(--accent), var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-family: var(--font-heading);
-        }
-        
-        .loading-subtitle {
-            font-size: 16px;
-            color: var(--gray-light);
-            margin-bottom: 32px;
-            max-width: 400px;
-        }
-        
-        .loading-progress {
-            width: 300px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-        
-        .loading-progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            border-radius: 3px;
-            width: 0%;
-            transition: width 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .loading-progress-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            animation: shimmer 2s infinite;
-        }
-        
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* ========================
-           PREMIUM TOAST NOTIFICATIONS
-        ======================== */
-        .toast-container {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: var(--z-toast);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-width: 400px;
-        }
-        
-        .toast {
-            background: var(--light);
-            backdrop-filter: blur(20px);
-            border-radius: var(--radius-lg);
-            padding: 16px;
-            box-shadow: var(--shadow-xl);
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            transform: translateX(120%);
-            animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-            border-left: 4px solid var(--primary);
-            max-width: 400px;
-            border: 1px solid var(--light-dark);
-        }
-        
-        .dark-mode .toast {
-            background: var(--dark-light);
-            border: 1px solid var(--glass-border);
-        }
-        
-        .toast-success { border-left-color: var(--success); }
-        .toast-error { border-left-color: var(--danger); }
-        .toast-warning { border-left-color: var(--warning); }
-        .toast-info { border-left-color: var(--info); }
-        
-        @keyframes slideIn {
-            to { transform: translateX(0); }
-        }
-        
-        .toast-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-md);
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: white;
-            flex-shrink: 0;
-        }
-        
-        .toast-success .toast-icon { background: var(--success); }
-        .toast-error .toast-icon { background: var(--danger); }
-        .toast-warning .toast-icon { background: var(--warning); }
-        .toast-info .toast-icon { background: var(--info); }
-        
-        .toast-content {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .toast-title {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 4px;
-            color: var(--dark);
-        }
-        
-        .dark-mode .toast-title {
-            color: var(--light);
-        }
-        
-        .toast-message {
-            font-size: 13px;
-            color: var(--gray);
-            line-height: 1.4;
-        }
-        
-        .dark-mode .toast-message {
-            color: var(--gray-light);
-        }
-        
-        .toast-close {
-            background: transparent;
-            border: none;
-            color: var(--gray);
-            cursor: pointer;
-            font-size: 16px;
-            padding: 4px;
-            border-radius: var(--radius-sm);
-            transition: all var(--transition-fast);
-            align-self: flex-start;
-            margin-top: -4px;
-        }
-        
-        .toast-close:hover {
-            background: var(--light-dark);
-            color: var(--dark);
-        }
-        
-        .dark-mode .toast-close:hover {
-            background: var(--dark-lighter);
-            color: var(--light);
-        }
-        
-        /* ========================
-           PREMIUM SIDEBAR
-        ======================== */
-        .admin-sidebar {
-            width: 280px;
-            background: var(--light);
-            border-right: 1px solid var(--light-dark);
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: var(--z-sidebar);
-            display: flex;
-            flex-direction: column;
-            transition: transform var(--transition-normal);
-        }
-        
-        .dark-mode .admin-sidebar {
-            background: var(--dark-light);
-            border-right: 1px solid var(--glass-border);
-        }
-        
-        .sidebar-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--light-dark);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .dark-mode .sidebar-header {
-            border-bottom-color: var(--glass-border);
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .logo {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-md);
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            font-weight: 700;
-        }
-        
-        .logo-container h2 {
-            font-family: var(--font-heading);
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--dark);
-        }
-        
-        .dark-mode .logo-container h2 {
-            color: var(--light);
-        }
-        
-        .admin-badge {
-            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            margin-left: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .sidebar-toggle {
-            background: transparent;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: var(--radius-md);
-            color: var(--gray);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition-fast);
-        }
-        
-        .sidebar-toggle:hover {
-            background: var(--light-dark);
-            color: var(--dark);
-        }
-        
-        .dark-mode .sidebar-toggle:hover {
-            background: var(--dark-lighter);
-            color: var(--light);
-        }
-        
-        .sidebar-user {
-            padding: 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            border-bottom: 1px solid var(--light-dark);
-        }
-        
-        .dark-mode .sidebar-user {
-            border-bottom-color: var(--glass-border);
-        }
-        
-        .user-avatar {
-            position: relative;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-        
-        .user-status {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: var(--success);
-            border: 2px solid var(--light);
-        }
-        
-        .dark-mode .user-status {
-            border-color: var(--dark-light);
-        }
-        
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .user-info h4 {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .dark-mode .user-info h4 {
-            color: var(--light);
-        }
-        
-        .user-role {
-            font-size: 13px;
-            color: var(--gray);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .dark-mode .user-role {
-            color: var(--gray-light);
-        }
-        
-        .sidebar-menu {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        
-        .menu-section {
-            margin-bottom: 32px;
-        }
-        
-        .menu-section:last-child {
-            margin-bottom: 0;
-        }
-        
-        .section-title {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--gray);
-            margin-bottom: 16px;
-            padding-left: 12px;
-        }
-        
-        .dark-mode .section-title {
-            color: var(--gray-light);
-        }
-        
-        .menu-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-radius: var(--radius-md);
-            color: var(--gray-dark);
-            text-decoration: none;
-            transition: all var(--transition-fast);
-            margin-bottom: 4px;
-            font-weight: 500;
-            border: 1px solid transparent;
-        }
-        
-        .menu-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .menu-item i {
-            width: 20px;
-            font-size: 16px;
-            color: var(--gray);
-        }
-        
-        .menu-item:hover {
-            background: var(--light-dark);
-            color: var(--dark);
-        }
-        
-        .menu-item:hover i {
-            color: var(--primary);
-        }
-        
-        .dark-mode .menu-item:hover {
-            background: var(--dark-lighter);
-            color: var(--light);
-        }
-        
-        .menu-item.active {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: 1px solid var(--primary);
-        }
-        
-        .menu-item.active i {
-            color: white;
-        }
-        
-        .menu-item.logout-btn {
-            color: var(--danger);
-            background: rgba(239, 68, 68, 0.1);
-        }
-        
-        .menu-item.logout-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--danger-dark);
-        }
-        
-        .sidebar-footer {
-            padding: 20px;
-            border-top: 1px solid var(--light-dark);
-        }
-        
-        .dark-mode .sidebar-footer {
-            border-top-color: var(--glass-border);
-        }
-        
-        .system-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-            animation: pulse 2s infinite;
-        }
-        
-        .status-indicator.online {
-            background: var(--success);
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .system-status span {
-            font-size: 13px;
-            color: var(--gray);
-        }
-        
-        .dark-mode .system-status span {
-            color: var(--gray-light);
-        }
-        
-        .version {
-            font-size: 12px;
-            color: var(--gray);
-        }
-        
-        .dark-mode .version {
-            color: var(--gray-light);
-        }
-        
-        /* ========================
-           PREMIUM TOP BAR
-        ======================== */
-        .main-content {
-            margin-left: 280px;
-            min-height: 100vh;
-            transition: margin-left var(--transition-normal);
-        }
-        
-        .top-bar {
-            background: var(--light);
-            border-bottom: 1px solid var(--light-dark);
-            padding: 20px 32px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: var(--z-topbar);
-        }
-        
-        .dark-mode .top-bar {
-            background: var(--dark-light);
-            border-bottom-color: var(--glass-border);
-        }
-        
-        .breadcrumb {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        
-        .breadcrumb h1 {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--dark);
-            font-family: var(--font-heading);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .dark-mode .breadcrumb h1 {
-            color: var(--light);
-        }
-        
-        .breadcrumb h1 i {
-            color: var(--primary);
-        }
-        
-        .breadcrumb nav {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: var(--gray);
-        }
-        
-        .dark-mode .breadcrumb nav {
-            color: var(--gray-light);
-        }
-        
-        .breadcrumb .current {
-            color: var(--primary);
-            font-weight: 500;
-        }
-        
-        .top-bar-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        
-        .btn-quick-action {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: var(--radius-lg);
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all var(--transition-normal);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .btn-quick-action:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        /* ========================
-           PREMIUM DASHBOARD CONTENT
-        ======================== */
-        .dashboard-content {
-            padding: 32px;
-        }
-        
-        /* Stats Cards */
-        .stats-overview {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 40px;
-        }
-        
-        .stat-card {
-            background: var(--light);
-            border-radius: var(--radius-xl);
-            padding: 24px;
-            border: 1px solid var(--light-dark);
-            transition: all var(--transition-normal);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .dark-mode .stat-card {
-            background: var(--dark-light);
-            border-color: var(--glass-border);
-        }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-        }
-        
-        .stat-card.stat-success::before {
-            background: linear-gradient(90deg, var(--success), var(--success-dark));
-        }
-        
-        .stat-card.stat-warning::before {
-            background: linear-gradient(90deg, var(--warning), var(--warning-dark));
-        }
-        
-        .stat-card.stat-danger::before {
-            background: linear-gradient(90deg, var(--danger), var(--danger-dark));
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--primary);
-        }
-        
-        .stat-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-lg);
-            background: rgba(67, 97, 238, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: var(--primary);
-        }
-        
-        .stat-card.stat-success .stat-icon {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-        }
-        
-        .stat-card.stat-warning .stat-icon {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-        }
-        
-        .stat-card.stat-danger .stat-icon {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-        
-        .stat-trend {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--success);
-        }
-        
-        .stat-trend.negative {
-            color: var(--danger);
-        }
-        
-        .stat-content h3 {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--dark);
-            margin-bottom: 8px;
-            font-family: var(--font-heading);
-        }
-        
-        .dark-mode .stat-content h3 {
-            color: var(--light);
-        }
-        
-        .stat-content p {
-            font-size: 14px;
-            color: var(--gray);
-            margin-bottom: 16px;
-        }
-        
-        .dark-mode .stat-content p {
-            color: var(--gray-light);
-        }
-        
-        .stat-progress {
-            width: 100%;
-            height: 6px;
-            background: var(--light-dark);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        
-        .dark-mode .stat-progress {
-            background: var(--dark-lighter);
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            border-radius: 3px;
-            width: 75%;
-        }
-        
-        /* Dashboard Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 24px;
-            margin-bottom: 40px;
-        }
-        
-        .dashboard-widget {
-            background: var(--light);
-            border-radius: var(--radius-xl);
-            border: 1px solid var(--light-dark);
-            overflow: hidden;
-        }
-        
-        .dark-mode .dashboard-widget {
-            background: var(--dark-light);
-            border-color: var(--glass-border);
-        }
-        
-        .widget-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--light-dark);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .dark-mode .widget-header {
-            border-bottom-color: var(--glass-border);
-        }
-        
-        .widget-header h3 {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--dark);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .dark-mode .widget-header h3 {
-            color: var(--light);
-        }
-        
-        .btn-refresh {
-            background: transparent;
-            border: 1px solid var(--light-dark);
-            width: 36px;
-            height: 36px;
-            border-radius: var(--radius-md);
-            color: var(--gray);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition-fast);
-        }
-        
-        .btn-refresh:hover {
-            background: var(--light-dark);
-            color: var(--dark);
-            border-color: var(--gray);
-        }
-        
-        .dark-mode .btn-refresh:hover {
-            background: var(--dark-lighter);
-            color: var(--light);
-        }
-        
-        .view-all {
-            color: var(--primary);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all var(--transition-fast);
-        }
-        
-        .view-all:hover {
-            color: var(--primary-dark);
-        }
-        
-        /* Activity List */
-        .activity-list {
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .activity-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 16px;
-            border-radius: var(--radius-lg);
-            background: var(--light-dark);
-            transition: all var(--transition-fast);
-        }
-        
-        .dark-mode .activity-item {
-            background: var(--dark-lighter);
-        }
-        
-        .activity-item:hover {
-            background: rgba(67, 97, 238, 0.1);
-            border-color: rgba(67, 97, 238, 0.2);
-        }
-        
-        .activity-item i {
-            width: 32px;
-            height: 32px;
-            border-radius: var(--radius-md);
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-        
-        .activity-details {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .activity-text {
-            font-size: 14px;
-            color: var(--dark);
-            margin-bottom: 4px;
-            line-height: 1.4;
-        }
-        
-        .dark-mode .activity-text {
-            color: var(--light);
-        }
-        
-        .activity-time {
-            font-size: 12px;
-            color: var(--gray);
-        }
-        
-        .dark-mode .activity-time {
-            color: var(--gray-light);
-        }
-        
-        /* Action Grid */
-        .action-grid {
-            padding: 24px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 16px;
-        }
-        
-        .action-item {
-            background: var(--light);
-            border: 2px solid var(--light-dark);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: all var(--transition-normal);
-        }
-        
-        .dark-mode .action-item {
-            background: var(--dark-light);
-            border-color: var(--glass-border);
-        }
-        
-        .action-item:hover {
-            border-color: var(--primary);
-            background: rgba(67, 97, 238, 0.05);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .dark-mode .action-item:hover {
-            background: rgba(67, 97, 238, 0.1);
-        }
-        
-        .action-item i {
-            font-size: 24px;
-            color: var(--primary);
-        }
-        
-        .action-item span {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--dark);
-            text-align: center;
-        }
-        
-        .dark-mode .action-item span {
-            color: var(--light);
-        }
-        
-        /* Table */
-        .users-table {
-            padding: 0;
-        }
-        
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .table thead {
-            background: var(--light-dark);
-        }
-        
-        .dark-mode .table thead {
-            background: var(--dark-lighter);
-        }
-        
-        .table th {
-            padding: 16px 24px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--dark);
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid var(--light-dark);
-        }
-        
-        .dark-mode .table th {
-            color: var(--light);
-            border-bottom-color: var(--glass-border);
-        }
-        
-        .table td {
-            padding: 16px 24px;
-            color: var(--gray-dark);
-            border-bottom: 1px solid var(--light-dark);
-            font-size: 14px;
-        }
-        
-        .dark-mode .table td {
-            color: var(--gray-light);
-            border-bottom-color: var(--glass-border);
-        }
-        
-        .table tbody tr:hover {
-            background: rgba(67, 97, 238, 0.05);
-        }
-        
-        .dark-mode .table tbody tr:hover {
-            background: rgba(67, 97, 238, 0.1);
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .action-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .admin-sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .admin-sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .stats-overview {
-                grid-template-columns: 1fr;
-            }
-            
-            .action-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .top-bar {
-                padding: 20px;
-                flex-direction: column;
-                gap: 16px;
-                align-items: stretch;
-            }
-            
-            .dashboard-content {
-                padding: 20px;
-            }
-            
-            .breadcrumb h1 {
-                font-size: 20px;
-            }
-        }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: var(--light-dark);
-            border-radius: 4px;
-        }
-        
-        .dark-mode ::-webkit-scrollbar-track {
-            background: var(--dark-lighter);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--gray);
-            border-radius: 4px;
-        }
-        
-        .dark-mode ::-webkit-scrollbar-thumb {
-            background: var(--gray-dark);
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary);
-        }
-    </style>
 </head>
 <body class="dark-mode">
+    <!-- Spark Canvas (flying gold particles) -->
+    <canvas id="sparkCanvas"></canvas>
+
     <!-- Loading Overlay -->
     <div id="loadingOverlay">
-        <div class="loading-content">
+        <div class="loading-content glass-premium">
             <div class="loading-logo">
                 <i class="fas fa-brain"></i>
             </div>
@@ -1233,8 +1477,8 @@
 
     <!-- Dashboard Container -->
     <div class="dashboard-container" id="dashboardContainer">
-        <!-- Admin Sidebar -->
-        <div class="admin-sidebar" id="adminSidebar">
+        <!-- Admin Sidebar (glass premium) -->
+        <div class="admin-sidebar glass-premium" id="adminSidebar">
             <div class="sidebar-header">
                 <div class="logo-container">
                     <div class="logo">DQ</div>
@@ -1297,6 +1541,40 @@
                         <i class="fas fa-folder"></i> Categories
                     </a>
                 </div>
+
+                <!-- ===== NEW: DDCET Management ===== -->
+                <div class="menu-section">
+                    <h3 class="section-title">DDCET Management</h3>
+                    <a href="../manage-ddcet/create-ddcet-test.html" class="menu-item">
+                        <i class="fas fa-pen-alt"></i> Create DDCET Test
+                    </a>
+                    <a href="../manage-ddcet/ddcet-analytics.html" class="menu-item">
+                        <i class="fas fa-chart-bar"></i> DDCET Analytics
+                    </a>
+                    <a href="../manage-ddcet/ddcet-materials.html" class="menu-item">
+                        <i class="fas fa-book"></i> DDCET Materials
+                    </a>
+                    <a href="../manage-ddcet/schedule-weekly.html" class="menu-item">
+                        <i class="fas fa-calendar-alt"></i> Schedule Weekly
+                    </a>
+                </div>
+
+                <!-- ===== NEW: Test Management ===== -->
+                <div class="menu-section">
+                    <h3 class="section-title">Test Management</h3>
+                    <a href="../manage-tests/create-test.html" class="menu-item">
+                        <i class="fas fa-plus-circle"></i> Create Test
+                    </a>
+                    <a href="../manage-tests/edit-tests.html" class="menu-item">
+                        <i class="fas fa-edit"></i> Edit Tests
+                    </a>
+                    <a href="../manage-tests/test-analytics.html" class="menu-item">
+                        <i class="fas fa-chart-line"></i> Test Analytics
+                    </a>
+                    <a href="../manage-tests/test-results.html" class="menu-item">
+                        <i class="fas fa-clipboard-list"></i> Test Results
+                    </a>
+                </div>
                 
                 <div class="menu-section">
                     <h3 class="section-title">System</h3>
@@ -1326,8 +1604,8 @@
 
         <!-- Main Content -->
         <div class="main-content" id="mainContent">
-            <!-- Top Bar -->
-            <div class="top-bar">
+            <!-- Top Bar (glass premium) -->
+            <div class="top-bar glass-premium">
                 <div class="breadcrumb">
                     <h1><i class="fas fa-chart-pie"></i> Dashboard Overview</h1>
                     <nav>
@@ -1338,7 +1616,7 @@
                 </div>
                 
                 <div class="top-bar-actions">
-                    <button class="btn-quick-action" onclick="quickUpload()">
+                    <button class="btn-quick-action btn-quantum" onclick="quickUpload()">
                         <i class="fas fa-plus"></i> New Content
                     </button>
                 </div>
@@ -1346,9 +1624,9 @@
 
             <!-- Dashboard Content -->
             <div class="dashboard-content">
-                <!-- Stats Overview -->
+                <!-- Stats Overview (premium stat cards) -->
                 <div class="stats-overview">
-                    <div class="stat-card stat-primary">
+                    <div class="stat-card stat-primary stat-card-premium">
                         <div class="stat-header">
                             <div class="stat-icon">
                                 <i class="fas fa-users"></i>
@@ -1361,13 +1639,13 @@
                         <div class="stat-content">
                             <h3 id="totalStudents">0</h3>
                             <p>Total Students</p>
-                            <div class="stat-progress">
-                                <div class="progress-bar" style="width: 85%"></div>
+                            <div class="stat-progress progress-premium">
+                                <div class="progress-bar-premium" style="width: 85%"></div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="stat-card stat-success">
+                    <div class="stat-card stat-success stat-card-premium">
                         <div class="stat-header">
                             <div class="stat-icon">
                                 <i class="fas fa-file-alt"></i>
@@ -1380,13 +1658,13 @@
                         <div class="stat-content">
                             <h3 id="totalMaterials">0</h3>
                             <p>Study Materials</p>
-                            <div class="stat-progress">
-                                <div class="progress-bar" style="width: 65%"></div>
+                            <div class="stat-progress progress-premium">
+                                <div class="progress-bar-premium" style="width: 65%"></div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="stat-card stat-warning">
+                    <div class="stat-card stat-warning stat-card-premium">
                         <div class="stat-header">
                             <div class="stat-icon">
                                 <i class="fas fa-clipboard-check"></i>
@@ -1399,13 +1677,13 @@
                         <div class="stat-content">
                             <h3 id="totalTests">0</h3>
                             <p>Active Tests</p>
-                            <div class="stat-progress">
-                                <div class="progress-bar" style="width: 75%"></div>
+                            <div class="stat-progress progress-premium">
+                                <div class="progress-bar-premium" style="width: 75%"></div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="stat-card stat-danger">
+                    <div class="stat-card stat-danger stat-card-premium">
                         <div class="stat-header">
                             <div class="stat-icon">
                                 <i class="fas fa-chart-line"></i>
@@ -1418,8 +1696,8 @@
                         <div class="stat-content">
                             <h3 id="totalAttempts">0</h3>
                             <p>Test Attempts</p>
-                            <div class="stat-progress">
-                                <div class="progress-bar" style="width: 90%"></div>
+                            <div class="stat-progress progress-premium">
+                                <div class="progress-bar-premium" style="width: 90%"></div>
                             </div>
                         </div>
                     </div>
@@ -1427,8 +1705,8 @@
 
                 <!-- Dashboard Grid -->
                 <div class="dashboard-grid">
-                    <!-- Recent Activity -->
-                    <div class="dashboard-widget">
+                    <!-- Recent Activity (holographic widget) -->
+                    <div class="dashboard-widget holographic glass-premium">
                         <div class="widget-header">
                             <h3><i class="fas fa-history"></i> Recent Activity</h3>
                             <button class="btn-refresh" onclick="loadRecentActivity()">
@@ -1446,8 +1724,8 @@
                         </div>
                     </div>
                     
-                    <!-- Quick Actions -->
-                    <div class="dashboard-widget">
+                    <!-- Quick Actions (quantum grid) -->
+                    <div class="dashboard-widget quantum-grid glass-premium">
                         <div class="widget-header">
                             <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
                         </div>
@@ -1480,13 +1758,13 @@
                     </div>
                 </div>
 
-                <!-- Recent Users -->
-                <div class="dashboard-widget">
+                <!-- Recent Users (data-stream effect) -->
+                <div class="dashboard-widget data-stream glass-premium">
                     <div class="widget-header">
                         <h3><i class="fas fa-user-plus"></i> Recent Registrations</h3>
                         <a href="../manage-users/view-students.html" class="view-all">View All →</a>
                     </div>
-                    <div class="users-table">
+                    <div class="users-table table-premium">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -1518,37 +1796,29 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.41.0/dist/apexcharts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     
-    <!-- Main Script -->
+    <!-- Main Script (Firebase integration + utilities – unchanged) -->
     <script>
         // ============================================
-        // PREMIUM UTILITY FUNCTIONS
+        // PREMIUM UTILITY FUNCTIONS (same as original)
         // ============================================
-        
-        // 1. Premium Loading Message
-        function updateLoadingMessage(title, subtitle = "") {
-            const loadingText = document.getElementById('loadingText');
-            const loadingSubtext = document.getElementById('loadingSubtext');
-            
-            if (loadingText) loadingText.textContent = title;
-            if (loadingSubtext) loadingSubtext.textContent = subtitle;
+        function updateLoadingMessage(title, subtitle) {
+            const el = document.getElementById('loadingText');
+            const sub = document.getElementById('loadingSubtext');
+            if (el) el.textContent = title;
+            if (sub) sub.textContent = subtitle;
         }
-        
-        // 2. Premium Toast System
         function showToast(message, type = 'info', title = '', duration = 5000) {
             const container = document.getElementById('toastContainer');
             const toastId = 'toast-' + Date.now();
-            
             const icons = {
                 success: 'check-circle',
                 error: 'exclamation-circle',
                 warning: 'exclamation-triangle',
                 info: 'info-circle'
             };
-            
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
             toast.id = toastId;
-            
             toast.innerHTML = `
                 <div class="toast-icon">
                     <i class="fas fa-${icons[type] || 'info-circle'}"></i>
@@ -1561,53 +1831,35 @@
                     <i class="fas fa-times"></i>
                 </button>
             `;
-            
             container.appendChild(toast);
-            
-            // Auto-remove
             setTimeout(() => {
                 const element = document.getElementById(toastId);
                 if (element) element.remove();
             }, duration);
-            
             return toastId;
         }
-        
-        // 3. Progress Update
         function updateProgress(percent) {
-            const progressBar = document.getElementById('loadingProgress');
-            if (progressBar) {
-                progressBar.style.width = `${percent}%`;
-            }
+            const bar = document.getElementById('loadingProgress');
+            if (bar) bar.style.width = percent + '%';
         }
-        
-        // 4. Smooth Animated Counter
         function animateCounter(elementId, targetValue, duration = 1000) {
             const element = document.getElementById(elementId);
             if (!element) return;
-            
             const current = parseInt(element.textContent.replace(/,/g, '')) || 0;
-            const increment = (targetValue - current) / (duration / 16); // 60fps
-            
+            const increment = (targetValue - current) / (duration / 16);
             let count = current;
             let startTime = null;
-            
             function updateCounter(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const elapsed = timestamp - startTime;
                 const progress = Math.min(elapsed / duration, 1);
-                
                 count = current + (targetValue - current) * progress;
                 element.textContent = Math.round(count).toLocaleString();
-                
-                if (progress < 1) {
-                    requestAnimationFrame(updateCounter);
-                }
+                if (progress < 1) requestAnimationFrame(updateCounter);
             }
-            
             requestAnimationFrame(updateCounter);
         }
-        
+
         // ============================================
         // GLOBAL VARIABLES
         // ============================================
@@ -1618,64 +1870,42 @@
         let firebaseAuth = null;
         let firestoreDb = null;
         let firebaseStorage = null;
-        
+
         // ============================================
         // PREMIUM INITIALIZATION
         // ============================================
-        
         document.addEventListener('DOMContentLoaded', function() {
             console.log("🚀 Premium Dashboard Initializing...");
-            
-            // Start loading animation
             simulateLoadingProgress();
-            
-            // Initialize UI
             initializePremiumUI();
-            
-            // Initialize Firebase
             initializeFirebase();
         });
-        
+
         function simulateLoadingProgress() {
             let progress = 0;
             const progressBar = document.getElementById('loadingProgress');
-            
             const interval = setInterval(() => {
                 progress += Math.random() * 10;
                 if (progress > 100) progress = 100;
                 progressBar.style.width = `${progress}%`;
-                
-                // Update messages based on progress
-                if (progress < 25) {
-                    updateLoadingMessage("Initializing Premium UI", "Loading design system...");
-                } else if (progress < 50) {
-                    updateLoadingMessage("Connecting Services", "Establishing secure connections...");
-                } else if (progress < 75) {
-                    updateLoadingMessage("Loading Dashboard", "Preparing analytics...");
-                } else {
-                    updateLoadingMessage("Almost Ready", "Finalizing setup...");
-                }
-                
-                if (progress >= 100) {
-                    clearInterval(interval);
-                }
+                if (progress < 25) updateLoadingMessage("Initializing Premium UI", "Loading design system...");
+                else if (progress < 50) updateLoadingMessage("Connecting Services", "Establishing secure connections...");
+                else if (progress < 75) updateLoadingMessage("Loading Dashboard", "Preparing analytics...");
+                else updateLoadingMessage("Almost Ready", "Finalizing setup...");
+                if (progress >= 100) clearInterval(interval);
             }, 100);
         }
-        
+
         function initializePremiumUI() {
-            // Sidebar toggle
             const sidebarToggle = document.getElementById('sidebarToggle');
             const sidebar = document.getElementById('adminSidebar');
             const mainContent = document.getElementById('mainContent');
-            
             if (sidebarToggle) {
                 sidebarToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('active');
                     mainContent.classList.toggle('sidebar-collapsed');
                 });
             }
-            
-            // Mobile menu toggle
             const mobileMenuToggle = document.createElement('button');
             mobileMenuToggle.className = 'mobile-menu-toggle';
             mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
@@ -1688,7 +1918,7 @@
                 height: 40px;
                 border-radius: 10px;
                 background: var(--primary);
-                color: white;
+                color: #0a0e1a;
                 border: none;
                 display: none;
                 align-items: center;
@@ -1696,14 +1926,10 @@
                 font-size: 18px;
                 cursor: pointer;
             `;
-            
             document.body.appendChild(mobileMenuToggle);
-            
             mobileMenuToggle.addEventListener('click', function() {
                 sidebar.classList.toggle('active');
             });
-            
-            // Responsive check
             function checkResponsive() {
                 if (window.innerWidth <= 768) {
                     mobileMenuToggle.style.display = 'flex';
@@ -1713,11 +1939,8 @@
                     sidebar.classList.remove('active');
                 }
             }
-            
             checkResponsive();
             window.addEventListener('resize', checkResponsive);
-            
-            // Add click outside to close sidebar on mobile
             document.addEventListener('click', function(event) {
                 if (window.innerWidth <= 768 && 
                     !sidebar.contains(event.target) && 
@@ -1727,17 +1950,16 @@
                 }
             });
         }
-        
+
         // ============================================
-        // FIREBASE INITIALIZATION (PREMIUM VERSION)
+        // FIREBASE INITIALIZATION
         // ============================================
-        
         function initializeFirebase() {
             try {
                 console.log("🔥 Initializing Premium Firebase...");
                 updateLoadingMessage("Connecting to Database", "Setting up cloud services...");
                 updateProgress(25);
-                
+
                 const firebaseConfig = {
                     apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
                     authDomain: "ddquest-614ea.firebaseapp.com",
@@ -1748,104 +1970,69 @@
                     appId: "1:602140742747:web:1cbd274462578fde845b7e",
                     measurementId: "G-1CRQVW0WF9"
                 };
-                
-                // Initialize Firebase
+
                 firebaseApp = firebase.initializeApp(firebaseConfig);
                 firebaseAuth = firebase.auth();
                 firestoreDb = firebase.firestore();
                 firebaseStorage = firebase.storage();
-                
-                // Enable persistence for better UX
+
                 firestoreDb.enablePersistence()
-                    .then(() => {
-                        console.log("✅ Offline persistence enabled");
-                    })
-                    .catch(err => {
-                        console.warn("⚠️ Persistence error:", err);
-                    });
-                
+                    .then(() => console.log("✅ Offline persistence enabled"))
+                    .catch(err => console.warn("⚠️ Persistence error:", err));
+
                 console.log("✅ Firebase Premium initialized");
                 firebaseInitialized = true;
                 updateProgress(50);
-                
-                // Setup auth listener
                 setupAuthListener();
-                
+
             } catch (error) {
                 console.error("❌ Firebase initialization failed:", error);
-                showToast(
-                    "Connection issue detected. Running in offline mode.",
-                    "warning",
-                    "Network Alert"
-                );
-                
-                // Load offline dashboard after delay
-                setTimeout(() => {
-                    loadOfflineDashboard();
-                }, 2000);
+                showToast("Connection issue detected. Running in offline mode.", "warning", "Network Alert");
+                setTimeout(() => loadOfflineDashboard(), 2000);
             }
         }
-        
+
         function setupAuthListener() {
-            if (!firebaseAuth) {
-                console.error("Firebase Auth not available");
-                setTimeout(setupAuthListener, 1000);
-                return;
-            }
-            
+            if (!firebaseAuth) { setTimeout(setupAuthListener, 1000); return; }
             firebaseAuth.onAuthStateChanged(async (user) => {
                 if (user) {
                     console.log("✅ User authenticated:", user.email);
                     currentUser = user;
-                    
-                    try {
-                        await checkAdminAccess(user);
-                    } catch (error) {
-                        console.error("Admin check failed:", error);
-                        loadOfflineDashboard();
-                    }
-                    
+                    try { await checkAdminAccess(user); } 
+                    catch (error) { console.error("Admin check failed:", error); loadOfflineDashboard(); }
                 } else {
                     console.log("❌ No user authenticated");
                     redirectToLogin();
                 }
             });
         }
-        
+
         async function checkAdminAccess(user) {
             updateLoadingMessage("Verifying Permissions", "Checking admin privileges...");
             updateProgress(60);
-            
             try {
-                // Try to get from Firestore first
                 const userDoc = await firestoreDb.collection('users').doc(user.uid).get();
-                
                 if (!userDoc.exists) {
                     showToast("User account not found", "error", "Access Denied");
                     await logoutAdmin();
                     return;
                 }
-                
                 adminData = userDoc.data();
                 console.log("📋 Admin data loaded:", adminData);
-                
-                // Check admin role
                 if (adminData.role !== 'admin' && adminData.role !== 'super_admin') {
                     showToast("Admin privileges required", "error", "Access Denied");
                     await logoutAdmin();
                     return;
                 }
-                
-                // Save session data
+                if (adminData.isActive === false) {
+                    showToast("Admin account deactivated.", "error");
+                    await logoutAdmin();
+                    return;
+                }
                 saveSessionData(user);
-                
-                // Initialize dashboard
                 initializeDashboard();
-                
             } catch (error) {
                 console.error("❌ Error checking admin access:", error);
-                
-                // Try cached data
                 const cachedData = localStorage.getItem('adminData');
                 if (cachedData) {
                     adminData = JSON.parse(cachedData);
@@ -1857,7 +2044,7 @@
                 }
             }
         }
-        
+
         function saveSessionData(user) {
             const sessionData = {
                 uid: user.uid,
@@ -1866,225 +2053,127 @@
                 role: adminData.role,
                 timestamp: new Date().toISOString()
             };
-            
             localStorage.setItem('adminData', JSON.stringify(sessionData));
             localStorage.setItem('adminSession', JSON.stringify(sessionData));
             sessionStorage.setItem('adminToken', user.uid);
         }
-        
-        // ============================================
-        // DASHBOARD INITIALIZATION
-        // ============================================
-        
+
         function initializeDashboard() {
             console.log("🎉 Initializing premium dashboard...");
             updateLoadingMessage("Loading Dashboard", "Preparing analytics...");
             updateProgress(75);
-            
-            // Update admin info
             updateAdminInfo();
-            
-            // Finalize loading
             setTimeout(() => {
                 updateProgress(100);
-                
                 setTimeout(() => {
                     const loadingOverlay = document.getElementById('loadingOverlay');
                     loadingOverlay.style.opacity = '0';
                     loadingOverlay.style.transition = 'opacity 0.5s ease';
-                    
                     setTimeout(() => {
                         loadingOverlay.style.display = 'none';
                         document.getElementById('dashboardContainer').style.display = 'flex';
-                        
-                        // Load data
                         loadDashboardData();
-                        
-                        // Welcome message
-                        showToast(
-                            `Welcome back, ${adminData?.name || 'Admin'}!`,
-                            "success",
-                            "Dashboard Ready"
-                        );
-                        
-                        // Add entrance animation
+                        showToast(`Welcome back, ${adminData?.name || 'Admin'}!`, "success", "Dashboard Ready");
                         document.querySelectorAll('.stat-card, .dashboard-widget').forEach((el, i) => {
                             el.style.opacity = '0';
                             el.style.transform = 'translateY(20px)';
-                            
                             setTimeout(() => {
                                 el.style.transition = 'all 0.5s ease';
                                 el.style.opacity = '1';
                                 el.style.transform = 'translateY(0)';
                             }, i * 100);
                         });
-                        
                     }, 500);
                 }, 500);
             }, 1000);
         }
-        
+
         function loadOfflineDashboard() {
             console.log("🔄 Loading offline premium dashboard...");
             updateLoadingMessage("Offline Mode", "Limited functionality available");
-            
-            // Create premium demo data
-            adminData = {
-                name: "Demo Admin",
-                email: "demo@admin.com",
-                role: "admin"
-            };
-            
+            adminData = { name: "Demo Admin", email: "demo@admin.com", role: "admin" };
             setTimeout(() => {
                 const loadingOverlay = document.getElementById('loadingOverlay');
                 loadingOverlay.style.opacity = '0';
-                
                 setTimeout(() => {
                     loadingOverlay.style.display = 'none';
                     document.getElementById('dashboardContainer').style.display = 'flex';
-                    
                     updateAdminInfo();
                     loadSampleData();
-                    
-                    showToast(
-                        "Running in offline mode with demo data",
-                        "warning",
-                        "Limited Mode"
-                    );
-                    
+                    showToast("Running in offline mode with demo data", "warning", "Limited Mode");
                 }, 500);
             }, 1500);
         }
-        
+
         function updateAdminInfo() {
             if (!adminData) return;
-            
             const adminName = document.getElementById('adminName');
             const adminRole = document.getElementById('adminRole');
-            
-            if (adminName) {
-                adminName.textContent = adminData.name || adminData.email || 'System Admin';
-            }
-            
+            if (adminName) adminName.textContent = adminData.name || adminData.email || 'System Admin';
             if (adminRole && adminData.role) {
                 const roleText = adminData.role === 'super_admin' ? 'Super Administrator' : 'Administrator';
                 adminRole.innerHTML = `<i class="fas fa-shield-alt"></i> ${roleText}`;
             }
         }
-        
-        // ============================================
-        // DATA LOADING FUNCTIONS
-        // ============================================
-        
+
         async function loadDashboardData() {
             console.log("📊 Loading premium dashboard data...");
-            
             try {
-                // Load all data in parallel
-                await Promise.all([
-                    loadStatistics(),
-                    loadRecentActivity(),
-                    loadRecentUsers()
-                ]);
-                
+                await Promise.all([loadStatistics(), loadRecentActivity(), loadRecentUsers()]);
                 console.log("✅ All data loaded successfully");
-                
             } catch (error) {
                 console.error("❌ Error loading dashboard data:", error);
                 showToast("Some data failed to load", "warning");
                 loadSampleData();
             }
         }
-        
+
         async function loadStatistics() {
             try {
                 if (!firestoreDb) throw new Error("Firestore not available");
-                
-                // Get student count
-                const studentsSnapshot = await firestoreDb.collection('users')
-                    .where('role', '==', 'student')
-                    .get();
-                
+                const studentsSnapshot = await firestoreDb.collection('users').where('role', '==', 'student').get();
                 const totalStudents = studentsSnapshot.size;
-                
-                // Update counters with animation
                 animateCounter('totalStudents', totalStudents);
-                animateCounter('totalMaterials', 48); // Fallback values
+                animateCounter('totalMaterials', 48);
                 animateCounter('totalTests', 12);
                 animateCounter('totalAttempts', 356);
-                
-                // Set trends
                 document.getElementById('studentTrend').textContent = "12.5%";
                 document.getElementById('materialTrend').textContent = "8.3%";
                 document.getElementById('testTrend').textContent = "15.2%";
                 document.getElementById('attemptTrend').textContent = "24.8%";
-                
             } catch (error) {
                 console.error("❌ Error loading statistics:", error);
                 loadSampleStatistics();
             }
         }
-        
+
         function loadSampleStatistics() {
-            // Set sample data with animation
             animateCounter('totalStudents', 125);
             animateCounter('totalMaterials', 48);
             animateCounter('totalTests', 12);
             animateCounter('totalAttempts', 356);
-            
             document.getElementById('studentTrend').textContent = "12.5%";
             document.getElementById('materialTrend').textContent = "8.3%";
             document.getElementById('testTrend').textContent = "15.2%";
             document.getElementById('attemptTrend').textContent = "24.8%";
         }
-        
+
         function loadRecentActivity() {
             const activityList = document.getElementById('recentActivityList');
             if (!activityList) return;
-            
-            // Clear loading state
             activityList.innerHTML = '';
-            
-            // Premium activity data
             const activities = [
-                {
-                    icon: 'fa-user-plus',
-                    text: 'New student registration: John Smith (Computer Engineering)',
-                    time: '5 minutes ago',
-                    color: 'var(--primary)'
-                },
-                {
-                    icon: 'fa-clipboard-check',
-                    text: 'Test "Advanced JavaScript Concepts" created and published',
-                    time: '1 hour ago',
-                    color: 'var(--success)'
-                },
-                {
-                    icon: 'fa-file-upload',
-                    text: 'Study material uploaded: "Data Structures & Algorithms"',
-                    time: '2 hours ago',
-                    color: 'var(--info)'
-                },
-                {
-                    icon: 'fa-server',
-                    text: 'System backup completed successfully. All data secured.',
-                    time: '3 hours ago',
-                    color: 'var(--warning)'
-                },
-                {
-                    icon: 'fa-user-check',
-                    text: 'Admin access approved for: Sarah Johnson',
-                    time: '5 hours ago',
-                    color: 'var(--primary)'
-                }
+                { icon: 'fa-user-plus', text: 'New student registration: John Smith (Computer Engineering)', time: '5 minutes ago', color: 'var(--primary)' },
+                { icon: 'fa-clipboard-check', text: 'Test "Advanced JavaScript Concepts" created and published', time: '1 hour ago', color: 'var(--success)' },
+                { icon: 'fa-file-upload', text: 'Study material uploaded: "Data Structures & Algorithms"', time: '2 hours ago', color: 'var(--info)' },
+                { icon: 'fa-server', text: 'System backup completed successfully. All data secured.', time: '3 hours ago', color: 'var(--warning)' },
+                { icon: 'fa-user-check', text: 'Admin access approved for: Sarah Johnson', time: '5 hours ago', color: 'var(--primary)' }
             ];
-            
             activities.forEach((activity, index) => {
                 setTimeout(() => {
                     const activityItem = document.createElement('div');
                     activityItem.className = 'activity-item';
                     activityItem.style.cssText = 'opacity: 0; transform: translateX(-20px);';
-                    
                     activityItem.innerHTML = `
                         <i class="fas ${activity.icon}" style="background: ${activity.color};"></i>
                         <div class="activity-details">
@@ -2092,60 +2181,41 @@
                             <p class="activity-time">${activity.time}</p>
                         </div>
                     `;
-                    
                     activityList.appendChild(activityItem);
-                    
-                    // Animate in
                     setTimeout(() => {
                         activityItem.style.transition = 'all 0.3s ease';
                         activityItem.style.opacity = '1';
                         activityItem.style.transform = 'translateX(0)';
                     }, 10);
-                    
                 }, index * 100);
             });
         }
-        
+
         async function loadRecentUsers() {
             try {
                 if (!firestoreDb) throw new Error("Firestore not available");
-                
                 const usersSnapshot = await firestoreDb.collection('users')
                     .where('role', '==', 'student')
                     .orderBy('createdAt', 'desc')
                     .limit(5)
                     .get();
-                
                 const usersBody = document.getElementById('recentUsersBody');
                 if (!usersBody) return;
-                
                 usersBody.innerHTML = '';
-                
                 if (usersSnapshot.empty) {
-                    usersBody.innerHTML = `
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 40px; color: var(--gray);">
-                                <i class="fas fa-user-slash fa-2x" style="margin-bottom: 16px; opacity: 0.5;"></i>
-                                <p>No users found</p>
-                            </td>
-                        </tr>
-                    `;
+                    usersBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px;"><i class="fas fa-user-slash fa-2x"></i><p>No users found</p></td></tr>`;
                     return;
                 }
-                
                 usersSnapshot.forEach((doc, index) => {
                     setTimeout(() => {
                         const user = doc.data();
                         const row = document.createElement('tr');
                         row.style.cssText = 'opacity: 0; transform: translateY(10px);';
-                        
-                        // Format join date
                         let joinDate = 'Recently';
                         if (user.createdAt && user.createdAt.toDate) {
                             const date = user.createdAt.toDate();
                             joinDate = formatRelativeTime(date);
                         }
-                        
                         row.innerHTML = `
                             <td style="font-weight: 500;">${user.name || 'N/A'}</td>
                             <td style="color: var(--gray);">${user.email || 'N/A'}</td>
@@ -2153,74 +2223,35 @@
                             <td>${user.branch || 'N/A'}</td>
                             <td style="color: var(--gray);">${joinDate}</td>
                         `;
-                        
                         usersBody.appendChild(row);
-                        
-                        // Animate in
                         setTimeout(() => {
                             row.style.transition = 'all 0.3s ease';
                             row.style.opacity = '1';
                             row.style.transform = 'translateY(0)';
                         }, 10);
-                        
                     }, index * 100);
                 });
-                
             } catch (error) {
                 console.error("❌ Error loading recent users:", error);
                 loadSampleUsers();
             }
         }
-        
+
         function loadSampleUsers() {
             const usersBody = document.getElementById('recentUsersBody');
             if (!usersBody) return;
-            
             usersBody.innerHTML = '';
-            
             const sampleUsers = [
-                {
-                    name: 'Alice Johnson',
-                    email: 'alice.johnson@student.edu',
-                    semester: '3rd',
-                    branch: 'Computer Science',
-                    joined: 'Today'
-                },
-                {
-                    name: 'Bob Williams',
-                    email: 'bob.williams@student.edu',
-                    semester: '2nd',
-                    branch: 'Mechanical Engineering',
-                    joined: 'Yesterday'
-                },
-                {
-                    name: 'Carol Davis',
-                    email: 'carol.davis@student.edu',
-                    semester: '5th',
-                    branch: 'Electrical Engineering',
-                    joined: '2 days ago'
-                },
-                {
-                    name: 'David Miller',
-                    email: 'david.miller@student.edu',
-                    semester: '1st',
-                    branch: 'Civil Engineering',
-                    joined: '3 days ago'
-                },
-                {
-                    name: 'Eve Wilson',
-                    email: 'eve.wilson@student.edu',
-                    semester: '4th',
-                    branch: 'Electronics',
-                    joined: '1 week ago'
-                }
+                { name: 'Alice Johnson', email: 'alice.johnson@student.edu', semester: '3rd', branch: 'Computer Science', joined: 'Today' },
+                { name: 'Bob Williams', email: 'bob.williams@student.edu', semester: '2nd', branch: 'Mechanical Engineering', joined: 'Yesterday' },
+                { name: 'Carol Davis', email: 'carol.davis@student.edu', semester: '5th', branch: 'Electrical Engineering', joined: '2 days ago' },
+                { name: 'David Miller', email: 'david.miller@student.edu', semester: '1st', branch: 'Civil Engineering', joined: '3 days ago' },
+                { name: 'Eve Wilson', email: 'eve.wilson@student.edu', semester: '4th', branch: 'Electronics', joined: '1 week ago' }
             ];
-            
             sampleUsers.forEach((user, index) => {
                 setTimeout(() => {
                     const row = document.createElement('tr');
                     row.style.cssText = 'opacity: 0; transform: translateY(10px);';
-                    
                     row.innerHTML = `
                         <td style="font-weight: 500;">${user.name}</td>
                         <td style="color: var(--gray);">${user.email}</td>
@@ -2228,139 +2259,70 @@
                         <td>${user.branch}</td>
                         <td style="color: var(--gray);">${user.joined}</td>
                     `;
-                    
                     usersBody.appendChild(row);
-                    
-                    // Animate in
                     setTimeout(() => {
                         row.style.transition = 'all 0.3s ease';
                         row.style.opacity = '1';
                         row.style.transform = 'translateY(0)';
                     }, 10);
-                    
                 }, index * 100);
             });
         }
-        
+
         function loadSampleData() {
             loadSampleStatistics();
             loadRecentActivity();
             loadSampleUsers();
         }
-        
-        // ============================================
-        // UTILITY FUNCTIONS
-        // ============================================
-        
+
         function formatRelativeTime(date) {
             const now = new Date();
             const diffMs = now - date;
             const diffMins = Math.floor(diffMs / (1000 * 60));
             const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
             const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-            
             if (diffMins < 60) return `${diffMins} min ago`;
             if (diffHours < 24) return `${diffHours} hr ago`;
             if (diffDays === 1) return 'Yesterday';
             if (diffDays < 7) return `${diffDays} days ago`;
-            
             return date.toLocaleDateString();
         }
-        
+
         // ============================================
         // ACTION FUNCTIONS
         // ============================================
-        
-        function quickUpload() {
-            showToast("Opening upload interface...", "info", "Quick Action");
-            setTimeout(() => {
-                window.location.href = '../manage-content/upload-material.html';
-            }, 500);
-        }
-        
-        function createTest() {
-            showToast("Redirecting to test creation...", "info", "Quick Action");
-            setTimeout(() => {
-                window.location.href = '../manage-tests/create-test.html';
-            }, 500);
-        }
-        
-        function manageUsers() {
-            showToast("Opening user management...", "info", "Quick Action");
-            setTimeout(() => {
-                window.location.href = '../manage-users/view-students.html';
-            }, 500);
-        }
-        
-        function showAnalytics() {
-            showToast("Opening analytics dashboard...", "info", "Quick Action");
-            setTimeout(() => {
-                window.location.href = '../dashboard/analytics.html';
-            }, 500);
-        }
-        
-        function openSettings() {
-            showToast("Opening system settings...", "info", "Quick Action");
-            setTimeout(() => {
-                window.location.href = '../system/settings.html';
-            }, 500);
-        }
-        
-        function exportData() {
-            showToast("Preparing data export...", "info", "Export");
-            // Simulate export process
-            setTimeout(() => {
-                showToast("Data export completed successfully", "success", "Export Complete");
-            }, 1500);
-        }
-        
-        // ============================================
-        // AUTH FUNCTIONS
-        // ============================================
-        
+        function quickUpload() { showToast("Opening upload interface...", "info", "Quick Action"); setTimeout(() => window.location.href = '../manage-content/upload-material.html', 500); }
+        function createTest() { showToast("Redirecting to test creation...", "info", "Quick Action"); setTimeout(() => window.location.href = '../manage-tests/create-test.html', 500); }
+        function manageUsers() { showToast("Opening user management...", "info", "Quick Action"); setTimeout(() => window.location.href = '../manage-users/view-students.html', 500); }
+        function showAnalytics() { showToast("Opening analytics dashboard...", "info", "Quick Action"); setTimeout(() => window.location.href = '../dashboard/analytics.html', 500); }
+        function openSettings() { showToast("Opening system settings...", "info", "Quick Action"); setTimeout(() => window.location.href = '../system/settings.html', 500); }
+        function exportData() { showToast("Preparing data export...", "info", "Export"); setTimeout(() => showToast("Data export completed successfully", "success", "Export Complete"), 1500); }
+
         async function logoutAdmin() {
             if (confirm('Are you sure you want to logout?')) {
                 try {
                     updateLoadingMessage("Securing Session", "Logging out...");
-                    
-                    // Clear all storage
                     localStorage.removeItem('adminData');
                     localStorage.removeItem('adminSession');
                     sessionStorage.removeItem('adminToken');
-                    
-                    // Sign out from Firebase
-                    if (firebaseAuth) {
-                        await firebaseAuth.signOut();
-                    }
-                    
-                    // Show confirmation
+                    if (firebaseAuth) await firebaseAuth.signOut();
                     showToast("Logged out successfully", "success", "Session Ended");
-                    
-                    // Redirect
-                    setTimeout(() => {
-                        window.location.href = '../../auth/login-admin.html';
-                    }, 1000);
-                    
+                    setTimeout(() => window.location.href = '../../auth/login-admin.html', 1000);
                 } catch (error) {
                     console.error("❌ Logout error:", error);
-                    // Still redirect even if error
                     window.location.href = '../../auth/login-admin.html';
                 }
             }
         }
-        
+
         function redirectToLogin() {
             updateLoadingMessage("Session Management", "Redirecting to login...");
-            
-            setTimeout(() => {
-                window.location.href = '../../auth/login-admin.html';
-            }, 2000);
+            setTimeout(() => window.location.href = '../../auth/login-admin.html', 2000);
         }
-        
+
         // ============================================
         // GLOBAL EXPORTS
         // ============================================
-        
         window.updateLoadingMessage = updateLoadingMessage;
         window.showToast = showToast;
         window.logoutAdmin = logoutAdmin;
@@ -2371,8 +2333,93 @@
         window.openSettings = openSettings;
         window.exportData = exportData;
         window.loadRecentActivity = loadRecentActivity;
-        
         console.log("✅ Premium dashboard initialized successfully!");
+    </script>
+
+    <!-- Spark Canvas Animation Script (flying gold sparks) -->
+    <script>
+        (function() {
+            const canvas = document.getElementById('sparkCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let width, height, particles = [], shootingStars = [];
+
+            const isMobile = window.innerWidth <= 768;
+            const pCount = isMobile ? 35 : 90;
+
+            function initCanvas() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                particles = [];
+                for (let i = 0; i < pCount; i++) {
+                    particles.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        size: Math.random() * 3.5 + 0.8,
+                        speedX: (Math.random() - 0.5) * 0.2,
+                        speedY: (Math.random() - 0.5) * 0.1,
+                        color: `rgba(199, 162, 75, ${Math.random() * 0.5 + 0.2})`,
+                        glow: Math.random() * 0.8 + 0.2
+                    });
+                }
+            }
+
+            function createShootingStar() {
+                shootingStars.push({
+                    x: Math.random() * width * 0.9,
+                    y: 0,
+                    length: Math.random() * 100 + 60,
+                    speed: Math.random() * 8 + 5,
+                    angle: Math.random() * 0.5 + 0.2,
+                    opacity: 0.9,
+                    width: Math.random() * 3 + 1.5
+                });
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+                for (let p of particles) {
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+                    if (p.x < 0) p.x = width;
+                    if (p.x > width) p.x = 0;
+                    if (p.y < 0) p.y = height;
+                    if (p.y > height) p.y = 0;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.shadowColor = '#c7a24b';
+                    ctx.shadowBlur = 8 * p.glow;
+                    ctx.fill();
+                }
+                ctx.shadowBlur = 0;
+                shootingStars = shootingStars.filter(star => {
+                    ctx.beginPath();
+                    ctx.moveTo(star.x, star.y);
+                    const endX = star.x - star.length * Math.cos(star.angle);
+                    const endY = star.y + star.length * Math.sin(star.angle);
+                    ctx.lineTo(endX, endY);
+                    ctx.strokeStyle = `rgba(255, 235, 190, ${star.opacity})`;
+                    ctx.lineWidth = star.width;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#ffd966';
+                    ctx.stroke();
+                    star.x += star.speed;
+                    star.y += star.speed * 0.4;
+                    star.opacity -= 0.004;
+                    return star.opacity > 0 && star.x < width + 200;
+                });
+                ctx.shadowBlur = 0;
+                requestAnimationFrame(draw);
+            }
+
+            window.addEventListener('resize', initCanvas);
+            initCanvas();
+            draw();
+            setInterval(createShootingStar, isMobile ? 3500 : 1800);
+        })();
     </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-// sem5.js – Semester 5 Landing Page (with index error handling)
+// sem6.js – Semester 6 Landing Page (based on sem5.js)
 
 let auth, db, currentUser = null;
 
@@ -66,12 +66,12 @@ async function loadUserData(uid) {
     }
 }
 
-// ---------- Load Recent Materials (Semester 5) ----------
+// ---------- Load Recent Materials (Semester 6) ----------
 async function loadRecentMaterials() {
-    console.log('📥 Loading recent materials...');
+    console.log('📥 Loading recent materials for semester 6...');
     try {
         const snapshot = await db.collection('materials')
-            .where('semester', '==', 5)
+            .where('semester', '==', 6)
             .orderBy('createdAt', 'desc')
             .limit(3)
             .get();
@@ -103,13 +103,15 @@ async function loadRecentMaterials() {
     }
 }
 
-// ---------- Load Upcoming Tests (Semester 5) ----------
+// ---------- Load Upcoming Tests (Semester 6) ----------
 async function loadUpcomingTests() {
-    console.log('📥 Loading upcoming tests...');
+    console.log('📥 Loading upcoming tests for semester 6...');
     try {
+        // Adjust the query based on your actual tests collection structure
+        // Here we assume 'semester' field exists and we want upcoming tests.
+        // If you have a 'status' field, use it; otherwise, you can filter by date.
         const snapshot = await db.collection('tests')
-            .where('semester', '==', 5)
-            .where('status', '==', 'upcoming')
+            .where('semester', '==', 6)
             .orderBy('scheduledDate', 'asc')
             .limit(3)
             .get();

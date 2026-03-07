@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DDQuest · Semester 5 Materials</title>
+    <title>DDQuest · Semester 5 Syllabus</title>
 
     <!-- Fonts & Icons (async) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,64 +12,77 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="materials.css">
+    <link rel="stylesheet" href="syllabus.css">
 
-    <!-- Firebase SDK (load synchronously – NO defer) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <!-- Firebase SDK (defer) -->
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-    <!-- Firebase Initialization (runs immediately after SDKs) -->
+    <!-- Firebase Initialization -->
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
-            authDomain: "ddquest-614ea.firebaseapp.com",
-            databaseURL: "https://ddquest-614ea-default-rtdb.firebaseio.com",
-            projectId: "ddquest-614ea",
-            storageBucket: "ddquest-614ea.appspot.com",
-            messagingSenderId: "602140742747",
-            appId: "1:602140742747:web:1cbd274462578fde845b7e",
-            measurementId: "G-1CRQVW0WF9"
-        };
-        firebase.initializeApp(firebaseConfig);
+        window.addEventListener('load', function() {
+            const firebaseConfig = {
+                apiKey: "AIzaSyCRWujKbVhlEpvygCBObMfkb7tp96Kiu4w",
+                authDomain: "ddquest-614ea.firebaseapp.com",
+                databaseURL: "https://ddquest-614ea-default-rtdb.firebaseio.com",
+                projectId: "ddquest-614ea",
+                storageBucket: "ddquest-614ea.appspot.com",
+                messagingSenderId: "602140742747",
+                appId: "1:602140742747:web:1cbd274462578fde845b7e",
+                measurementId: "G-1CRQVW0WF9"
+            };
+            firebase.initializeApp(firebaseConfig);
+        });
     </script>
 </head>
 <body>
+    <!-- 3D Space Canvas -->
     <canvas id="spaceCanvas"></canvas>
     <div class="toast-container" id="toastContainer"></div>
 
-    <div class="materials-container">
-        <div class="materials-header">
+    <div class="syllabus-container">
+        <!-- Header -->
+        <div class="syllabus-header">
             <div class="container">
                 <div class="header-content">
                     <div class="navigation-buttons">
-                        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Semester 5</a>
-                        <button onclick="logoutUser()" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                        <a href="index.html" class="back-btn">
+                            <i class="fas fa-arrow-left"></i> Semester 5
+                        </a>
+                        <button onclick="logoutUser()" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
                     </div>
+
                     <div class="welcome-message">
                         <h1><span id="greeting">Hello</span>, <span id="userName">Student</span>!</h1>
-                        <p>Semester 5 – Study Materials</p>
+                        <p>Semester 5 – Syllabus</p>
                     </div>
+
+                    <!-- Current Time & Date -->
                     <div class="time-display">
-                        <i class="far fa-clock"></i> <span id="currentTime"></span> • <span id="currentDate"></span>
+                        <i class="far fa-clock"></i>
+                        <span id="currentTime"></span> • <span id="currentDate"></span>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Syllabus Content -->
         <div class="container">
-            <h2 class="section-title">All Materials</h2>
-            <div class="materials-grid" id="materialsGrid">
+            <h2 class="section-title">Syllabus</h2>
+            <div class="syllabus-grid" id="syllabusGrid">
                 <div class="loader"></div>
             </div>
         </div>
     </div>
 
-    <!-- View Modal -->
+    <!-- View Modal (reuse from materials) -->
     <div class="modal" id="viewModal">
         <div class="modal-card">
             <div class="view-modal-header">
-                <h2 id="viewModalTitle"><i class="fas fa-eye"></i> View Material</h2>
+                <h2 id="viewModalTitle"><i class="fas fa-eye"></i> View Syllabus</h2>
                 <div class="view-controls">
                     <button id="viewReloadBtn" title="Reload"><i class="fas fa-sync-alt"></i></button>
                     <a href="#" id="viewDirectLink" target="_blank" title="Open in new tab"><i class="fas fa-external-link-alt"></i></a>
@@ -77,12 +90,16 @@
                 </div>
             </div>
             <div class="view-modal-body">
-                <div class="iframe-loader" id="iframeLoader"><div class="spinner"></div><span>Loading document...</span></div>
+                <div class="iframe-loader" id="iframeLoader">
+                    <div class="spinner"></div>
+                    <span>Loading document...</span>
+                </div>
                 <iframe id="viewFrame" class="view-frame" src="about:blank" frameborder="0" allowfullscreen></iframe>
             </div>
         </div>
     </div>
 
-    <script src="materials.js"></script>
+    <!-- Custom JS -->
+    <script defer src="syllabus.js"></script>
 </body>
 </html>

@@ -1,0 +1,388 @@
+/* sem6.css – Semester 6 Landing Page (Space Theme) */
+
+:root {
+    --primary: #4361ee;
+    --primary-glow: rgba(67, 97, 238, 0.4);
+    --accent: #4cc9f0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --dark: #0b1120;
+    --dark-card: #1e293b;
+    --light: #f8fafc;
+    --gray: #94a3b8;
+    --border-light: rgba(255, 255, 255, 0.1);
+    --radius-lg: 24px;
+    --radius-md: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: radial-gradient(ellipse at bottom, #0d1d31 0%, #0c0d13 100%);
+    color: var(--light);
+    min-height: 100vh;
+    perspective: 1200px;
+    overflow-x: hidden;
+    position: relative;
+}
+
+#spaceCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.semester-container {
+    min-height: 100vh;
+    position: relative;
+    z-index: 2;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.semester-header {
+    background: rgba(10, 20, 30, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(76, 201, 240, 0.2);
+    padding: 40px 0 30px;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(76, 201, 240, 0.1) inset;
+}
+
+.header-content {
+    position: relative;
+}
+
+.navigation-buttons {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    gap: 15px;
+    z-index: 10;
+}
+
+.logout-btn, .back-btn {
+    background: rgba(15, 25, 35, 0.7);
+    border: 1px solid rgba(76, 201, 240, 0.3);
+    color: #f8fafc;
+    padding: 10px 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: var(--transition);
+    backdrop-filter: blur(10px);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.logout-btn:hover, .back-btn:hover {
+    background: rgba(76, 201, 240, 0.2);
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.welcome-message {
+    margin-top: 40px;
+    animation: fadeInUp 0.8s ease;
+}
+
+.welcome-message h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff, #a0d8ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(76, 201, 240, 0.5);
+}
+
+.welcome-message p {
+    font-size: 1.1rem;
+    color: var(--gray);
+}
+
+.time-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 60px;
+    width: fit-content;
+    color: var(--gray);
+    border: 1px solid rgba(76, 201, 240, 0.3);
+    backdrop-filter: blur(5px);
+    transition: var(--transition);
+}
+
+.time-display:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent);
+}
+
+.time-display i {
+    color: var(--accent);
+}
+
+/* Cards Grid */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin: 60px 0 40px;
+}
+
+.card {
+    background: rgba(15, 25, 35, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(76, 201, 240, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 40px 30px;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transform: translateX(-100%);
+    transition: transform 0.4s ease;
+}
+
+.card:hover::before {
+    transform: translateX(0);
+}
+
+.card:hover {
+    transform: translateY(-10px) scale(1.02);
+    border-color: rgba(76, 201, 240, 0.4);
+    box-shadow: 0 30px 50px var(--primary-glow);
+    background: rgba(25, 35, 45, 0.7);
+}
+
+.card-icon {
+    width: 90px;
+    height: 90px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+    color: white;
+    font-size: 38px;
+    box-shadow: 0 10px 20px var(--primary-glow);
+    transition: transform 0.3s ease;
+}
+
+.card:hover .card-icon {
+    transform: scale(1.05) rotate(5deg);
+}
+
+.card h3 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: #f1f5f9;
+    font-weight: 700;
+}
+
+.card p {
+    color: var(--gray);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.card-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: rgba(76, 201, 240, 0.2);
+    border: 1px solid var(--accent);
+    border-radius: 40px;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.card:hover .card-badge {
+    background: var(--accent);
+    color: #0a0c14;
+}
+
+/* Recent Sections */
+.recent-section {
+    margin: 50px 0;
+}
+
+.section-title {
+    font-size: 1.8rem;
+    color: #f1f5f9;
+    margin-bottom: 25px;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 12px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 2px;
+    box-shadow: 0 0 15px var(--accent);
+}
+
+.recent-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.recent-item {
+    background: rgba(15, 25, 35, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    transition: var(--transition);
+    border-left: 4px solid transparent;
+    display: flex;
+    flex-direction: column;
+}
+
+.recent-item:hover {
+    background: rgba(25, 35, 45, 0.6);
+    border-left-color: var(--accent);
+    transform: translateX(5px);
+}
+
+.recent-item h4 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    color: #f1f5f9;
+    font-weight: 600;
+}
+
+.recent-item p {
+    color: var(--gray);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.recent-item .meta {
+    display: flex;
+    justify-content: space-between;
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 10px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px;
+    color: var(--gray);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-lg);
+    grid-column: 1 / -1;
+    backdrop-filter: blur(5px);
+    border: 1px solid var(--border-light);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    color: var(--accent);
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #f1f5f9;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .navigation-buttons {
+        position: static;
+        margin-top: 20px;
+        flex-direction: column;
+    }
+    .welcome-message h1 {
+        font-size: 2rem;
+    }
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+    .recent-list {
+        grid-template-columns: 1fr;
+    }
+    .time-display {
+        flex-wrap: wrap;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .time-display {
+        font-size: 0.8rem;
+    }
+    .card {
+        padding: 30px 20px;
+    }
+    .card h3 {
+        font-size: 1.5rem;
+    }
+}
